@@ -1,0 +1,8 @@
+protected_identities:
+  - name: "Wheelhouse Capital LLC"
+    handle: "wheelhousecap"
+    display_name: "Wheelhouse Capital"
+    type: "brand"
+    report_as: "My company, brand, or organization"
+    reporter_name: "Authorized Reporter"
+    reporter_email: "security@example.com"
