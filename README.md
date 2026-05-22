@@ -1,140 +1,154 @@
+<meta property="og:image" content="https://raw.githubusercontent.com/wheelieinvestor/x-impersonation-guard/main/docs/assets/og-image.png">
+<meta property="og:title" content="x-impersonation-guard">
+<meta property="og:description" content="Detect and report X accounts impersonating you. Local-first, explainable, safe by default.">
+
+![x-impersonation-guard banner](docs/assets/repo-banner.png)
+
+![Hero demo of xig scan-fixture, xig list, xig review, and dry-run reporting](docs/demo/hero.gif)
+
 # x-impersonation-guard
 
 > Detect and report X accounts impersonating you. Local-first, explainable, safe by default.
 
 [![CI](https://github.com/wheelieinvestor/x-impersonation-guard/actions/workflows/test.yml/badge.svg)](https://github.com/wheelieinvestor/x-impersonation-guard/actions)
-[![PyPI](https://img.shields.io/pypi/v/x-impersonation-guard)](https://pypi.org/project/x-impersonation-guard/)
+[![PyPI](https://img.shields.io/pypi/v/x-impersonation-guard?include_prereleases)](https://pypi.org/project/x-impersonation-guard/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**Status: Public alpha.** First scan path works end-to-end. Live reporting validated on one impersonator. Calibrating against more impersonators is in progress. Use the offline demo to evaluate; use the live path with the review queue, never auto-submit.
+**Status: Public alpha.** Offline demo, dry-run reporting, fail-closed reporter safety, and three-environment PyPI install are verified. Live X API scans and live help.x.com submissions are implemented but still pending Phase 2 validation. See [docs/status.md](docs/status.md).
 
-![Offline demo of xig scan-fixture, xig list, and xig report dry-run](docs/demo/quickstart.gif)
+---
 
-[Watch the asciinema-style terminal recording](docs/demo/quickstart.cast)
+**The problem:** Public figures and creators on X get cloned constantly. Impersonators farm followers, run crypto scams, and damage reputations. The official reporting flow is manual, slow, and limited.
 
-Public figures get cloned constantly. Reporting each clone by hand is slow, repetitive, and easy to miss. X does not provide an API endpoint for impersonation reports, so this tool separates detection, review, and official Help Center submission.
+**What this does:** Detects impersonators of your account using multi-signal scoring: handle similarity, display-name match, profile-picture perceptual hashing, posting behavior, account age, follower patterns, and verification status. It surfaces candidates in a review queue with explainable scores and files official reports through X's Help Center via Playwright when you approve them.
 
-X Impersonation Guard is built for local control. Your credentials stay on your machine. You review candidates before reports are submitted by default.
+**What this is not:** A way to silence critics or parody accounts. A bypass of X's limits. A guarantee of removal. Legal advice. See [What this tool does NOT do](#what-this-tool-does-not-do).
 
-## Quickstart
+---
 
-You have two paths. Try the offline demo first.
+## Try it in 60 seconds
 
-### Path A: Offline demo, 60 seconds, no credentials
-
-This runs the full pipeline against a bundled demo fixture. No X API key needed. Nothing touches the real X.
+No credentials. No live X calls. No reports submitted.
 
 ```bash
-# Install, requires Python 3.11+
-pip install x-impersonation-guard
+pip install --pre x-impersonation-guard
 playwright install chromium
-
-# Run the demo
 xig scan-fixture
+xig review
+```
+
+The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. The point is judgment, not just detection.
+
+To create a dry-run evidence package:
+
+```bash
 xig list
 xig report --dry-run 1
 ```
 
-You should see candidates appear with explainable scores and a dry-run evidence package generated under `~/.x-impersonation-guard/reports/`.
+Everything runs locally on your machine. Nothing touches the real X in fixture mode.
 
-### Path B: Real scan against your account, about 10 minutes
+## Why this exists
 
-After the demo works, set up against your actual handle.
+Most existing options leave you stuck:
+
+| Approach | Reality |
+|----------|---------|
+| Manual reporting through X's UI | Repetitive, slow, no local audit trail |
+| Hiring a brand-protection service | Expensive, opaque process, not built for small creators |
+| "Just ignore them" | Followers get scammed in your name |
+| One-off scripts | Usually detect only one signal and stop before the report workflow |
+
+`x-impersonation-guard` automates the full detection-to-report pipeline locally, with an explainable scoring model and a hard safety gate before any live submission.
+
+## Use it for real
+
+After the offline demo works, set up against your actual handle.
 
 ```bash
-# 1. Get an X API bearer token from https://developer.x.com. Pay-per-use is fine.
+# 1. Optional but recommended: get an X API bearer token from https://developer.x.com.
 export X_API_BEARER_TOKEN="your_token_here"
 
-# 2. Generate your config
+# 2. Generate your config.
 xig init
 
-# 3. Edit config.yaml to set your handle, display name, and contact email
+# 3. Edit config.yaml to set your handle, display name, and contact email.
 
 # 4. Scan. This is read-only. No reports are filed.
 xig scan
 
-# 5. Review candidates
+# 5. Review candidates.
 xig review
 
-# 6. Approved candidates queue for reporting. This does not submit yet.
-xig list
-
-# 7. Dry-run the first report package before any live submission
+# 6. Dry-run the first report package before any live submission.
 xig report --dry-run 1
 ```
 
-Playwright requires a one-time `playwright install chromium` after pip install.
-
-## What the default scan does
-
-`xig scan` runs four detection steps:
-
-1. **Handle variant lookup**: generates username variants of your protected handle and checks which accounts exist.
-2. **Display name search**: searches recent posts and profiles for your display name.
-3. **Follower scan**: samples followers for accounts that match suspicious patterns.
-4. **Profile image hashing**: fetches and perceptually hashes profile pictures of candidates from steps 1-3 when image URLs are available.
-
-Detection mode:
-
-- If `X_API_BEARER_TOKEN` is set in your environment, scan uses the official X API.
-- Otherwise, scan falls back to authenticated browser scraping via Playwright. This is slower, less reliable, and free.
-
-You can force a mode with `x_api.mode: api` or `x_api.mode: scrape` in `config.yaml`.
+Live browser scanning and live Help Center reporting require `playwright install chromium`. The offline demo and dry-run evidence path do not submit reports.
 
 ## How it works
 
-```text
-config.yaml -> detectors -> scorer -> SQLite review queue -> user approval -> Playwright reporter -> audit log
+```mermaid
+flowchart LR
+    Config[config.yaml] --> Mode[scan mode selector]
+    Mode --> API[X API client]
+    Mode --> Scrape[Playwright scrape client]
+    API --> Detectors[detectors]
+    Scrape --> Detectors
+    Detectors --> Hash[profile image hashing]
+    Hash --> Score[explainable scorer]
+    Score --> Queue[(SQLite review queue)]
+    Queue --> Review[human review]
+    Review --> DryRun[dry-run evidence package]
+    Review --> Reporter[Playwright Help Center reporter]
+    Reporter --> Audit[(audit log)]
 ```
 
-Three pipelines stay separate:
+Detection finds candidate accounts through handle variants, display-name search, and follower sampling. Profile image hashes are fetched when image URLs are available. Scoring ranks each candidate from 0 to 100, then stores reviewable accounts in SQLite.
 
-1. Detection finds candidate accounts through handle variants, display-name matches, follower scans, cached image hashes, or scrape fallback.
-2. Scoring ranks each candidate from 0 to 100 with an explainable signal breakdown.
-3. Reporting uses Playwright to submit X's official Help Center impersonation form after approval.
+### The scoring model
 
-## Safety warning
+The default score is a weighted blend of nine signals:
 
-Mass reporting can put the reporter account at risk. X may flag accounts that submit too many reports.
+| Signal | Why it matters |
+|--------|----------------|
+| Handle similarity | Most clones use one-character edits, suffixes, or homoglyphs. |
+| Display-name similarity | Clones copy the public-facing name even when the handle changes. |
+| Bio similarity | Scam clones often reference the original identity or "official" support. |
+| Profile image similarity | Perceptual hashing catches copied profile pictures. |
+| Account age | Fresh accounts are more suspicious in impersonation clusters. |
+| Follower ratio | Tiny follower counts against a large protected account are a warning sign. |
+| Follow-back pattern | Following the protected account's audience is suspicious. |
+| Posting behavior | New accounts posting about the protected handle get extra scrutiny. |
+| Verified status | Paid verification can make clones more dangerous. |
 
-Defaults are conservative:
+Parody, fan, satire, "not affiliated", and older-account mitigations reduce scores. That is intentional: the tool should help you report scams, not punish legitimate speech.
 
-- Manual review queue enabled.
-- `auto_submit: false`.
-- Maximum 5 reports per identity per rolling 24 hours.
-- Hard configuration cap of 20 reports per rolling 24 hours.
-- Random delay between submissions.
-- Evidence and audit package saved for every attempted report.
+### The reporting flow
 
-If you enable auto-submit, you are accepting that risk explicitly.
+X does not provide an impersonation-report API. The reporter uses Playwright against X's official Help Center form. By default:
 
-## Configuration
+- Reports require explicit review approval before live submission.
+- `xig report --dry-run <id>` creates an evidence package without submitting.
+- Required Help Center fields fail closed if selectors drift.
+- Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
 
-Run:
+## Why I built this
 
-```bash
-uv run xig init --config config.yaml
-```
+<!--
+Dean: replace this placeholder with a personal 120-180 word founder note before launch.
 
-The generated config is designed for `@wheelieinvestor` and can be edited for another individual identity.
+Hit these beats:
+- One concrete impersonator/scam moment.
+- The cost: manual report time, follower DMs, trust damage.
+- The pivot: "I am an engineer; this should be automated."
+- The invitation: free, open-source, feedback wanted.
 
-API mode is preferred when `X_API_BEARER_TOKEN` is configured. Scrape mode is slower and more fragile because X can change page markup.
+Tone: factual, institutional, not influencer-flavored.
+-->
 
-## Commands
-
-```bash
-xig init
-xig scan
-xig scan --identity wheelieinvestor
-xig list
-xig review
-xig report <candidate_id>
-xig log
-xig status
-xig daemon
-xig export json
-```
+Founder note coming before public promotion.
 
 ## What this tool does NOT do
 
@@ -144,11 +158,48 @@ xig export json
 - It does not fabricate evidence.
 - It does not silence critics, parody accounts, fan accounts, or people you dislike.
 - It does not provide legal advice.
-- It does not yet provide a hosted SaaS dashboard, nightly E2E selector monitoring, or cross-platform Threads/Bluesky support.
+- It does not provide a hosted SaaS dashboard or browser extension.
+- It does not support Threads, Bluesky, Instagram, or multi-platform monitoring yet.
 
-## Limits
+## FAQ
 
-There is no X API endpoint for impersonation reports. Reporting requires browser automation against X's Help Center form. The user may still need to confirm emailed verification links from X.
+### Will this get my account banned?
+
+Mass reporting can put the reporter account at risk. The tool defaults to review-first mode, `auto_submit: false`, a 5/day reporting cap, and randomized delays. Live submissions require explicit approval unless you deliberately change the config.
+
+### Does this work for brands or companies?
+
+The alpha is optimized for one individual identity. Brand and organization support are on the roadmap after live validation.
+
+### Does X actually remove reported accounts?
+
+At X's discretion. This tool gets reports filed consistently through the official form and keeps an audit trail proving what was submitted.
+
+### Do I need to pay for the X API?
+
+No. Scrape mode can run through Playwright without an API token. API mode is preferred for reliability when you have access.
+
+### Is this against X's ToS?
+
+Detection uses public APIs or public pages. Reporting automates a Help Center form you are entitled to submit. The tool does not bypass limits, fabricate evidence, or rotate credentials.
+
+### Can I run this on a server?
+
+Technically yes, but the defaults are local-first, headed browser, and explicit review approval. Removing guardrails is a config decision and prints warnings.
+
+### What about Threads or Bluesky?
+
+The architecture can support other platforms, but reporters and detectors are platform-specific. Those integrations are later work.
+
+## Roadmap
+
+| Now (v0.2.x alpha) | Soon (v1.0) | Later (v2.0+) |
+|--------------------|-------------|---------------|
+| Offline demo works | Live X API scan validated | Browser extension |
+| Dry-run reporter works | Real impersonator calibration | Threads support |
+| Single user identity | First live reports filed | Bluesky support |
+| Fail-closed reporter checks | Brand/org identities | Hosted version |
+| PyPI prerelease install | Nightly selector drift CI | Multi-platform dashboard |
 
 ## Developer install
 
@@ -163,18 +214,18 @@ uv run ruff format --check .
 uv run mypy src tests
 ```
 
-## Roadmap
+## Contributing
 
-- Harden Playwright selectors against live Help Center changes.
-- Add nightly selector e2e checks with staging credentials.
-- Add richer Textual review workflows.
-- Add Hermes adapter for agent-operated scans and summaries.
-- Add Threads and Bluesky detection support after X v1.0 is stable.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Good first issues are tracked with the `good first issue` label.
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Do not paste tokens, cookies, browser profiles, or unredacted evidence packages into public issues.
 
 ## License
 
 MIT
 
-## Author
+## Acknowledgements
 
-Wheelhouse Capital LLC. Built for Dean Ahrens, @WheelieInvestor.
+Built by [Dean Ahrens](https://x.com/WheelieInvestor) at Wheelhouse Capital. Powered by Hermes, a Claude-based coding agent.

@@ -6,4 +6,7 @@ def test_readme_names_non_default_limits() -> None:
     assert "## What this tool does NOT do" in readme
     assert "does not submit reports through the X API" in readme
     assert "does not bypass X rate limits" in readme
-    assert "does not yet provide a hosted SaaS dashboard" in readme
+    assert "does not provide a hosted SaaS dashboard" in readme
+    assert "docs/demo/hero.gif" in readme
+    assert "## FAQ" in readme
+    assert "```mermaid" in readme
