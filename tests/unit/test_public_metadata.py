@@ -76,6 +76,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "JSON calibration evidence export" in changelog
     assert "Controlled live-validation runbook" in changelog
     assert "`xig quickstart` onboarding command" in changelog
+    assert "Broader `xig redact-report` secret scrubbing" in changelog
     assert "`--confirm-live`" in changelog
 
 

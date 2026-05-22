@@ -165,7 +165,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - `xig report --dry-run <id>` creates an evidence package without submitting.
 - `xig report --identity <handle> <id>` fails closed if the candidate belongs to a different protected identity.
 - Live Help Center submission requires both `--execute` and `--confirm-live`.
-- `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip for public bug reports.
+- `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip with JSON/text/log secret redaction for public bug reports.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
 - API-backed scans enforce the configured estimated request budget before making another live API call.
