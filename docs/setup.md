@@ -62,6 +62,17 @@ uv run xig calibrate --config examples/config.individual.yaml --input examples/c
 
 The command prints precision, recall, F1, and any false positives or false negatives at the selected threshold. Use `--threshold <score>` to test a stricter or looser review threshold against the same labels.
 
+Write a JSON evidence file when you want to compare calibration runs or share a redacted validation artifact:
+
+```bash
+uv run xig calibrate \
+  --config examples/config.individual.yaml \
+  --input examples/calibration.sample.json \
+  --output calibration-results.json
+```
+
+The JSON includes the threshold, precision, recall, F1, confusion-matrix counts, every scored candidate, and any misses.
+
 ## Why reporting is not fully automatic by default
 
 False positives are expensive. News accounts, parody accounts, fan accounts, and legitimate support accounts can look similar by text alone. X also may flag reporters that file too many reports. Manual review is the safe default.
