@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ### Changed
 
+- Public issue templates now request privacy-safe `xig doctor --json`, `xig status --json`, and redacted report diagnostics where relevant.
 - Live Help Center submissions now require both `--execute` and `--confirm-live`.
 - Multi-identity review and report actions fail closed when `--identity` does not own the candidate.
 - Dry-run report output points users toward redacted report bundles before sharing diagnostics.
