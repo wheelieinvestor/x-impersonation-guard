@@ -74,4 +74,23 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Cached image-hash lookup in the default scan path" in changelog
     assert "Offline scorer calibration command" in changelog
     assert "JSON calibration evidence export" in changelog
+    assert "Controlled live-validation runbook" in changelog
     assert "`--confirm-live`" in changelog
+
+
+def test_live_validation_runbook_is_publicly_linked() -> None:
+    readme = Path("README.md").read_text()
+    index = Path("docs/index.md").read_text()
+    status = Path("docs/status.md").read_text()
+    mkdocs = Path("docs/site/mkdocs.yml").read_text()
+    runbook = Path("docs/live-validation.md").read_text()
+    issue_template = Path(".github/ISSUE_TEMPLATE/live_validation.yml").read_text()
+
+    assert "docs/live-validation.md" in readme
+    assert "live-validation.md" in index
+    assert "live-validation.md" in status
+    assert "Live validation: live-validation.md" in mkdocs
+    assert "Do not paste X API tokens" in runbook
+    assert "xig calibrate" in runbook
+    assert "xig report" in runbook
+    assert "API tokens, cookies, browser profiles" in issue_template
