@@ -39,6 +39,7 @@ xig scan-fixture
 xig doctor
 xig review
 xig review --next
+xig validation-template
 ```
 
 The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. The point is judgment, not just detection.
@@ -166,6 +167,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - `xig list --status snoozed` and `xig list --status all` make deferred and historical queue items easy to rediscover.
 - `xig export json` or `xig export zip` gives you a portable review queue for handoff or local analysis.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
+- `xig validation-template` writes a public-safe checklist for controlled live-validation evidence.
 - Approval and dry-run commands print the next safe reporting command, preserving config and identity flags where needed.
 - `xig report --identity <handle> <id>` fails closed if the candidate belongs to a different protected identity.
 - Live Help Center submission requires both `--execute` and `--confirm-live`.

@@ -4,6 +4,12 @@ Use this runbook before treating the alpha as ready for broad public launch. The
 
 Do not paste X API tokens, cookies, browser profiles, private DMs, private evidence packages, or unredacted follower data into GitHub issues, docs, chats, or screenshots.
 
+Generate a local evidence checklist before the run:
+
+```bash
+xig validation-template --config config.yaml --output live-validation-result.md
+```
+
 ## Exit criteria
 
 Phase 3 launch is not ready until all of these are true:
