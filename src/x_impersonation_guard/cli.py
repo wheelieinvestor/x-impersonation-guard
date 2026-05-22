@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import sys
 import time
 import zipfile
@@ -419,6 +420,57 @@ def scan_fixture_command(
         "Run `xig review` to see them, or `xig list` for a summary."
     )
     typer.echo("No reports were submitted. Review and report explicitly.")
+
+
+@app.command()
+def demo(
+    reset: Annotated[
+        bool,
+        typer.Option("--reset", help="Delete and recreate the local demo workspace."),
+    ] = False,
+) -> None:
+    """Run the bundled demo in an isolated .xig-demo workspace."""
+    workspace = Path(".xig-demo")
+    if reset and workspace.exists():
+        shutil.rmtree(workspace)
+        typer.echo(f"Reset demo workspace: {workspace}")
+    workspace.mkdir(parents=True, exist_ok=True)
+    config_path = workspace / "config.yaml"
+    fixture_path = _resolve_fixture_path(Path("examples/demo_fixture.json"))
+    demo_fixture = DemoFixture.model_validate_json(fixture_path.read_text())
+    scan_fixture = demo_fixture.to_fixture_scan()
+    cfg = _config_for_demo_fixture(_isolated_demo_config(workspace), scan_fixture)
+    config_path.write_text(yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False))
+
+    store = ReviewStore(cfg.storage.db_path)
+    lookup = FixtureLookup(scan_fixture.protected, scan_fixture.candidates)
+    results = asyncio.run(run_scan(cfg, cfg.protected_identities[0], lookup, store))
+    _apply_demo_detection_times(store, cfg.protected_identities[0].handle, demo_fixture)
+    high = sum(
+        1
+        for result in results
+        if result.priority is not None and result.priority.value in {"high", "critical"}
+    )
+    medium = sum(
+        1
+        for result in results
+        if result.priority is not None and result.priority.value == "medium"
+    )
+    queued = high + medium
+    typer.echo(
+        f"Demo scan complete. {queued} candidates queued ({high} high, {medium} medium)."
+    )
+    typer.echo("Demo workspace: .xig-demo")
+    typer.echo("Next commands:")
+    _echo_commands(
+        [
+            f"xig list --config {config_path}",
+            f"xig review --config {config_path} --next",
+            f"xig report --config {config_path} --dry-run <candidate_id>",
+            "xig demo --reset",
+        ]
+    )
+    typer.echo("No live X calls were made and no reports were submitted.")
 
 
 @app.command()
@@ -1357,6 +1409,16 @@ def _demo_config() -> AppConfig:
             "extra_display_variants": [],
         }
     )
+    return AppConfig.model_validate(raw)
+
+
+def _isolated_demo_config(workspace: Path) -> AppConfig:
+    raw = _demo_config().model_dump(mode="json")
+    raw["storage"] = {
+        "db_path": str(workspace / "db.sqlite"),
+        "evidence_dir": str(workspace / "evidence"),
+        "reports_dir": str(workspace / "reports"),
+    }
     return AppConfig.model_validate(raw)
 
 

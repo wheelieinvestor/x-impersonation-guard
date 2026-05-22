@@ -35,6 +35,7 @@ No credentials. No live X calls. No reports submitted.
 pip install --pre x-impersonation-guard
 playwright install chromium
 xig quickstart
+xig demo
 xig scan-fixture
 xig config
 xig doctor
@@ -43,7 +44,7 @@ xig review --next
 xig validation-template
 ```
 
-The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. The point is judgment, not just detection.
+The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. `xig demo` keeps that state in `.xig-demo/`; rerun `xig demo --reset` for a clean demo workspace. The point is judgment, not just detection.
 
 To create a dry-run evidence package:
 
