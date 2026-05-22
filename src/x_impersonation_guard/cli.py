@@ -194,7 +194,18 @@ def report(
     )
     if execute:
         _print_safety_warning()
-    result = asyncio.run(reporter.submit(identity, candidate_id, candidate, score))
+    try:
+        result = asyncio.run(reporter.submit(identity, candidate_id, candidate, score))
+    except Exception as exc:
+        store.record_report(
+            candidate_id,
+            record.identity_handle,
+            candidate.username,
+            QueueStatus.REPORT_FAILED.value,
+            error=str(exc),
+        )
+        store.set_status(candidate_id, QueueStatus.REPORT_FAILED)
+        raise typer.BadParameter(f"report failed: {exc}") from exc
     status = "submitted" if result.submitted else "dry_run"
     store.record_report(
         candidate_id,
