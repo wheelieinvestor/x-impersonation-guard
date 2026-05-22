@@ -269,6 +269,59 @@ def init(
     _print_safety_warning()
 
 
+@app.command("config")
+def config_summary(
+    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json", help="Emit privacy-safe machine-readable config summary."
+        ),
+    ] = False,
+) -> None:
+    """Show a privacy-safe summary of the active config."""
+    config_path = config.expanduser()
+    try:
+        cfg = load_config(config_path)
+    except (OSError, ValueError, ValidationError) as exc:
+        typer.echo(f"Config invalid: {exc}", err=True)
+        raise typer.Exit(1) from exc
+
+    payload = _config_summary_payload(config_path, cfg)
+    if json_output:
+        typer.echo(json.dumps(payload, indent=2, sort_keys=True))
+        return
+
+    typer.echo(f"Config: {payload['config']}")
+    typer.echo(f"Protected identities: {payload['protected_identity_count']}")
+    for identity in payload["identities"]:
+        typer.echo(
+            f"- @{identity['handle']} ({identity['type']}): "
+            f"user_id={'set' if identity['user_id_configured'] else 'not set'}, "
+            f"auto_report_threshold={identity['auto_report_threshold']}"
+        )
+    token_state = "set" if payload["x_api"]["bearer_token_set"] else "not set"
+    typer.echo(
+        f"Scan mode: {payload['x_api']['mode']} "
+        f"({payload['x_api']['bearer_token_env']} {token_state})"
+    )
+    typer.echo(
+        f"Reporting: auto_submit={payload['reporting']['auto_submit']} "
+        f"max_reports_per_24h={payload['reporting']['max_reports_per_24h']} "
+        f"headless={payload['reporting']['headless']}"
+    )
+    typer.echo(
+        f"Scoring: medium={payload['scoring']['thresholds']['review_queue_medium']} "
+        f"high={payload['scoring']['thresholds']['review_queue_high']} "
+        f"weights_total={payload['scoring']['weights_total']}"
+    )
+    warnings = payload["warnings"]
+    if warnings:
+        typer.echo("Warnings:")
+        for warning in warnings:
+            typer.echo(f"- {warning}")
+
+
 @app.command()
 def scan(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
@@ -955,6 +1008,7 @@ def quickstart(
     _echo_commands(
         [
             f"xig doctor --config {config_path}",
+            f"xig config --config {config_path}",
             f"xig scan --config {config_path}",
             f"xig status --config {config_path}",
             f"xig status --config {config_path} --json",
@@ -1171,6 +1225,55 @@ Not included:
 
 Review this archive before sharing it publicly. If you need to share report-package diagnostics, run `xig redact-report <report_dir>` and attach that redacted zip separately.
 """
+
+
+def _config_summary_payload(config_path: Path, cfg: AppConfig) -> dict[str, Any]:
+    weights = cfg.scoring.weights.model_dump()
+    token_name = cfg.x_api.bearer_token_env
+    return {
+        "config": str(config_path),
+        "protected_identity_count": len(cfg.protected_identities),
+        "identities": [
+            {
+                "handle": identity.handle,
+                "display_name": identity.display_name,
+                "type": identity.type.value,
+                "user_id_configured": identity.user_id is not None,
+                "extra_handle_variant_count": len(identity.extra_handle_variants),
+                "extra_display_variant_count": len(identity.extra_display_variants),
+                "reporter_email_configured": bool(identity.reporter_email),
+                "auto_report_threshold": identity.auto_report_threshold,
+            }
+            for identity in cfg.protected_identities
+        ],
+        "x_api": {
+            "mode": cfg.x_api.mode.value,
+            "bearer_token_env": token_name,
+            "bearer_token_set": bool(os.getenv(token_name)),
+            "max_cost_per_scan_usd": cfg.x_api.max_cost_per_scan_usd,
+            "estimated_cost_per_request_usd": cfg.x_api.estimated_cost_per_request_usd,
+        },
+        "scoring": {
+            "thresholds": cfg.scoring.thresholds.model_dump(),
+            "weights_total": sum(weights.values()),
+            "weights": weights,
+        },
+        "reporting": {
+            "auto_submit": cfg.reporting.auto_submit,
+            "max_reports_per_24h": cfg.reporting.max_reports_per_24h,
+            "delay_between_reports_seconds": list(
+                cfg.reporting.delay_between_reports_seconds
+            ),
+            "headless": cfg.reporting.headless,
+        },
+        "storage": {
+            "db_path": str(cfg.storage.db_path),
+            "evidence_dir": str(cfg.storage.evidence_dir),
+            "reports_dir": str(cfg.storage.reports_dir),
+        },
+        "logging": cfg.logging.model_dump(),
+        "warnings": _starter_identity_warnings(cfg),
+    }
 
 
 @app.command()

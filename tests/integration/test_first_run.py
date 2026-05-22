@@ -50,6 +50,7 @@ def test_quickstart_with_config_prints_real_next_steps(
     assert "WARN:" in result.output
     assert "X_API_BEARER_TOKEN: not set" in result.output
     assert "xig doctor --config config.yaml" in result.output
+    assert "xig config --config config.yaml" in result.output
     assert "xig status --config config.yaml --json" in result.output
     assert "xig review --config config.yaml --next" in result.output
     assert "xig report --config config.yaml --dry-run <candidate_id>" in result.output

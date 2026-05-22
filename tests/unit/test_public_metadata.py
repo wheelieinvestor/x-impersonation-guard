@@ -72,6 +72,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Review queue snooze and restore workflow" in changelog
     assert "Estimated X API scan cost guard" in changelog
     assert "Cached image-hash lookup in the default scan path" in changelog
+    assert "`xig config` privacy-safe config summary" in changelog
     assert "`xig doctor --json` privacy-safe setup diagnostics" in changelog
     assert "`xig support-bundle` privacy-safe diagnostic zip" in changelog
     assert "Offline scorer calibration command" in changelog

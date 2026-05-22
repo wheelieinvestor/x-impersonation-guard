@@ -36,6 +36,7 @@ pip install --pre x-impersonation-guard
 playwright install chromium
 xig quickstart
 xig scan-fixture
+xig config
 xig doctor
 xig review
 xig review --next
@@ -98,6 +99,7 @@ xig init \
 
 # 3. Check your local setup before the first real scan.
 xig doctor
+xig config
 
 # 4. Scan. This is read-only. No reports are filed.
 xig scan
@@ -180,6 +182,8 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 ### Local readiness checks
 
 Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, Chromium browser installation, config validity, starter identity placeholders, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Use `xig doctor --json` for privacy-safe diagnostics in support issues or validation records. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
+
+Use `xig config` or `xig config --json` to inspect protected identity count, scan mode, reporting limits, scoring thresholds, storage paths, token environment-variable state, and starter-config warnings without printing reporter emails or token values.
 
 For GitHub issues, `xig support-bundle --output xig-support.zip` creates a small diagnostic zip with `doctor.json` and a manifest. It intentionally excludes config files, API tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
 
