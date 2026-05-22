@@ -42,7 +42,7 @@ Live submission requires an approved candidate and `--execute`.
 `xig doctor` is safe to run before or after creating `config.yaml`. It verifies:
 
 - Python 3.11 or newer.
-- Playwright package availability.
+- Playwright package availability and Chromium browser installation.
 - Config validity when a config file exists.
 - Selected scan mode and whether the configured X API token environment variable is set.
 - Storage directory writability.

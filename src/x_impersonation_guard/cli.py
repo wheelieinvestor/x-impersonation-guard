@@ -499,6 +499,15 @@ def doctor(
 
     if importlib.util.find_spec("playwright") is not None:
         emit("OK", "playwright", "Python package is installed")
+        browser_path = _chromium_executable_path()
+        if browser_path is not None and browser_path.exists():
+            emit("OK", "chromium", str(browser_path.expanduser()))
+        else:
+            emit(
+                "WARN",
+                "chromium",
+                "browser binary not found; run `playwright install chromium` before live scraping or reporting",
+            )
     else:
         failures += 1
         emit("FAIL", "playwright", "install package dependencies first")
@@ -681,6 +690,18 @@ def _prompt_init_fields(
         resolved_reporter_name,
         resolved_reporter_email,
     )
+
+
+def _chromium_executable_path() -> Path | None:
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        return None
+    try:
+        with sync_playwright() as playwright:
+            return Path(playwright.chromium.executable_path)
+    except Exception:
+        return None
 
 
 def _apply_demo_detection_times(
