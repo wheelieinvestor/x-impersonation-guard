@@ -980,24 +980,76 @@ def doctor(
     ] = False,
 ) -> None:
     """Check local install, config, scan mode, and storage readiness."""
+    checks, exit_code = _doctor_diagnostics(config.expanduser())
+    if json_output:
+        typer.echo(
+            json.dumps(
+                _doctor_payload(config.expanduser(), checks, exit_code),
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        for check in checks:
+            typer.echo(f"{check['state']}: {check['label']}: {check['detail']}")
+    raise typer.Exit(exit_code)
+
+
+@app.command("support-bundle")
+def support_bundle(
+    output: Annotated[
+        Path,
+        typer.Option("--output", "-o", help="Destination .zip path."),
+    ] = Path("xig-support.zip"),
+    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    force: Annotated[
+        bool,
+        typer.Option("--force", help="Overwrite the destination if it already exists."),
+    ] = False,
+) -> None:
+    """Create a privacy-safe diagnostic zip for support issues."""
+    destination = output.expanduser()
+    if destination.exists() and not force:
+        typer.echo(
+            f"{destination} already exists; pass --force to replace it",
+            err=True,
+        )
+        raise typer.Exit(1)
+    if destination.parent != Path("."):
+        destination.parent.mkdir(parents=True, exist_ok=True)
+    config_path = config.expanduser()
+    checks, doctor_exit_code = _doctor_diagnostics(config_path)
+    manifest = {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "config": str(config_path),
+        "doctor_ok": doctor_exit_code == 0,
+        "files": ["SUPPORT_README.md", "doctor.json", "MANIFEST.json"],
+        "privacy": "This bundle intentionally excludes config files, tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.",
+    }
+    with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("SUPPORT_README.md", _support_bundle_readme())
+        archive.writestr(
+            "doctor.json",
+            json.dumps(
+                _doctor_payload(config_path, checks, doctor_exit_code),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        )
+        archive.writestr("MANIFEST.json", json.dumps(manifest, indent=2) + "\n")
+    typer.echo(f"Support bundle written to {destination}")
+    typer.echo("Review before sharing. Do not attach raw reports, cookies, or tokens.")
+    if doctor_exit_code != 0:
+        typer.echo("Doctor found setup issues; the bundle was still created.")
+
+
+def _doctor_diagnostics(config_path: Path) -> tuple[list[dict[str, str]], int]:
     failures = 0
     checks: list[dict[str, str]] = []
 
     def emit(state: str, label: str, detail: str) -> None:
         checks.append({"state": state, "label": label, "detail": detail})
-        if not json_output:
-            typer.echo(f"{state}: {label}: {detail}")
-
-    def finish(exit_code: int) -> None:
-        if json_output:
-            payload = {
-                "generated_at": datetime.now(UTC).isoformat(),
-                "config": str(config.expanduser()),
-                "ok": exit_code == 0,
-                "checks": checks,
-            }
-            typer.echo(json.dumps(payload, indent=2, sort_keys=True))
-        raise typer.Exit(exit_code)
 
     emit("OK", "python", sys.version.split()[0])
 
@@ -1016,20 +1068,19 @@ def doctor(
         failures += 1
         emit("FAIL", "playwright", "install package dependencies first")
 
-    config_path = config.expanduser()
     if not config_path.exists():
         emit(
             "WARN",
             "config",
             f"{config_path} not found; run `xig scan-fixture` for demo setup or `xig init` for real use",
         )
-        finish(failures)
+        return checks, failures
 
     try:
         cfg = load_config(config_path)
     except (OSError, ValueError, ValidationError) as exc:
         emit("FAIL", "config", str(exc))
-        finish(1)
+        return checks, 1
 
     emit(
         "OK",
@@ -1084,8 +1135,42 @@ def doctor(
         emit("OK", "sqlite", f"review queue reachable; pending={pending}")
 
     if failures:
-        finish(1)
-    finish(0)
+        return checks, 1
+    return checks, 0
+
+
+def _doctor_payload(
+    config_path: Path, checks: list[dict[str, str]], exit_code: int
+) -> dict[str, Any]:
+    return {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "config": str(config_path),
+        "ok": exit_code == 0,
+        "checks": checks,
+    }
+
+
+def _support_bundle_readme() -> str:
+    return """# x-impersonation-guard support bundle
+
+This zip is designed for public GitHub issues and maintainer support.
+
+Included:
+
+- `doctor.json`: privacy-safe setup diagnostics from `xig doctor --json`.
+- `MANIFEST.json`: bundle metadata.
+
+Not included:
+
+- config files;
+- API tokens or environment values;
+- cookies or browser profiles;
+- screenshots;
+- raw report packages;
+- private DMs, emails, follower data, or evidence.
+
+Review this archive before sharing it publicly. If you need to share report-package diagnostics, run `xig redact-report <report_dir>` and attach that redacted zip separately.
+"""
 
 
 @app.command()

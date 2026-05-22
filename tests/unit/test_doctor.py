@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -70,6 +71,41 @@ def test_doctor_json_allows_missing_config_with_setup_guidance(
     assert payload["checks"][-1]["state"] == "WARN"
     assert payload["checks"][-1]["label"] == "config"
     assert "xig init" in payload["checks"][-1]["detail"]
+
+
+def test_support_bundle_writes_privacy_safe_diagnostics(
+    config_path: Path,
+    runner: CliRunner,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(cli, "_chromium_executable_path", lambda: config_path)
+    monkeypatch.setenv("X_API_BEARER_TOKEN", "secret-token-value")
+    bundle = tmp_path / "support" / "xig-support.zip"
+
+    result = runner.invoke(
+        app, ["support-bundle", "--config", str(config_path), "--output", str(bundle)]
+    )
+
+    assert result.exit_code == 0, result.output
+    assert f"Support bundle written to {bundle}" in result.output
+    with zipfile.ZipFile(bundle) as archive:
+        names = set(archive.namelist())
+        assert names == {"SUPPORT_README.md", "doctor.json", "MANIFEST.json"}
+        doctor = json.loads(archive.read("doctor.json"))
+        manifest = json.loads(archive.read("MANIFEST.json"))
+        combined = "\n".join(
+            archive.read(name).decode("utf-8") for name in sorted(names)
+        )
+    assert doctor["ok"] is True
+    assert manifest["doctor_ok"] is True
+    assert "secret-token-value" not in combined
+    assert "config files" in combined
+    assert "xig redact-report <report_dir>" in combined
+
+    duplicate = runner.invoke(app, ["support-bundle", "--output", str(bundle)])
+    assert duplicate.exit_code != 0
+    assert "already exists; pass --force" in duplicate.output
 
 
 def test_doctor_warns_when_chromium_is_missing(
