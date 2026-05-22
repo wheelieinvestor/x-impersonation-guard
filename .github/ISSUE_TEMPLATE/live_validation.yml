@@ -1,0 +1,79 @@
+name: Live validation result
+description: Record a controlled live validation run without sharing secrets or private evidence.
+title: "[live validation]: "
+labels: ["validation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this after following the controlled live validation runbook. Do not include API tokens, cookies, browser profiles, private DMs, unredacted follower data, or raw evidence packages.
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      description: Output from `xig --version`.
+      placeholder: "x-impersonation-guard 0.2.0a0"
+    validations:
+      required: true
+  - type: dropdown
+    id: scan_mode
+    attributes:
+      label: Scan mode
+      options:
+        - api
+        - scrape
+        - fixture
+        - auto
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, install method, and whether Playwright Chromium was installed.
+      placeholder: "macOS 15, Python 3.12, pip prerelease install, Chromium installed"
+    validations:
+      required: true
+  - type: textarea
+    id: calibration
+    attributes:
+      label: Calibration summary
+      description: Redacted metrics from `xig calibrate --output`, including threshold, precision, recall, F1, TP, FP, TN, and FN.
+      placeholder: "threshold=70 precision=... recall=... f1=... tp=... fp=... tn=... fn=..."
+    validations:
+      required: true
+  - type: textarea
+    id: scan_result
+    attributes:
+      label: Live scan result
+      description: Candidate counts, estimated API budget/spend, and any redacted false-positive or false-negative notes.
+      placeholder: "pending=... snoozed=... approved=... estimated_spend=..."
+    validations:
+      required: true
+  - type: textarea
+    id: dry_run
+    attributes:
+      label: Dry-run report package
+      description: Confirm whether a dry-run report package was created and inspected locally.
+      placeholder: "Dry-run package created and inspected; no private material shared publicly."
+    validations:
+      required: true
+  - type: textarea
+    id: live_report
+    attributes:
+      label: Live Help Center report
+      description: State whether one live report was submitted, skipped, or blocked. Include selector drift or manual browser steps.
+      placeholder: "Submitted one report / skipped / blocked by selector drift..."
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: I did not include API tokens, cookies, browser profiles, or private evidence.
+          required: true
+        - label: I reviewed false positives and ambiguous accounts before any live report.
+          required: true
+        - label: I submitted no more than one live report during this validation run.
+          required: true

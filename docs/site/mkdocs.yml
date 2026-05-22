@@ -40,6 +40,7 @@ nav:
   - Install: install.md
   - Configuration: configuration.md
   - Setup: setup.md
+  - Live validation: live-validation.md
   - Scoring explained: scoring.md
   - Scoring reference: scoring-explained.md
   - Reporting flow: reporting-flow.md
