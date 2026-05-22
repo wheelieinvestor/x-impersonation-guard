@@ -10,3 +10,6 @@ def test_readme_names_non_default_limits() -> None:
     assert "docs/demo/hero.gif" in readme
     assert "## FAQ" in readme
     assert "```mermaid" in readme
+    assert "replace this " + "placeholder" not in readme
+    assert "Founder note " + "coming" not in readme
+    assert "brand-protection team" in readme

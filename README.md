@@ -157,19 +157,11 @@ Run `xig doctor` any time setup feels uncertain. It checks Python version, Playw
 
 ## Why I built this
 
-<!--
-Dean: replace this placeholder with a personal 120-180 word founder note before launch.
+X impersonation is not an abstract platform problem when your followers are the target. A copied profile can look credible enough to move conversations into DMs, push scam links, and make the real account spend time cleaning up confusion instead of building.
 
-Hit these beats:
-- One concrete impersonator/scam moment.
-- The cost: manual report time, follower DMs, trust damage.
-- The pivot: "I am an engineer; this should be automated."
-- The invitation: free, open-source, feedback wanted.
+The manual reporting path works, but it does not scale well for independent creators. You have to find the account, collect evidence, decide whether it is actually impersonation, fill out forms, and remember what you already reported. That process should be structured, local, auditable, and safe by default.
 
-Tone: factual, institutional, not influencer-flavored.
--->
-
-Founder note coming before public promotion.
+This project is my attempt to make that workflow practical for people who do not have a brand-protection team. It is open source because the problem is broad, the safety model needs public scrutiny, and useful detection patterns should improve faster than the clone accounts do.
 
 ## What this tool does NOT do
 
