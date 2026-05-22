@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -14,7 +13,9 @@ import typer
 import yaml
 from pydantic import BaseModel, ValidationError
 
+from x_impersonation_guard.clients.mode_selector import select_scan_mode
 from x_impersonation_guard.clients.x_api import XApiClient
+from x_impersonation_guard.clients.x_scrape import XScrapeClient
 from x_impersonation_guard.config import (
     AppConfig,
     default_config_dict,
@@ -148,12 +149,15 @@ def scan(
             scan_fixture.protected, scan_fixture.candidates
         )
     else:
-        token = os.getenv(cfg.x_api.bearer_token_env)
-        if not token:
-            raise typer.BadParameter(
-                f"{cfg.x_api.bearer_token_env} is not set. Use --fixture for offline scan."
+        decision = select_scan_mode(cfg)
+        typer.echo(f"Scan mode: {decision.mode.value} ({decision.reason})")
+        if decision.bearer_token:
+            lookup = XApiClient(decision.bearer_token)
+        else:
+            lookup = XScrapeClient(
+                str(Path("~/.x-impersonation-guard/browser").expanduser()),
+                headless=cfg.reporting.headless,
             )
-        lookup = XApiClient(token)
     results = asyncio.run(run_scan(cfg, selected, lookup, store))
     _render_scores(results)
 

@@ -21,6 +21,22 @@ uv run xig scan --config config.yaml
 uv run xig list --config config.yaml
 ```
 
+## What the default scan does
+
+`xig scan` runs four detection steps:
+
+1. **Handle variant lookup**: generates username variants of your protected handle and checks which accounts exist.
+2. **Display name search**: searches recent posts and profiles for your display name.
+3. **Follower scan**: samples followers for accounts that match suspicious patterns.
+4. **Profile image hashing**: fetches and perceptually hashes profile pictures of candidates from steps 1-3 when image URLs are available.
+
+Detection mode:
+
+- If `X_API_BEARER_TOKEN` is set in your environment, scan uses the official X API.
+- Otherwise, scan falls back to authenticated browser scraping via Playwright. This is slower, less reliable, and free.
+
+You can force a mode with `x_api.mode: api` or `x_api.mode: scrape` in `config.yaml`.
+
 ## How it works
 
 ```text
@@ -75,13 +91,15 @@ xig daemon
 xig export json
 ```
 
-## What this tool is not
+## What this tool does NOT do
 
-- It is not a way to silence critics, parody accounts, or people you dislike.
-- It is not legal advice.
-- It is not a guarantee of removal. X decides enforcement outcomes.
-- It is not a bypass for X's rate limits.
-- It does not fabricate evidence or rotate credentials to evade platform limits.
+- It does not guarantee account removal. X decides enforcement outcomes.
+- It does not submit reports through the X API. X has no impersonation report endpoint.
+- It does not bypass X rate limits or rotate credentials to evade platform controls.
+- It does not fabricate evidence.
+- It does not silence critics, parody accounts, fan accounts, or people you dislike.
+- It does not provide legal advice.
+- It does not yet provide a hosted SaaS dashboard, nightly E2E selector monitoring, or cross-platform Threads/Bluesky support.
 
 ## Limits
 
