@@ -280,7 +280,12 @@ def test_scan_fixture_lists_and_dry_run_report(
     approved = runner.invoke(
         app, ["review", "--config", str(config_path), "--approve", "1"]
     )
-    assert approved.exit_code == 0
+    assert approved.exit_code == 0, approved.output
+    assert "Dry-run report: xig report --dry-run 1" in approved.output
+    assert (
+        "Live report after inspecting dry-run evidence: xig report --execute --confirm-live 1"
+        in approved.output
+    )
     status_after_approval = runner.invoke(app, ["status", "--config", str(config_path)])
     assert status_after_approval.exit_code == 0, status_after_approval.output
     assert "approved=1" in status_after_approval.output
@@ -297,6 +302,10 @@ def test_scan_fixture_lists_and_dry_run_report(
     )
     assert reported.exit_code == 0, reported.output
     assert "dry-run evidence package created" in reported.output
+    assert (
+        "Live report after inspecting evidence: xig report --execute --confirm-live 1"
+        in reported.output
+    )
 
     history = runner.invoke(app, ["log", "--config", str(config_path)])
     assert history.exit_code == 0

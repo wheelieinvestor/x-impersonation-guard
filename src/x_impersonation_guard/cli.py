@@ -612,6 +612,10 @@ def review(
         _get_review_candidate(store, approve, selected.handle if selected else None)
         store.set_status(approve, QueueStatus.APPROVED)
         typer.echo(f"Approved candidate {approve}")
+        typer.echo(f"Dry-run report: xig report --dry-run {approve}")
+        typer.echo(
+            f"Live report after inspecting dry-run evidence: xig report --execute --confirm-live {approve}"
+        )
         return
     if dismiss is not None:
         _get_review_candidate(store, dismiss, selected.handle if selected else None)
@@ -721,6 +725,14 @@ def report(
         typer.echo(
             f"For public bug reports, share `xig redact-report {result.report_dir}` output instead of the original package."
         )
+        if record.status == QueueStatus.APPROVED.value:
+            typer.echo(
+                f"Live report after inspecting evidence: xig report --execute --confirm-live {candidate_id}"
+            )
+        else:
+            typer.echo(
+                f"Approve before live submission: xig review --approve {candidate_id}"
+            )
     if execute:
         low, high = cfg.reporting.delay_between_reports_seconds
         typer.echo(f"Pacing enabled. Next submission should wait {low}-{high} seconds.")

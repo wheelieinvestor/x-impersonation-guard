@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `xig quickstart` onboarding command for safe demo and real-account next steps.
 - Broader `xig redact-report` secret scrubbing for JSON, text, and log diagnostics.
 - `xig review --next` shortcut for inspecting the highest-priority pending candidate.
+- Next-step reporting guidance after approval and dry-run evidence creation.
 
 ### Changed
 
