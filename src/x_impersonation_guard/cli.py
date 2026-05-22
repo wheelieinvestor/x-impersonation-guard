@@ -432,6 +432,7 @@ def review(
 def report(
     candidate_id: int,
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    identity: Annotated[str | None, typer.Option("--identity")] = None,
     dry_run: Annotated[
         bool,
         typer.Option(
@@ -449,10 +450,11 @@ def report(
 ) -> None:
     """Create evidence package or submit an approved candidate."""
     cfg = _load(config)
+    selected_identity = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
-    record = store.get_candidate(candidate_id)
-    if record is None:
-        raise typer.BadParameter(f"candidate not found: {candidate_id}")
+    record = _get_review_candidate(
+        store, candidate_id, selected_identity.handle if selected_identity else None
+    )
     execute = not dry_run
     if record.status != QueueStatus.APPROVED.value and dry_run:
         typer.echo("Dry run evidence package only. Approve before live submission.")
@@ -466,14 +468,14 @@ def report(
     if execute and not decision.allowed:
         raise typer.BadParameter(decision.message)
 
-    identity = cfg.identity_for_handle(record.identity_handle)
+    protected_identity = cfg.identity_for_handle(record.identity_handle)
     candidate = profile_from_record(record)
     protected = AccountProfile(
-        id=identity.user_id or identity.handle,
-        username=identity.handle,
-        name=identity.display_name,
+        id=protected_identity.user_id or protected_identity.handle,
+        username=protected_identity.handle,
+        name=protected_identity.display_name,
     )
-    score = score_candidate(protected, candidate, identity, cfg.scoring)
+    score = score_candidate(protected, candidate, protected_identity, cfg.scoring)
     reporter = XHelpFormReporter(
         reports_dir=cfg.storage.reports_dir,
         evidence_dir=cfg.storage.evidence_dir,
@@ -484,7 +486,9 @@ def report(
     if execute:
         _print_safety_warning()
     try:
-        result = asyncio.run(reporter.submit(identity, candidate_id, candidate, score))
+        result = asyncio.run(
+            reporter.submit(protected_identity, candidate_id, candidate, score)
+        )
     except Exception as exc:
         store.record_report(
             candidate_id,
