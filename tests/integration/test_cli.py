@@ -7,6 +7,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from x_impersonation_guard.cli import app
+from x_impersonation_guard.config import load_config
 from x_impersonation_guard.models import AccountProfile
 
 
@@ -45,7 +46,38 @@ def test_init_writes_config(tmp_path: Path, runner: CliRunner) -> None:
     result = runner.invoke(app, ["init", "--config", str(config)])
     assert result.exit_code == 0
     assert config.exists()
+    cfg = load_config(config)
+    assert cfg.protected_identities[0].handle == "yourhandle"
+    assert "Edit the starter identity fields" in result.output
     assert "WARNING" in result.stderr
+
+
+def test_init_accepts_identity_options(tmp_path: Path, runner: CliRunner) -> None:
+    config = tmp_path / "config.yaml"
+    result = runner.invoke(
+        app,
+        [
+            "init",
+            "--config",
+            str(config),
+            "--handle",
+            "@ExampleCreator",
+            "--display-name",
+            "Example Creator",
+            "--reporter-name",
+            "Example Legal",
+            "--reporter-email",
+            "reports@example.com",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    cfg = load_config(config)
+    identity = cfg.protected_identities[0]
+    assert identity.handle == "examplecreator"
+    assert identity.display_name == "Example Creator"
+    assert identity.reporter_name == "Example Legal"
+    assert identity.reporter_email == "reports@example.com"
+    assert "Edit the starter identity fields" not in result.output
 
 
 def test_scan_fixture_lists_and_dry_run_report(

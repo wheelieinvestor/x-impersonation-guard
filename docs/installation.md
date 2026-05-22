@@ -4,7 +4,12 @@
 git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
 cd x-impersonation-guard
 uv sync --all-groups
-uv run xig init --config config.yaml
+uv run xig init \
+  --config config.yaml \
+  --handle yourhandle \
+  --display-name "Your Name" \
+  --reporter-name "Your Legal Name" \
+  --reporter-email you@example.com
 ```
 
 For API-backed detection, export your own X bearer token:

@@ -11,6 +11,17 @@ from x_impersonation_guard.models import AccountProfile
 from x_impersonation_guard.storage.repository import ReviewStore
 
 
+def _wheelie_config() -> AppConfig:
+    return AppConfig.model_validate(
+        default_config_dict(
+            handle="wheelieinvestor",
+            display_name="Wheelie Investor",
+            reporter_name="Dean Ahrens",
+            reporter_email="dean@example.com",
+        )
+    )
+
+
 class FakeLookup(XProfileLookup):
     def __init__(self) -> None:
         self.protected = AccountProfile(
@@ -52,7 +63,7 @@ class FakeLookup(XProfileLookup):
 
 @pytest.mark.asyncio
 async def test_run_scan_dedupes_scores_and_writes_queue(tmp_path) -> None:  # type: ignore[no-untyped-def]
-    cfg = AppConfig.model_validate(default_config_dict())
+    cfg = _wheelie_config()
     store = ReviewStore(tmp_path / "db.sqlite")
     results = await run_scan(cfg, cfg.protected_identities[0], FakeLookup(), store)
     assert len(results) == 1
@@ -98,7 +109,7 @@ async def test_run_scan_hashes_profile_images_before_scoring(
         return "0000000000000001"
 
     monkeypatch.setattr(detection, "_phash_url", fake_phash_url)
-    cfg = AppConfig.model_validate(default_config_dict())
+    cfg = _wheelie_config()
     store = ReviewStore(tmp_path / "db.sqlite")
     results = await run_scan(cfg, cfg.protected_identities[0], ImageLookup(), store)
 

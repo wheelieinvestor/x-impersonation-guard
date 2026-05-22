@@ -6,7 +6,14 @@ from x_impersonation_guard.scoring.scorer import score_candidate
 
 
 def _cfg() -> AppConfig:
-    return AppConfig.model_validate(default_config_dict())
+    return AppConfig.model_validate(
+        default_config_dict(
+            handle="wheelieinvestor",
+            display_name="Wheelie Investor",
+            reporter_name="Dean Ahrens",
+            reporter_email="dean@example.com",
+        )
+    )
 
 
 def test_score_candidate_affiliation_and_predates_mitigations() -> None:
