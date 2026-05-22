@@ -63,6 +63,7 @@ class XApiConfig(BaseModel):
     mode: XApiMode = XApiMode.AUTO
     bearer_token_env: str = "X_API_BEARER_TOKEN"
     max_cost_per_scan_usd: float = Field(default=2.0, gt=0, le=50)
+    estimated_cost_per_request_usd: float = Field(default=0.01, gt=0, le=1)
 
 
 class ScoringThresholds(BaseModel):
@@ -231,6 +232,7 @@ def default_config_dict(
             "mode": "auto",
             "bearer_token_env": "X_API_BEARER_TOKEN",
             "max_cost_per_scan_usd": 2.0,
+            "estimated_cost_per_request_usd": 0.01,
         },
         "scoring": {
             "thresholds": {"review_queue_medium": 70, "review_queue_high": 90},

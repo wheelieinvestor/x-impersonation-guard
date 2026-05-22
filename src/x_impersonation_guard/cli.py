@@ -21,6 +21,10 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy import select
 
 from x_impersonation_guard import __version__
+from x_impersonation_guard.clients.cost_guard import (
+    ApiCostBudgetExceeded,
+    CostGuardedLookup,
+)
 from x_impersonation_guard.clients.mode_selector import select_scan_mode
 from x_impersonation_guard.clients.x_api import XApiClient
 from x_impersonation_guard.clients.x_scrape import XScrapeClient
@@ -272,13 +276,26 @@ def scan(
         decision = select_scan_mode(cfg)
         typer.echo(f"Scan mode: {decision.mode.value} ({decision.reason})")
         if decision.bearer_token:
-            lookup = XApiClient(decision.bearer_token)
+            lookup = CostGuardedLookup(
+                XApiClient(decision.bearer_token),
+                max_cost_usd=cfg.x_api.max_cost_per_scan_usd,
+                estimated_cost_per_request_usd=cfg.x_api.estimated_cost_per_request_usd,
+            )
+            typer.echo(
+                "API scan budget: "
+                f"max_estimated=${cfg.x_api.max_cost_per_scan_usd:.2f} "
+                f"estimated_per_request=${cfg.x_api.estimated_cost_per_request_usd:.2f} "
+                f"max_requests={lookup.max_calls}"
+            )
         else:
             lookup = XScrapeClient(
                 str(Path("~/.x-impersonation-guard/browser").expanduser()),
                 headless=cfg.reporting.headless,
             )
-    results = asyncio.run(run_scan(cfg, selected, lookup, store))
+    try:
+        results = asyncio.run(run_scan(cfg, selected, lookup, store))
+    except ApiCostBudgetExceeded as exc:
+        raise typer.BadParameter(str(exc)) from exc
     _render_scores(results)
 
 
