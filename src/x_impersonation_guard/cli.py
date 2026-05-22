@@ -761,8 +761,9 @@ def redact_report(
                 included.append(path.name)
                 redacted.append(path.name)
             elif path.suffix in {".txt", ".log"}:
-                archive.write(path, path.name)
+                archive.writestr(path.name, _redact_text(path.read_text()))
                 included.append(path.name)
+                redacted.append(path.name)
             else:
                 excluded.append(path.name)
         manifest = {
@@ -1331,12 +1332,23 @@ SENSITIVE_REPORT_FIELDS = {
     "x_user_id",
 }
 
+SENSITIVE_KEY_PATTERNS = (
+    "authorization",
+    "bearer",
+    "cookie",
+    "csrf",
+    "password",
+    "secret",
+    "session",
+    "token",
+)
+
 
 def _redact_json(value: Any) -> Any:
     if isinstance(value, dict):
         return {
             str(key): "<redacted>"
-            if str(key) in SENSITIVE_REPORT_FIELDS
+            if _is_sensitive_json_key(str(key))
             else _redact_json(item)
             for key, item in value.items()
         }
@@ -1349,8 +1361,43 @@ def _redact_json(value: Any) -> Any:
             "https://x.com/<redacted>",
             redacted,
         )
-        return redacted
+        return _redact_secret_text(redacted)
     return value
+
+
+def _redact_text(value: str) -> str:
+    redacted = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", "<redacted-email>", value)
+    redacted = re.sub(
+        r"https?://(?:www\.)?(?:x|twitter)\.com/[A-Za-z0-9_]+",
+        "https://x.com/<redacted>",
+        redacted,
+    )
+    return _redact_secret_text(redacted)
+
+
+def _redact_secret_text(value: str) -> str:
+    redacted = re.sub(
+        r"(?i)\b(authorization)\s*[:=]\s*bearer\s+[^'\"\s,;]+",
+        r"\1=<redacted>",
+        value,
+    )
+    redacted = re.sub(
+        r"(?i)\bbearer\s+[^'\"\s,;]+",
+        "Bearer <redacted>",
+        redacted,
+    )
+    return re.sub(
+        r"(?i)\b(bearer|token|authorization|cookie|set-cookie|session|csrf|secret|password)\s*[:=]\s*['\"]?[^'\"\s,;]+",
+        r"\1=<redacted>",
+        redacted,
+    )
+
+
+def _is_sensitive_json_key(key: str) -> bool:
+    normalized = key.lower().replace("-", "_")
+    return normalized in SENSITIVE_REPORT_FIELDS or any(
+        pattern in normalized for pattern in SENSITIVE_KEY_PATTERNS
+    )
 
 
 def _queue_export_payload(records: list[CandidateRecord]) -> list[dict[str, Any]]:

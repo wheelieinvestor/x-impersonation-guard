@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - JSON calibration evidence export for comparing scorer validation runs.
 - Controlled live-validation runbook and issue template for recording launch-gate results.
 - `xig quickstart` onboarding command for safe demo and real-account next steps.
+- Broader `xig redact-report` secret scrubbing for JSON, text, and log diagnostics.
 
 ### Changed
 
