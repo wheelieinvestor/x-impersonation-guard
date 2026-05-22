@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `xig review --show <id>` evidence details with score reasons, mitigations, weighted signals, profile metadata, and next safe commands.
 - Review queue snooze and restore workflow in both CLI and Textual TUI.
 - `xig list --status ...` and `xig status` queue visibility for pending, snoozed, approved, dismissed, reported, and failed candidates.
+- `xig status --json` machine-readable queue and report usage output for validation records and automation.
 - JSON and zip queue exports with manifests for handoff and local analysis.
 - Redacted diagnostic report bundles for safer public issue reports.
 - Estimated X API scan cost guard with configurable per-request estimate.

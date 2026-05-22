@@ -193,6 +193,15 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert status.exit_code == 0, status.output
     assert "pending=1" in status.output
     assert "snoozed=0" in status.output
+    status_json = runner.invoke(app, ["status", "--config", str(config_path), "--json"])
+    assert status_json.exit_code == 0, status_json.output
+    payload = json.loads(status_json.output)
+    assert payload["max_reports_per_24h"] == 5
+    assert payload["identities"][0]["handle"] == "wheelieinvestor"
+    assert payload["identities"][0]["queue"]["pending"] == 1
+    assert payload["identities"][0]["queue"]["snoozed"] == 0
+    assert payload["identities"][0]["reports_24h"] == 0
+    assert payload["identities"][0]["reports_limit_24h"] == 5
 
     reviewed = runner.invoke(app, ["review", "--config", str(config_path)])
     assert reviewed.exit_code == 0, reviewed.output
