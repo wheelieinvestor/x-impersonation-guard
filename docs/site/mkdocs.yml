@@ -1,0 +1,51 @@
+site_name: x-impersonation-guard
+site_description: Detect and report X accounts impersonating you.
+site_url: https://wheelieinvestor.github.io/x-impersonation-guard/
+repo_url: https://github.com/wheelieinvestor/x-impersonation-guard
+repo_name: wheelieinvestor/x-impersonation-guard
+docs_dir: ..
+site_dir: ../../site
+
+theme:
+  name: material
+  logo: assets/favicon.png
+  favicon: assets/favicon.png
+  palette:
+    - scheme: slate
+      primary: blue grey
+      accent: red
+  features:
+    - navigation.sections
+    - navigation.instant
+    - search.suggest
+    - content.code.copy
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/wheelieinvestor/x-impersonation-guard
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/WheelieInvestor
+  generator: false
+
+extra_css:
+  - site/styles.css
+
+nav:
+  - Home: index.md
+  - How it works: how-it-works.md
+  - Install: install.md
+  - Configuration: configuration.md
+  - Setup: setup.md
+  - Scoring explained: scoring.md
+  - Scoring reference: scoring-explained.md
+  - Reporting flow: reporting-flow.md
+  - Rate limits and safety: rate-limits-and-safety.md
+  - Legacy installation notes: installation.md
+  - FAQ: faq.md
+  - Security: security.md
+  - Changelog: changelog.md
+  - Status: status.md
