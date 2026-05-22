@@ -59,7 +59,7 @@ Use `xig status` to see queue counts by status and 24-hour reporting usage, or `
 - Storage directory writability.
 - SQLite review queue access.
 
-It never prints token values. Use `xig doctor --json` to save the same privacy-safe diagnostics for support issues, scripts, or live-validation records.
+It never prints token values. Use `xig doctor --json` to save the same privacy-safe diagnostics for support issues, scripts, or live-validation records. Use `xig support-bundle --output xig-support.zip` to create a small public-safe diagnostic zip that excludes config files, tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
 
 ## Troubleshooting
 

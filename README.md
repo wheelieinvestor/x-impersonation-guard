@@ -181,6 +181,8 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, Chromium browser installation, config validity, starter identity placeholders, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Use `xig doctor --json` for privacy-safe diagnostics in support issues or validation records. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
 
+For GitHub issues, `xig support-bundle --output xig-support.zip` creates a small diagnostic zip with `doctor.json` and a manifest. It intentionally excludes config files, API tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
+
 ## Why I built this
 
 X impersonation is not an abstract platform problem when your followers are the target. A copied profile can look credible enough to move conversations into DMs, push scam links, and make the real account spend time cleaning up confusion instead of building.
