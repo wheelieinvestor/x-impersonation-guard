@@ -72,6 +72,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Review queue snooze and restore workflow" in changelog
     assert "Estimated X API scan cost guard" in changelog
     assert "Cached image-hash lookup in the default scan path" in changelog
+    assert "`xig doctor --json` privacy-safe setup diagnostics" in changelog
     assert "Offline scorer calibration command" in changelog
     assert "JSON calibration evidence export" in changelog
     assert "`xig status --json` machine-readable queue" in changelog
@@ -102,6 +103,7 @@ def test_live_validation_runbook_is_publicly_linked() -> None:
     assert "Live validation: live-validation.md" in mkdocs
     assert "Do not paste X API tokens" in runbook
     assert "xig validation-template" in runbook
+    assert "xig doctor --config config.yaml --json" in runbook
     assert "xig calibrate" in runbook
     assert "xig report" in runbook
     assert "API tokens, cookies, browser profiles" in issue_template

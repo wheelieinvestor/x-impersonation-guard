@@ -974,12 +974,30 @@ def quickstart(
 @app.command()
 def doctor(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Emit privacy-safe machine-readable diagnostics."),
+    ] = False,
 ) -> None:
     """Check local install, config, scan mode, and storage readiness."""
     failures = 0
+    checks: list[dict[str, str]] = []
 
     def emit(state: str, label: str, detail: str) -> None:
-        typer.echo(f"{state}: {label}: {detail}")
+        checks.append({"state": state, "label": label, "detail": detail})
+        if not json_output:
+            typer.echo(f"{state}: {label}: {detail}")
+
+    def finish(exit_code: int) -> None:
+        if json_output:
+            payload = {
+                "generated_at": datetime.now(UTC).isoformat(),
+                "config": str(config.expanduser()),
+                "ok": exit_code == 0,
+                "checks": checks,
+            }
+            typer.echo(json.dumps(payload, indent=2, sort_keys=True))
+        raise typer.Exit(exit_code)
 
     emit("OK", "python", sys.version.split()[0])
 
@@ -1005,13 +1023,13 @@ def doctor(
             "config",
             f"{config_path} not found; run `xig scan-fixture` for demo setup or `xig init` for real use",
         )
-        raise typer.Exit(failures)
+        finish(failures)
 
     try:
         cfg = load_config(config_path)
     except (OSError, ValueError, ValidationError) as exc:
         emit("FAIL", "config", str(exc))
-        raise typer.Exit(1) from exc
+        finish(1)
 
     emit(
         "OK",
@@ -1066,7 +1084,8 @@ def doctor(
         emit("OK", "sqlite", f"review queue reachable; pending={pending}")
 
     if failures:
-        raise typer.Exit(1)
+        finish(1)
+    finish(0)
 
 
 @app.command()
