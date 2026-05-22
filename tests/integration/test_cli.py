@@ -118,6 +118,26 @@ def test_init_guided_accepts_default_reporter_name(
     assert identity.reporter_name == "Guided Creator"
 
 
+def test_calibrate_reports_precision_and_recall(runner: CliRunner) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "calibrate",
+            "--config",
+            "examples/config.individual.yaml",
+            "--input",
+            "examples/calibration.sample.json",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "Calibration candidates: 4" in result.output
+    assert "precision=1.00" in result.output
+    assert "recall=1.00" in result.output
+    assert "tp=2 fp=0 tn=2 fn=0" in result.output
+    assert "No calibration misses." in result.output
+
+
 def test_scan_fixture_lists_and_dry_run_report(
     tmp_path: Path,
     config_path: Path,
