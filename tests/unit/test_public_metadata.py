@@ -72,4 +72,5 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Review queue snooze and restore workflow" in changelog
     assert "Estimated X API scan cost guard" in changelog
     assert "Cached image-hash lookup in the default scan path" in changelog
+    assert "Offline scorer calibration command" in changelog
     assert "`--confirm-live`" in changelog

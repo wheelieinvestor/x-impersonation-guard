@@ -28,6 +28,7 @@ Creators get cloned constantly. Impersonators DM followers, run scams, and erode
 - `xig doctor` setup checks for Python, Playwright, Chromium, config, starter identity fields, storage, token state, and SQLite.
 - Dry-run evidence packages before live submission.
 - Playwright Help Center reporter that fails closed when selectors drift.
+- Offline scorer calibration with precision, recall, F1, and miss reporting.
 
 ## Status
 
