@@ -107,3 +107,17 @@ def test_live_validation_runbook_is_publicly_linked() -> None:
     assert "xig calibrate" in runbook
     assert "xig report" in runbook
     assert "API tokens, cookies, browser profiles" in issue_template
+
+
+def test_issue_templates_request_privacy_safe_diagnostics() -> None:
+    bug = Path(".github/ISSUE_TEMPLATE/bug_report.yml").read_text()
+    live_validation = Path(".github/ISSUE_TEMPLATE/live_validation.yml").read_text()
+    selector_drift = Path(".github/ISSUE_TEMPLATE/selector_drift.yml").read_text()
+    changelog = Path("CHANGELOG.md").read_text()
+
+    assert "xig doctor --json" in bug
+    assert "xig doctor --json" in live_validation
+    assert "xig status --json" in live_validation
+    assert "xig doctor --json" in selector_drift
+    assert "xig redact-report <report_dir>" in selector_drift
+    assert "Public issue templates now request privacy-safe" in changelog

@@ -49,3 +49,11 @@ body:
       render: shell
     validations:
       required: false
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Privacy-safe diagnostics
+      description: Paste output from `xig doctor --json` if relevant. Do not paste token values, cookies, browser profiles, private DMs, or unredacted report packages.
+      render: json
+    validations:
+      required: false
