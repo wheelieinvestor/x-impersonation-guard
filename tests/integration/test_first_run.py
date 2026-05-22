@@ -29,6 +29,7 @@ def test_quickstart_without_config_prints_demo_and_setup_paths(
     assert result.exit_code == 0, result.output
     assert "Safe offline demo:" in result.output
     assert "xig scan-fixture" in result.output
+    assert "xig review --next" in result.output
     assert "xig report --dry-run 1" in result.output
     assert "No config found" in result.output
     assert "xig init --guided" in result.output
@@ -49,6 +50,7 @@ def test_quickstart_with_config_prints_real_next_steps(
     assert "WARN:" in result.output
     assert "X_API_BEARER_TOKEN: not set" in result.output
     assert "xig doctor --config config.yaml" in result.output
+    assert "xig review --config config.yaml --next" in result.output
     assert "xig report --config config.yaml --dry-run <candidate_id>" in result.output
     assert "docs/live-validation.md" in result.output
 
