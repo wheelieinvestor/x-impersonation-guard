@@ -45,6 +45,7 @@ To create a dry-run evidence package:
 
 ```bash
 xig list
+xig review --show 1
 xig report --dry-run 1
 ```
 
@@ -99,6 +100,7 @@ xig scan
 
 # 5. Review candidates.
 xig review
+xig review --show 1
 
 # 6. Dry-run the first report package before any live submission.
 xig report --dry-run 1
@@ -151,6 +153,7 @@ Parody, fan, satire, "not affiliated", and older-account mitigations reduce scor
 X does not provide an impersonation-report API. The reporter uses Playwright against X's official Help Center form. By default:
 
 - Reports require explicit review approval before live submission.
+- `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
