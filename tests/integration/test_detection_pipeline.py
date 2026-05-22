@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 
+import x_impersonation_guard.detection as detection
 from x_impersonation_guard.config import AppConfig, default_config_dict
 from x_impersonation_guard.detection import run_scan
 from x_impersonation_guard.detectors.base import XProfileLookup
@@ -58,3 +60,47 @@ async def test_run_scan_dedupes_scores_and_writes_queue(tmp_path) -> None:  # ty
     rows = store.list_queue("wheelieinvestor")
     assert len(rows) == 1
     assert rows[0].handle == "whee1ieinvestor"
+
+
+class ImageLookup(FakeLookup):
+    def __init__(self) -> None:
+        super().__init__()
+        self.protected = AccountProfile.model_validate(
+            {
+                "id": "1",
+                "username": "wheelieinvestor",
+                "name": "Wheelie Investor",
+                "followers_count": 100_000,
+                "created_at": datetime(2019, 1, 1, tzinfo=UTC),
+                "profile_image_url": "https://example.com/protected.jpg",
+            }
+        )
+        self.fake = AccountProfile.model_validate(
+            {
+                "id": "2",
+                "username": "whee1ieinvestor",
+                "name": "Wheelie Investor",
+                "followers_count": 5,
+                "following_count": 800,
+                "created_at": datetime(2026, 5, 1, tzinfo=UTC),
+                "profile_image_url": "https://example.com/fake.jpg",
+            }
+        )
+
+
+@pytest.mark.asyncio
+async def test_run_scan_hashes_profile_images_before_scoring(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def fake_phash_url(url: str) -> str:
+        if "protected" in url:
+            return "0000000000000000"
+        return "0000000000000001"
+
+    monkeypatch.setattr(detection, "_phash_url", fake_phash_url)
+    cfg = AppConfig.model_validate(default_config_dict())
+    store = ReviewStore(tmp_path / "db.sqlite")
+    results = await run_scan(cfg, cfg.protected_identities[0], ImageLookup(), store)
+
+    assert results[0].signals.image_similarity > 0.9
+    assert results[0].score == 100

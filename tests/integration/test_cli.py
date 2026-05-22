@@ -59,7 +59,7 @@ def test_scan_fixture_lists_and_dry_run_report(
         ["scan-fixture", "--config", str(config_path), "--input", str(fixture)],
     )
     assert scan.exit_code == 0, scan.output
-    assert "score=100" in scan.output
+    assert "Demo scan complete. 1 candidates queued" in scan.output
 
     listed = runner.invoke(app, ["list", "--config", str(config_path)])
     assert listed.exit_code == 0
@@ -70,7 +70,9 @@ def test_scan_fixture_lists_and_dry_run_report(
     )
     assert approved.exit_code == 0
 
-    reported = runner.invoke(app, ["report", "1", "--config", str(config_path)])
+    reported = runner.invoke(
+        app, ["report", "--dry-run", "1", "--config", str(config_path)]
+    )
     assert reported.exit_code == 0, reported.output
     assert "dry-run evidence package created" in reported.output
 

@@ -1,25 +1,86 @@
-# X Impersonation Guard
+# x-impersonation-guard
 
-Automatically detect and report X accounts impersonating you.
+> Detect and report X accounts impersonating you. Local-first, explainable, safe by default.
+
+[![CI](https://github.com/wheelieinvestor/x-impersonation-guard/actions/workflows/test.yml/badge.svg)](https://github.com/wheelieinvestor/x-impersonation-guard/actions)
+[![PyPI](https://img.shields.io/pypi/v/x-impersonation-guard)](https://pypi.org/project/x-impersonation-guard/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
+**Status: Public alpha.** First scan path works end-to-end. Live reporting validated on one impersonator. Calibrating against more impersonators is in progress. Use the offline demo to evaluate; use the live path with the review queue, never auto-submit.
+
+![Offline demo of xig scan-fixture, xig list, and xig report dry-run](docs/demo/quickstart.gif)
+
+[Watch the asciinema-style terminal recording](docs/demo/quickstart.cast)
 
 Public figures get cloned constantly. Reporting each clone by hand is slow, repetitive, and easy to miss. X does not provide an API endpoint for impersonation reports, so this tool separates detection, review, and official Help Center submission.
 
 X Impersonation Guard is built for local control. Your credentials stay on your machine. You review candidates before reports are submitted by default.
 
-## Status
-
-Private alpha foundation. Core scoring, review queue storage, safety limits, and dry-run reporting are implemented. Live X API and Help Center form automation are structured behind adapters so they can be tested without live credentials.
-
 ## Quickstart
 
+You have two paths. Try the offline demo first.
+
+### Path A: Offline demo, 60 seconds, no credentials
+
+This runs the full pipeline against a bundled demo fixture. No X API key needed. Nothing touches the real X.
+
 ```bash
-git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
-cd x-impersonation-guard
-uv sync --all-groups
-uv run xig init --config config.yaml
-uv run xig scan --config config.yaml
-uv run xig list --config config.yaml
+# Install, requires Python 3.11+
+pip install x-impersonation-guard
+playwright install chromium
+
+# Run the demo
+xig scan-fixture
+xig list
+xig report --dry-run 1
 ```
+
+You should see candidates appear with explainable scores and a dry-run evidence package generated under `~/.x-impersonation-guard/reports/`.
+
+### Path B: Real scan against your account, about 10 minutes
+
+After the demo works, set up against your actual handle.
+
+```bash
+# 1. Get an X API bearer token from https://developer.x.com. Pay-per-use is fine.
+export X_API_BEARER_TOKEN="your_token_here"
+
+# 2. Generate your config
+xig init
+
+# 3. Edit config.yaml to set your handle, display name, and contact email
+
+# 4. Scan. This is read-only. No reports are filed.
+xig scan
+
+# 5. Review candidates
+xig review
+
+# 6. Approved candidates queue for reporting. This does not submit yet.
+xig list
+
+# 7. Dry-run the first report package before any live submission
+xig report --dry-run 1
+```
+
+Playwright requires a one-time `playwright install chromium` after pip install.
+
+## What the default scan does
+
+`xig scan` runs four detection steps:
+
+1. **Handle variant lookup**: generates username variants of your protected handle and checks which accounts exist.
+2. **Display name search**: searches recent posts and profiles for your display name.
+3. **Follower scan**: samples followers for accounts that match suspicious patterns.
+4. **Profile image hashing**: fetches and perceptually hashes profile pictures of candidates from steps 1-3 when image URLs are available.
+
+Detection mode:
+
+- If `X_API_BEARER_TOKEN` is set in your environment, scan uses the official X API.
+- Otherwise, scan falls back to authenticated browser scraping via Playwright. This is slower, less reliable, and free.
+
+You can force a mode with `x_api.mode: api` or `x_api.mode: scrape` in `config.yaml`.
 
 ## How it works
 
@@ -75,22 +136,27 @@ xig daemon
 xig export json
 ```
 
-## What this tool is not
+## What this tool does NOT do
 
-- It is not a way to silence critics, parody accounts, or people you dislike.
-- It is not legal advice.
-- It is not a guarantee of removal. X decides enforcement outcomes.
-- It is not a bypass for X's rate limits.
-- It does not fabricate evidence or rotate credentials to evade platform limits.
+- It does not guarantee account removal. X decides enforcement outcomes.
+- It does not submit reports through the X API. X has no impersonation report endpoint.
+- It does not bypass X rate limits or rotate credentials to evade platform controls.
+- It does not fabricate evidence.
+- It does not silence critics, parody accounts, fan accounts, or people you dislike.
+- It does not provide legal advice.
+- It does not yet provide a hosted SaaS dashboard, nightly E2E selector monitoring, or cross-platform Threads/Bluesky support.
 
 ## Limits
 
 There is no X API endpoint for impersonation reports. Reporting requires browser automation against X's Help Center form. The user may still need to confirm emailed verification links from X.
 
-## Development
+## Developer install
 
 ```bash
+git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
+cd x-impersonation-guard
 uv sync --all-groups
+uv run playwright install chromium
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .

@@ -4,16 +4,25 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import time
+from datetime import UTC, datetime, timedelta
+from importlib.resources import files
 from pathlib import Path
 from typing import Annotated
 
 import typer
+import yaml
 from pydantic import BaseModel, ValidationError
 
+from x_impersonation_guard.clients.mode_selector import select_scan_mode
 from x_impersonation_guard.clients.x_api import XApiClient
-from x_impersonation_guard.config import AppConfig, load_config, write_default_config
+from x_impersonation_guard.clients.x_scrape import XScrapeClient
+from x_impersonation_guard.config import (
+    AppConfig,
+    default_config_dict,
+    load_config,
+    write_default_config,
+)
 from x_impersonation_guard.detection import run_scan
 from x_impersonation_guard.detectors.base import XProfileLookup
 from x_impersonation_guard.models import (
@@ -28,12 +37,78 @@ from x_impersonation_guard.scoring.scorer import score_candidate
 from x_impersonation_guard.storage.repository import ReviewStore, profile_from_record
 from x_impersonation_guard.utils.logging import configure_logging
 
-app = typer.Typer(no_args_is_help=True, help="X impersonation detection and reporting.")
+app = typer.Typer(help="X impersonation detection and reporting.")
+
+
+@app.callback(invoke_without_command=True)
+def main(ctx: typer.Context) -> None:
+    """X impersonation detection and reporting."""
+    if ctx.invoked_subcommand is not None:
+        return
+    if not Path("config.yaml").exists():
+        typer.echo(
+            "It looks like this is your first run. Try `xig scan-fixture` for an offline demo, or `xig init` to set up against your real account."
+        )
+        raise typer.Exit()
+    typer.echo(ctx.get_help())
+    raise typer.Exit()
 
 
 class FixtureScan(BaseModel):
     protected: AccountProfile
     candidates: list[AccountProfile]
+
+
+class DemoProtectedIdentity(BaseModel):
+    handle: str
+    display_name: str
+    user_id: str
+    profile_image_hash: str
+
+
+class DemoCandidate(BaseModel):
+    handle: str
+    display_name: str
+    bio: str
+    follower_count: int
+    account_age_days: int
+    profile_image_hash: str
+    expected_score_range: tuple[int, int]
+    expected_tier: str
+
+
+class DemoFixture(BaseModel):
+    demo_protected_identity: DemoProtectedIdentity
+    demo_candidates: list[DemoCandidate]
+
+    def to_fixture_scan(self) -> FixtureScan:
+        now = datetime.now(UTC)
+        protected = AccountProfile(
+            id=self.demo_protected_identity.user_id,
+            username=self.demo_protected_identity.handle,
+            name=self.demo_protected_identity.display_name,
+            followers_count=100_000,
+            created_at=now - timedelta(days=2_000),
+            profile_image_phash=self.demo_protected_identity.profile_image_hash,
+        )
+        candidates = [
+            AccountProfile(
+                id=str(index + 2_000_000_000),
+                username=candidate.handle,
+                name=candidate.display_name,
+                description=candidate.bio,
+                followers_count=candidate.follower_count,
+                following_count=750 if candidate.follower_count < 50 else 200,
+                tweet_count=3 if candidate.account_age_days < 30 else 150,
+                recent_posts_containing_protected_handle=1
+                if "official" in candidate.bio.lower()
+                else 0,
+                created_at=now - timedelta(days=candidate.account_age_days),
+                profile_image_phash=candidate.profile_image_hash,
+            )
+            for index, candidate in enumerate(self.demo_candidates)
+        ]
+        return FixtureScan(protected=protected, candidates=candidates)
 
 
 class FixtureLookup(XProfileLookup):
@@ -89,23 +164,61 @@ def scan(
             scan_fixture.protected, scan_fixture.candidates
         )
     else:
-        token = os.getenv(cfg.x_api.bearer_token_env)
-        if not token:
-            raise typer.BadParameter(
-                f"{cfg.x_api.bearer_token_env} is not set. Use --fixture for offline scan."
+        decision = select_scan_mode(cfg)
+        typer.echo(f"Scan mode: {decision.mode.value} ({decision.reason})")
+        if decision.bearer_token:
+            lookup = XApiClient(decision.bearer_token)
+        else:
+            lookup = XScrapeClient(
+                str(Path("~/.x-impersonation-guard/browser").expanduser()),
+                headless=cfg.reporting.headless,
             )
-        lookup = XApiClient(token)
     results = asyncio.run(run_scan(cfg, selected, lookup, store))
     _render_scores(results)
 
 
 @app.command("scan-fixture")
 def scan_fixture_command(
-    input: Annotated[Path, typer.Option("--input")],
+    input: Annotated[Path, typer.Option("--input")] = Path(
+        "examples/demo_fixture.json"
+    ),
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
 ) -> None:
-    """Score candidate accounts from a local JSON fixture."""
-    scan(config=config, fixture=input)
+    """Run the bundled offline demo fixture with no network calls."""
+    if config.expanduser().exists():
+        cfg = _load(config)
+    else:
+        cfg = _demo_config()
+        config.expanduser().parent.mkdir(parents=True, exist_ok=True)
+        config.expanduser().write_text(
+            yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
+        )
+        typer.echo(f"Wrote demo config to {config}")
+    fixture_path = _resolve_fixture_path(input)
+    raw = json.loads(fixture_path.read_text())
+    if "demo_protected_identity" in raw:
+        scan_fixture = DemoFixture.model_validate(raw).to_fixture_scan()
+        cfg = _config_for_demo_fixture(cfg, scan_fixture)
+    else:
+        scan_fixture = FixtureScan.model_validate(raw)
+    store = ReviewStore(cfg.storage.db_path)
+    lookup = FixtureLookup(scan_fixture.protected, scan_fixture.candidates)
+    results = asyncio.run(run_scan(cfg, cfg.protected_identities[0], lookup, store))
+    high = sum(
+        1
+        for result in results
+        if result.priority is not None and result.priority.value in {"high", "critical"}
+    )
+    medium = sum(
+        1
+        for result in results
+        if result.priority is not None and result.priority.value == "medium"
+    )
+    queued = high + medium
+    typer.echo(
+        f"Demo scan complete. {queued} candidates queued ({high} high, {medium} medium). "
+        "Run `xig review` to see them, or `xig list` for a summary."
+    )
     typer.echo("No reports were submitted. Review and report explicitly.")
 
 
@@ -159,9 +272,13 @@ def review(
 def report(
     candidate_id: int,
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
-    execute: Annotated[
-        bool, typer.Option("--execute", help="Submit live form.")
-    ] = False,
+    dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run/--execute",
+            help="Create evidence only or submit the live Help Center form.",
+        ),
+    ] = True,
 ) -> None:
     """Create evidence package or submit an approved candidate."""
     cfg = _load(config)
@@ -169,7 +286,8 @@ def report(
     record = store.get_candidate(candidate_id)
     if record is None:
         raise typer.BadParameter(f"candidate not found: {candidate_id}")
-    if record.status != QueueStatus.APPROVED.value and not execute:
+    execute = not dry_run
+    if record.status != QueueStatus.APPROVED.value and dry_run:
         typer.echo("Dry run evidence package only. Approve before live submission.")
     if execute and record.status != QueueStatus.APPROVED.value:
         raise typer.BadParameter("live reports require approved review status")
@@ -194,7 +312,18 @@ def report(
     )
     if execute:
         _print_safety_warning()
-    result = asyncio.run(reporter.submit(identity, candidate_id, candidate, score))
+    try:
+        result = asyncio.run(reporter.submit(identity, candidate_id, candidate, score))
+    except Exception as exc:
+        store.record_report(
+            candidate_id,
+            record.identity_handle,
+            candidate.username,
+            QueueStatus.REPORT_FAILED.value,
+            error=str(exc),
+        )
+        store.set_status(candidate_id, QueueStatus.REPORT_FAILED)
+        raise typer.BadParameter(f"report failed: {exc}") from exc
     status = "submitted" if result.submitted else "dry_run"
     store.record_report(
         candidate_id,
@@ -276,6 +405,55 @@ def export(
         for record in records
     ]
     typer.echo(json.dumps(payload, indent=2, default=str))
+
+
+def _resolve_fixture_path(input_path: Path) -> Path:
+    fixture_path = input_path.expanduser()
+    if fixture_path.exists():
+        return fixture_path
+    if input_path == Path("examples/demo_fixture.json"):
+        return Path(
+            str(files("x_impersonation_guard.resources").joinpath("demo_fixture.json"))
+        )
+    if not fixture_path.is_absolute():
+        source_path = Path(__file__).resolve().parents[2] / fixture_path
+        if source_path.exists():
+            return source_path
+    return fixture_path
+
+
+def _demo_config() -> AppConfig:
+    raw = default_config_dict()
+    raw["protected_identities"][0].update(
+        {
+            "name": "Demo User",
+            "handle": "demouser",
+            "display_name": "Demo User",
+            "user_id": "1000000001",
+            "reporter_name": "Demo User",
+            "reporter_email": "demo@example.com",
+            "extra_handle_variants": [],
+            "extra_display_variants": [],
+        }
+    )
+    return AppConfig.model_validate(raw)
+
+
+def _config_for_demo_fixture(cfg: AppConfig, fixture: FixtureScan) -> AppConfig:
+    raw = cfg.model_dump(mode="json")
+    raw["protected_identities"][0].update(
+        {
+            "name": fixture.protected.name,
+            "handle": fixture.protected.username,
+            "display_name": fixture.protected.name,
+            "user_id": fixture.protected.id,
+            "reporter_name": fixture.protected.name,
+            "reporter_email": "demo@example.com",
+            "extra_handle_variants": [],
+            "extra_display_variants": [],
+        }
+    )
+    return AppConfig.model_validate(raw)
 
 
 def _load(path: Path) -> AppConfig:

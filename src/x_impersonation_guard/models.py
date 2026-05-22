@@ -24,6 +24,7 @@ class QueueStatus(StrEnum):
     DISMISSED = "dismissed"
     SNOOZED = "snoozed"
     REPORTED = "reported"
+    REPORT_FAILED = "report_failed"
     FAILED = "failed"
 
 

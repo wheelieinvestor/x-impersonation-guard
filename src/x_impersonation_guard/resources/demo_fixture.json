@@ -1,0 +1,90 @@
+{
+  "demo_protected_identity": {
+    "handle": "demouser",
+    "display_name": "Demo User",
+    "user_id": "1000000001",
+    "profile_image_hash": "f0e0c0c0e0f0c0c0"
+  },
+  "demo_candidates": [
+    {
+      "handle": "demouser1",
+      "display_name": "Demo User",
+      "bio": "real account official",
+      "follower_count": 12,
+      "account_age_days": 4,
+      "profile_image_hash": "f0e0c0c0e0f0c0c1",
+      "expected_score_range": [90, 100],
+      "expected_tier": "high"
+    },
+    {
+      "handle": "demouser_official",
+      "display_name": "Demo User Official",
+      "bio": "official demo account",
+      "follower_count": 3,
+      "account_age_days": 1,
+      "profile_image_hash": "f0e0c0c0e0f0c0c0",
+      "expected_score_range": [95, 100],
+      "expected_tier": "high"
+    },
+    {
+      "handle": "real_demouser",
+      "display_name": "Demo User",
+      "bio": "backup official profile",
+      "follower_count": 22,
+      "account_age_days": 12,
+      "profile_image_hash": "f0e0c0c0e0f0c0c2",
+      "expected_score_range": [80, 100],
+      "expected_tier": "high"
+    },
+    {
+      "handle": "demo_user_alerts",
+      "display_name": "Demo User Alerts",
+      "bio": "updates and alerts for Demo User",
+      "follower_count": 40,
+      "account_age_days": 45,
+      "profile_image_hash": "f0e0c0c0e0000000",
+      "expected_score_range": [70, 89],
+      "expected_tier": "medium"
+    },
+    {
+      "handle": "demouser_fan",
+      "display_name": "Demo User Fan Account",
+      "bio": "parody account, not affiliated",
+      "follower_count": 800,
+      "account_age_days": 600,
+      "profile_image_hash": "f0e0c0c0e0f0c0c0",
+      "expected_score_range": [30, 55],
+      "expected_tier": "filtered"
+    },
+    {
+      "handle": "demouser_news",
+      "display_name": "Demo User News",
+      "bio": "unofficial news and fan updates",
+      "follower_count": 1500,
+      "account_age_days": 900,
+      "profile_image_hash": "f0e0c0c0e0f0c0c0",
+      "expected_score_range": [30, 55],
+      "expected_tier": "filtered"
+    },
+    {
+      "handle": "demoagency",
+      "display_name": "Demo Agency",
+      "bio": "legitimate agency account with no relationship",
+      "follower_count": 5000,
+      "account_age_days": 1200,
+      "profile_image_hash": "0000000000000000",
+      "expected_score_range": [0, 35],
+      "expected_tier": "filtered"
+    },
+    {
+      "handle": "demolover",
+      "display_name": "Someone Else",
+      "bio": "completely unrelated person",
+      "follower_count": 3200,
+      "account_age_days": 1100,
+      "profile_image_hash": "1111111111111111",
+      "expected_score_range": [0, 25],
+      "expected_tier": "filtered"
+    }
+  ]
+}
