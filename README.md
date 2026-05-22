@@ -155,6 +155,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - Reports require explicit review approval before live submission.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
+- `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip for public bug reports.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
 

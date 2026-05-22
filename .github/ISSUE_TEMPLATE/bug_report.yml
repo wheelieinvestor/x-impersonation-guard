@@ -45,7 +45,7 @@ body:
     id: redacted-log
     attributes:
       label: Redacted log output
-      description: Paste relevant logs with tokens, cookies, emails, and private data removed.
+      description: Paste relevant logs with tokens, cookies, emails, and private data removed. For report packages, attach output from `xig redact-report <report_dir>`, not the original report directory.
       render: shell
     validations:
       required: false
