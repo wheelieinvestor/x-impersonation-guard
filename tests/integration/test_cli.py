@@ -212,8 +212,11 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert "Profile: https://x.com/whee1ieinvestor" in detail.output
     assert "Reasons:" in detail.output
     assert "Top weighted signals:" in detail.output
-    assert "Snooze: xig review --snooze 1" in detail.output
-    assert "Dry-run after approval: xig report --dry-run 1" in detail.output
+    assert f"Snooze: xig review --config {config_path} --snooze 1" in detail.output
+    assert (
+        f"Dry-run after approval: xig report --config {config_path} --dry-run 1"
+        in detail.output
+    )
 
     exported_json = runner.invoke(app, ["export", "json", "--config", str(config_path)])
     assert exported_json.exit_code == 0, exported_json.output
@@ -281,9 +284,12 @@ def test_scan_fixture_lists_and_dry_run_report(
         app, ["review", "--config", str(config_path), "--approve", "1"]
     )
     assert approved.exit_code == 0, approved.output
-    assert "Dry-run report: xig report --dry-run 1" in approved.output
     assert (
-        "Live report after inspecting dry-run evidence: xig report --execute --confirm-live 1"
+        f"Dry-run report: xig report --config {config_path} --dry-run 1"
+        in approved.output
+    )
+    assert (
+        f"Live report after inspecting dry-run evidence: xig report --config {config_path} --execute --confirm-live 1"
         in approved.output
     )
     status_after_approval = runner.invoke(app, ["status", "--config", str(config_path)])
@@ -303,7 +309,7 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert reported.exit_code == 0, reported.output
     assert "dry-run evidence package created" in reported.output
     assert (
-        "Live report after inspecting evidence: xig report --execute --confirm-live 1"
+        f"Live report after inspecting evidence: xig report --config {config_path} --execute --confirm-live 1"
         in reported.output
     )
 
@@ -387,6 +393,41 @@ def test_identity_filter_guards_review_and_report_actions(
     )
     assert wrong_report_identity.exit_code != 0
     assert "does not belong to @secondcreator" in wrong_report_identity.output
+
+    next_detail = runner.invoke(
+        app,
+        [
+            "review",
+            "--config",
+            str(config),
+            "--identity",
+            "firstcreator",
+            "--next",
+        ],
+    )
+    assert next_detail.exit_code == 0, next_detail.output
+    assert (
+        f"xig report --config {config} --identity firstcreator --dry-run {candidate_id}"
+        in next_detail.output
+    )
+
+    approved = runner.invoke(
+        app,
+        [
+            "review",
+            "--config",
+            str(config),
+            "--identity",
+            "firstcreator",
+            "--approve",
+            str(candidate_id),
+        ],
+    )
+    assert approved.exit_code == 0, approved.output
+    assert (
+        f"xig report --config {config} --identity firstcreator --dry-run {candidate_id}"
+        in approved.output
+    )
 
     right_identity = runner.invoke(
         app,

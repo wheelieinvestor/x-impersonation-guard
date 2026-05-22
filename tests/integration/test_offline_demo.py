@@ -46,7 +46,10 @@ def test_offline_demo_scan_list_and_dry_run_report(
     assert report.exit_code == 0, report.output
     assert "dry-run evidence package created" in report.output
     assert "xig redact-report" in report.output
-    assert "Approve before live submission: xig review --approve" in report.output
+    assert (
+        f"Approve before live submission: xig review --config {config} --approve {first_id}"
+        in report.output
+    )
     report_dir_match = re.search(
         r"dry-run evidence package created: (/.*)$", report.output, re.MULTILINE
     )
