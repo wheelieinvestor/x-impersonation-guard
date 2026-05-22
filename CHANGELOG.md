@@ -36,6 +36,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 - Textual review UI now binds `o` to open the selected candidate profile, matching the detail panel hint.
 - Textual review UI now respects `--identity` and preserves config/identity flags in follow-up commands.
+- Textual review UI now shell-quotes generated follow-up commands for config paths with spaces.
 - Public issue templates now request privacy-safe `xig doctor --json`, `xig status --json`, and redacted report diagnostics where relevant.
 - Live Help Center submissions now require both `--execute` and `--confirm-live`.
 - Multi-identity review and report actions fail closed when `--identity` does not own the candidate.
