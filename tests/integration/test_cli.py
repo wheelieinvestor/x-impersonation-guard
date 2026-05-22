@@ -131,6 +131,21 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert listed.exit_code == 0
     assert "@whee1ieinvestor" in listed.output
 
+    reviewed = runner.invoke(app, ["review", "--config", str(config_path)])
+    assert reviewed.exit_code == 0, reviewed.output
+    assert "Pending review candidates: 1" in reviewed.output
+    assert "xig review --show <id>" in reviewed.output
+    assert "@whee1ieinvestor" in reviewed.output
+    assert "handle is highly similar" in reviewed.output
+
+    detail = runner.invoke(app, ["review", "--config", str(config_path), "--show", "1"])
+    assert detail.exit_code == 0, detail.output
+    assert "Candidate 1: @whee1ieinvestor" in detail.output
+    assert "Profile: https://x.com/whee1ieinvestor" in detail.output
+    assert "Reasons:" in detail.output
+    assert "Top weighted signals:" in detail.output
+    assert "Dry-run after approval: xig report --dry-run 1" in detail.output
+
     approved = runner.invoke(
         app, ["review", "--config", str(config_path), "--approve", "1"]
     )
