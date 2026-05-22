@@ -10,6 +10,32 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Wheelhouse Capital LLC" }]
+keywords = [
+    "x",
+    "twitter",
+    "impersonation",
+    "brand-protection",
+    "security",
+    "creator-tools",
+    "playwright",
+    "osint",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet",
+    "Topic :: Security",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
 dependencies = [
     "httpx==0.28.1",
     "imagehash==4.3.2",
@@ -30,6 +56,13 @@ dependencies = [
 [project.scripts]
 xig = "x_impersonation_guard.cli:app"
 x-impersonation-guard = "x_impersonation_guard.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/wheelieinvestor/x-impersonation-guard"
+Documentation = "https://wheelieinvestor.github.io/x-impersonation-guard/"
+Issues = "https://github.com/wheelieinvestor/x-impersonation-guard/issues"
+Source = "https://github.com/wheelieinvestor/x-impersonation-guard"
+Changelog = "https://github.com/wheelieinvestor/x-impersonation-guard/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [

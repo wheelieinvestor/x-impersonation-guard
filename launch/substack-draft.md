@@ -6,7 +6,11 @@ I built an open-source agent to find the accounts impersonating me on X
 
 ## Hook
 
-Open with the concrete impersonator story Dean will fill in before launch: who cloned the account, what they sent followers, and why manual reporting was not enough.
+X impersonation stops being theoretical the moment a copied profile starts sending your followers into DMs. The account can reuse your name, your profile image, and enough of your language to make a rushed follower hesitate before realizing something is wrong.
+
+The frustrating part is not just finding the clone. It is collecting evidence, deciding whether the account is actually impersonating you, filing the same report flow again, and remembering what has already been submitted. That is manageable once. It is not a system.
+
+So I built `x-impersonation-guard`: a local-first, open-source CLI for detecting likely impersonators, reviewing explainable scores, and preparing official X Help Center reports without turning reporting into an unsafe auto-submit machine.
 
 ## Why this matters for FinTwit
 

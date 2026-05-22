@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Fail-closed Playwright Help Center reporter checks.
 - Public alpha README, demo assets, issue templates, and CI.
 - PyPI prerelease package `x-impersonation-guard==0.2.0a0`.
+- PyPI-facing project URLs, classifiers, keywords, and typed-package marker.
 
 ### Verified
 
