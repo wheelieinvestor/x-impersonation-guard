@@ -122,6 +122,38 @@ def test_offline_demo_scan_list_and_dry_run_report(
     assert "failure.log" in manifest["redacted"]
 
 
+def test_isolated_demo_uses_local_workspace(
+    tmp_path: Path,
+    runner: CliRunner,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["demo"])
+
+    assert result.exit_code == 0, result.output
+    assert "Demo workspace: .xig-demo" in result.output
+    assert "xig review --config .xig-demo/config.yaml --next" in result.output
+    assert "No live X calls were made" in result.output
+    config = tmp_path / ".xig-demo" / "config.yaml"
+    db = tmp_path / ".xig-demo" / "db.sqlite"
+    assert config.exists()
+    assert db.exists()
+
+    listed = runner.invoke(app, ["list", "--config", str(config)])
+    assert listed.exit_code == 0, listed.output
+    assert "@alex_charts1" in listed.output
+
+    marker = tmp_path / ".xig-demo" / "old.txt"
+    marker.write_text("old")
+    reset = runner.invoke(app, ["demo", "--reset"])
+    assert reset.exit_code == 0, reset.output
+    assert "Reset demo workspace: .xig-demo" in reset.output
+    assert not marker.exists()
+    assert config.exists()
+    assert db.exists()
+
+
 def test_demo_fixture_scores_match_story() -> None:
     raw = json.loads(Path("examples/demo_fixture.json").read_text())
     demo = DemoFixture.model_validate(raw)
