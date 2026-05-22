@@ -41,7 +41,7 @@ dependencies = [
     "imagehash==4.3.2",
     "pillow==12.2.0",
     "playwright==1.56.0",
-    "pydantic==2.12.5",
+    "pydantic==2.13.4",
     "pydantic-settings==2.11.0",
     "email-validator==2.3.0",
     "pyyaml==6.0.3",
