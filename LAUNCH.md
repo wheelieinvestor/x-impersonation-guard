@@ -4,13 +4,13 @@
 
 - Build core detection and scoring.
 - Manual review queue only.
-- Test against `wheelieinvestor` and known impersonators.
+- Test against a maintainer-controlled identity and known impersonators.
 - Iterate scorer accuracy until precision is at least 95% on the test set.
 
 ## Phase 2: Public beta, week 2 to 3
 
 - Add Playwright reporter.
-- Add `xig init` interactive setup.
+- Add user-first `xig init` setup.
 - Complete docs.
 - Recruit 5 to 10 finance and crypto creators with known impersonation problems.
 - Publish to PyPI as `x-impersonation-guard`.
