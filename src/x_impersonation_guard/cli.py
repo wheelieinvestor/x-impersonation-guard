@@ -546,6 +546,8 @@ def doctor(
         "config",
         f"{len(cfg.protected_identities)} protected identity configured",
     )
+    for warning in _starter_identity_warnings(cfg):
+        emit("WARN", "identity", warning)
 
     try:
         decision = select_scan_mode(cfg)
@@ -882,6 +884,25 @@ def _top_weighted_signals(weighted: dict[Any, Any]) -> list[tuple[str, float]]:
         except (TypeError, ValueError):
             continue
     return sorted(signals, key=lambda item: item[1], reverse=True)[:5]
+
+
+def _starter_identity_warnings(cfg: AppConfig) -> list[str]:
+    warnings = []
+    for identity in cfg.protected_identities:
+        placeholders = []
+        if identity.handle == "yourhandle":
+            placeholders.append("handle")
+        if identity.display_name == "Your Name":
+            placeholders.append("display_name")
+        if identity.reporter_name == "Your Name":
+            placeholders.append("reporter_name")
+        if str(identity.reporter_email) == "you@example.com":
+            placeholders.append("reporter_email")
+        if placeholders:
+            warnings.append(
+                f"@{identity.handle} still uses starter values for {', '.join(placeholders)}; run `xig init --guided` or edit config.yaml before live scans"
+            )
+    return warnings
 
 
 def _render_scores(results: list[ScoreResult]) -> None:

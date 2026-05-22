@@ -45,6 +45,7 @@ Use `xig review --show <id>` to inspect score reasons, mitigations, profile meta
 - Python 3.11 or newer.
 - Playwright package availability and Chromium browser installation.
 - Config validity when a config file exists.
+- Starter identity placeholders that should be replaced before live scans.
 - Selected scan mode and whether the configured X API token environment variable is set.
 - Storage directory writability.
 - SQLite review queue access.
