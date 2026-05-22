@@ -160,7 +160,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 ### Local readiness checks
 
-Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, Chromium browser installation, config validity, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
+Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, Chromium browser installation, config validity, starter identity placeholders, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
 
 ## Why I built this
 
