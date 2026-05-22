@@ -24,7 +24,7 @@ xig init \
   --reporter-email you@example.com
 ```
 
-If you skip those identity options, `xig init` writes a generic starter config and tells you which fields to edit before live use.
+If you skip those identity options, `xig init` writes a generic starter config and tells you which fields to edit before live use. Use `xig init --guided` if you prefer prompts.
 
 Then run:
 

@@ -19,3 +19,5 @@ export X_API_BEARER_TOKEN=...
 ```
 
 Scrape fallback is available through the client layer, but API mode is preferred.
+
+Use `uv run xig init --guided --config config.yaml` if you prefer prompts over command flags.
