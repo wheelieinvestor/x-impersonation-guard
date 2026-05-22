@@ -11,7 +11,7 @@ A report package contains:
 - `form_response.html`
 - `report.json`
 
-Dry run mode creates an evidence package without submitting. Live submission requires an approved candidate plus `--execute --confirm-live`.
+Dry run mode creates an evidence package without submitting. Live submission requires an approved candidate plus `--execute --confirm-live`. If your config has more than one protected identity, use `xig report --identity <handle> <candidate_id>` so the command fails closed when the candidate belongs to a different identity.
 
 ## Sharing diagnostics
 
