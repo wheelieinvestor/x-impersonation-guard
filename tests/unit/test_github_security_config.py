@@ -8,12 +8,22 @@ import yaml
 def test_dependabot_tracks_uv_and_github_actions() -> None:
     config = yaml.safe_load(Path(".github/dependabot.yml").read_text())
 
-    ecosystems = {entry["package-ecosystem"] for entry in config["updates"]}
+    updates_by_ecosystem = {
+        entry["package-ecosystem"]: entry for entry in config["updates"]
+    }
+    ecosystems = set(updates_by_ecosystem)
     assert ecosystems == {"uv", "github-actions"}
     for entry in config["updates"]:
         assert entry["directory"] == "/"
         assert entry["schedule"]["interval"] == "weekly"
         assert entry["open-pull-requests-limit"] <= 5
+
+    assert updates_by_ecosystem["uv"]["groups"] == {
+        "python-dependencies": {"patterns": ["*"]}
+    }
+    assert updates_by_ecosystem["github-actions"]["groups"] == {
+        "github-actions": {"patterns": ["*"]}
+    }
 
 
 def test_dependency_review_blocks_high_severity_and_copyleft() -> None:
