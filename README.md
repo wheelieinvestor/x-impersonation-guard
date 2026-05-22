@@ -12,14 +12,52 @@ Private alpha foundation. Core scoring, review queue storage, safety limits, and
 
 ## Quickstart
 
+You have two paths. Try the offline demo first.
+
+### Path A: Offline demo, 60 seconds, no credentials
+
+This runs the full pipeline against a bundled demo fixture. No X API key needed. Nothing touches the real X.
+
 ```bash
-git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
-cd x-impersonation-guard
-uv sync --all-groups
-uv run xig init --config config.yaml
-uv run xig scan --config config.yaml
-uv run xig list --config config.yaml
+# Install, requires Python 3.11+
+pip install x-impersonation-guard
+playwright install chromium
+
+# Run the demo
+xig scan-fixture
+xig list
+xig report --dry-run 1
 ```
+
+You should see candidates appear with explainable scores and a dry-run evidence package generated under `~/.x-impersonation-guard/reports/`.
+
+### Path B: Real scan against your account, about 10 minutes
+
+After the demo works, set up against your actual handle.
+
+```bash
+# 1. Get an X API bearer token from https://developer.x.com. Pay-per-use is fine.
+export X_API_BEARER_TOKEN="your_token_here"
+
+# 2. Generate your config
+xig init
+
+# 3. Edit config.yaml to set your handle, display name, and contact email
+
+# 4. Scan. This is read-only. No reports are filed.
+xig scan
+
+# 5. Review candidates
+xig review
+
+# 6. Approved candidates queue for reporting. This does not submit yet.
+xig list
+
+# 7. Dry-run the first report package before any live submission
+xig report --dry-run 1
+```
+
+Playwright requires a one-time `playwright install chromium` after pip install.
 
 ## What the default scan does
 
@@ -105,10 +143,13 @@ xig export json
 
 There is no X API endpoint for impersonation reports. Reporting requires browser automation against X's Help Center form. The user may still need to confirm emailed verification links from X.
 
-## Development
+## Developer install
 
 ```bash
+git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
+cd x-impersonation-guard
 uv sync --all-groups
+uv run playwright install chromium
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .

@@ -36,7 +36,21 @@ from x_impersonation_guard.scoring.scorer import score_candidate
 from x_impersonation_guard.storage.repository import ReviewStore, profile_from_record
 from x_impersonation_guard.utils.logging import configure_logging
 
-app = typer.Typer(no_args_is_help=True, help="X impersonation detection and reporting.")
+app = typer.Typer(help="X impersonation detection and reporting.")
+
+
+@app.callback(invoke_without_command=True)
+def main(ctx: typer.Context) -> None:
+    """X impersonation detection and reporting."""
+    if ctx.invoked_subcommand is not None:
+        return
+    if not Path("config.yaml").exists():
+        typer.echo(
+            "It looks like this is your first run. Try `xig scan-fixture` for an offline demo, or `xig init` to set up against your real account."
+        )
+        raise typer.Exit()
+    typer.echo(ctx.get_help())
+    raise typer.Exit()
 
 
 class FixtureScan(BaseModel):
