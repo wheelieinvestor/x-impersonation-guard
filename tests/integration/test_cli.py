@@ -183,6 +183,13 @@ def test_scan_fixture_lists_and_dry_run_report(
     )
     assert approved.exit_code == 0
 
+    live_without_confirm = runner.invoke(
+        app,
+        ["report", "--execute", "1", "--config", str(config_path)],
+        color=False,
+    )
+    assert live_without_confirm.exit_code != 0
+
     reported = runner.invoke(
         app, ["report", "--dry-run", "1", "--config", str(config_path)]
     )

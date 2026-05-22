@@ -11,7 +11,7 @@ A report package contains:
 - `form_response.html`
 - `report.json`
 
-Dry run mode creates an evidence package without submitting. Live submission requires `--execute` and an approved candidate.
+Dry run mode creates an evidence package without submitting. Live submission requires an approved candidate plus `--execute --confirm-live`.
 
 ## Sharing diagnostics
 
