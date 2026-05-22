@@ -16,6 +16,7 @@ from x_impersonation_guard.detectors.display_name_search import (
 )
 from x_impersonation_guard.detectors.follower_scan import FollowerScanDetector
 from x_impersonation_guard.detectors.handle_variants import HandleVariantDetector
+from x_impersonation_guard.detectors.image_lookup import ImageLookupDetector
 from x_impersonation_guard.models import AccountProfile, DetectionCandidate, ScoreResult
 from x_impersonation_guard.scoring.scorer import score_candidate
 from x_impersonation_guard.storage.repository import ReviewStore
@@ -42,6 +43,7 @@ async def run_scan(
         HandleVariantDetector(lookup),
         DisplayNameSearchDetector(lookup),
         FollowerScanDetector(lookup),
+        ImageLookupDetector(store.cached_profiles(identity.handle)),
     ]
     raw_candidates: list[DetectionCandidate] = []
     for detector in detectors:
