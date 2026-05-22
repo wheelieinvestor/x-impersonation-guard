@@ -13,6 +13,7 @@ xig quickstart
 xig scan-fixture
 xig doctor
 xig review
+xig review --next
 ```
 
 The offline demo runs against fictional `@alex_charts` candidates and never touches the real X.

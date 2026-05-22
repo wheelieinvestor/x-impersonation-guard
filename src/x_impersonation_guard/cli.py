@@ -575,6 +575,13 @@ def review(
         int | None,
         typer.Option("--show", help="Show detailed evidence for a candidate ID."),
     ] = None,
+    next_candidate: Annotated[
+        bool,
+        typer.Option(
+            "--next",
+            help="Show detailed evidence for the highest-priority pending candidate.",
+        ),
+    ] = False,
     approve: Annotated[int | None, typer.Option("--approve")] = None,
     dismiss: Annotated[int | None, typer.Option("--dismiss")] = None,
     snooze: Annotated[int | None, typer.Option("--snooze")] = None,
@@ -588,6 +595,13 @@ def review(
     cfg = _load(config)
     selected = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
+    if next_candidate:
+        record = _next_pending_candidate(store, selected.handle if selected else None)
+        if record is None:
+            typer.echo("No pending candidates.")
+            return
+        _render_review_detail(record)
+        return
     if show is not None:
         record = _get_review_candidate(
             store, show, selected.handle if selected else None
@@ -810,7 +824,7 @@ def quickstart(
             "xig scan-fixture",
             "xig doctor",
             "xig review",
-            "xig review --show 1",
+            "xig review --next",
             "xig report --dry-run 1",
         ]
     )
@@ -858,6 +872,7 @@ def quickstart(
             f"xig scan --config {config_path}",
             f"xig status --config {config_path}",
             f"xig review --config {config_path}",
+            f"xig review --config {config_path} --next",
             f"xig review --config {config_path} --show <candidate_id>",
             f"xig report --config {config_path} --dry-run <candidate_id>",
         ]
@@ -1242,6 +1257,13 @@ def _get_review_candidate(
             f"candidate {candidate_id} does not belong to @{identity_handle}"
         )
     return record
+
+
+def _next_pending_candidate(
+    store: ReviewStore, identity_handle: str | None
+) -> CandidateRecord | None:
+    records = store.list_queue(identity_handle)
+    return records[0] if records else None
 
 
 def _render_review_detail(record: CandidateRecord) -> None:
