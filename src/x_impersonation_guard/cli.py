@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import importlib.util
 import json
+import os
+import sys
 import time
 from datetime import UTC, datetime, timedelta
 from importlib.resources import files
@@ -412,6 +415,93 @@ def status(
 
 
 @app.command()
+def doctor(
+    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+) -> None:
+    """Check local install, config, scan mode, and storage readiness."""
+    failures = 0
+
+    def emit(state: str, label: str, detail: str) -> None:
+        typer.echo(f"{state}: {label}: {detail}")
+
+    emit("OK", "python", sys.version.split()[0])
+
+    if importlib.util.find_spec("playwright") is not None:
+        emit("OK", "playwright", "Python package is installed")
+    else:
+        failures += 1
+        emit("FAIL", "playwright", "install package dependencies first")
+
+    config_path = config.expanduser()
+    if not config_path.exists():
+        emit(
+            "WARN",
+            "config",
+            f"{config_path} not found; run `xig scan-fixture` for demo setup or `xig init` for real use",
+        )
+        raise typer.Exit(failures)
+
+    try:
+        cfg = load_config(config_path)
+    except (OSError, ValueError, ValidationError) as exc:
+        emit("FAIL", "config", str(exc))
+        raise typer.Exit(1) from exc
+
+    emit(
+        "OK",
+        "config",
+        f"{len(cfg.protected_identities)} protected identity configured",
+    )
+
+    try:
+        decision = select_scan_mode(cfg)
+    except ValueError as exc:
+        failures += 1
+        emit("FAIL", "scan mode", str(exc))
+    else:
+        token_state = "token set" if decision.bearer_token else "no token"
+        emit(
+            "OK",
+            "scan mode",
+            f"{decision.mode.value} ({decision.reason}; {token_state})",
+        )
+
+    token_name = cfg.x_api.bearer_token_env
+    emit(
+        "OK" if os.getenv(token_name) else "WARN",
+        "x api token",
+        f"{token_name} is {'set' if os.getenv(token_name) else 'not set'}",
+    )
+
+    storage_paths = [
+        ("database parent", cfg.storage.db_path.parent),
+        ("evidence dir", cfg.storage.evidence_dir),
+        ("reports dir", cfg.storage.reports_dir),
+    ]
+    for label, path in storage_paths:
+        if _is_writable_dir(path):
+            emit("OK", label, str(path.expanduser()))
+        else:
+            failures += 1
+            emit("FAIL", label, f"{path.expanduser()} is not writable")
+
+    try:
+        store = ReviewStore(cfg.storage.db_path)
+        pending = sum(
+            len(store.list_queue(identity.handle))
+            for identity in cfg.protected_identities
+        )
+    except Exception as exc:
+        failures += 1
+        emit("FAIL", "sqlite", str(exc))
+    else:
+        emit("OK", "sqlite", f"review queue reachable; pending={pending}")
+
+    if failures:
+        raise typer.Exit(1)
+
+
+@app.command()
 def daemon(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
     every_hours: Annotated[float, typer.Option("--every-hours")] = 6.0,
@@ -548,6 +638,18 @@ def _relative_age(value: datetime) -> str:
     if hours < 48:
         return f"{hours}h"
     return f"{hours // 24}d"
+
+
+def _is_writable_dir(path: Path) -> bool:
+    directory = path.expanduser()
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        probe = directory / ".xig-write-test"
+        probe.write_text("ok")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
 
 
 def _load(path: Path) -> AppConfig:

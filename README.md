@@ -35,6 +35,7 @@ No credentials. No live X calls. No reports submitted.
 pip install --pre x-impersonation-guard
 playwright install chromium
 xig scan-fixture
+xig doctor
 xig review
 ```
 
@@ -88,13 +89,16 @@ xig init
 
 # 3. Edit config.yaml to set your handle, display name, and contact email.
 
-# 4. Scan. This is read-only. No reports are filed.
+# 4. Check your local setup before the first real scan.
+xig doctor
+
+# 5. Scan. This is read-only. No reports are filed.
 xig scan
 
-# 5. Review candidates.
+# 6. Review candidates.
 xig review
 
-# 6. Dry-run the first report package before any live submission.
+# 7. Dry-run the first report package before any live submission.
 xig report --dry-run 1
 ```
 
@@ -146,6 +150,10 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - `xig report --dry-run <id>` creates an evidence package without submitting.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
+
+### Local readiness checks
+
+Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, config validity, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
 
 ## Why I built this
 
