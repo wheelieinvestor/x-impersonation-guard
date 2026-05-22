@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import webbrowser
 from datetime import UTC, datetime
 from typing import Any
 
@@ -111,6 +112,7 @@ class ReviewQueueApp(App[None]):
         ("a", "approve", "Approve"),
         ("d", "dismiss", "Dismiss"),
         ("s", "snooze", "Snooze"),
+        ("o", "open_profile", "Open"),
         ("r", "refresh_queue", "Refresh"),
         ("q", "quit", "Quit"),
     ]
@@ -185,6 +187,18 @@ class ReviewQueueApp(App[None]):
         self._render_all(
             f"Snoozed @{record.handle}. Restore later with `xig review --restore {record.id}`."
         )
+
+    def action_open_profile(self) -> None:
+        if not self.records:
+            return
+        record = self.records[self.selected_index]
+        profile = _profile_payload(record)
+        url = str(profile.get("handle_url") or f"https://x.com/{record.handle}")
+        opened = webbrowser.open(url)
+        if opened:
+            self._render_all(f"Opened @{record.handle}: {url}")
+        else:
+            self._render_all(f"Open manually: {url}")
 
     def _load_records(self) -> None:
         self.records = self.store.list_queue()
