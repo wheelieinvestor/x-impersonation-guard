@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import sys
 import time
 import zipfile
@@ -600,21 +601,36 @@ def review(
         if record is None:
             typer.echo("No pending candidates.")
             return
-        _render_review_detail(record)
+        _render_review_detail(
+            record,
+            config_path=config,
+            identity_handle=_command_identity_handle(cfg, selected, record),
+        )
         return
     if show is not None:
         record = _get_review_candidate(
             store, show, selected.handle if selected else None
         )
-        _render_review_detail(record)
+        _render_review_detail(
+            record,
+            config_path=config,
+            identity_handle=_command_identity_handle(cfg, selected, record),
+        )
         return
     if approve is not None:
-        _get_review_candidate(store, approve, selected.handle if selected else None)
+        record = _get_review_candidate(
+            store, approve, selected.handle if selected else None
+        )
         store.set_status(approve, QueueStatus.APPROVED)
+        command_identity = _command_identity_handle(cfg, selected, record)
         typer.echo(f"Approved candidate {approve}")
-        typer.echo(f"Dry-run report: xig report --dry-run {approve}")
         typer.echo(
-            f"Live report after inspecting dry-run evidence: xig report --execute --confirm-live {approve}"
+            "Dry-run report: "
+            f"{_report_command(approve, config, command_identity, '--dry-run')}"
+        )
+        typer.echo(
+            "Live report after inspecting dry-run evidence: "
+            f"{_report_command(approve, config, command_identity, '--execute --confirm-live')}"
         )
         return
     if dismiss is not None:
@@ -725,13 +741,16 @@ def report(
         typer.echo(
             f"For public bug reports, share `xig redact-report {result.report_dir}` output instead of the original package."
         )
+        command_identity = _command_identity_handle(cfg, selected_identity, record)
         if record.status == QueueStatus.APPROVED.value:
             typer.echo(
-                f"Live report after inspecting evidence: xig report --execute --confirm-live {candidate_id}"
+                "Live report after inspecting evidence: "
+                f"{_report_command(candidate_id, config, command_identity, '--execute --confirm-live')}"
             )
         else:
             typer.echo(
-                f"Approve before live submission: xig review --approve {candidate_id}"
+                "Approve before live submission: "
+                f"{_review_command('approve', candidate_id, config, command_identity)}"
             )
     if execute:
         low, high = cfg.reporting.delay_between_reports_seconds
@@ -1278,7 +1297,12 @@ def _next_pending_candidate(
     return records[0] if records else None
 
 
-def _render_review_detail(record: CandidateRecord) -> None:
+def _render_review_detail(
+    record: CandidateRecord,
+    *,
+    config_path: Path = Path("config.yaml"),
+    identity_handle: str | None = None,
+) -> None:
     profile = _profile_payload(record)
     score = _score_payload(record)
     reasons = [str(reason) for reason in score.get("reasons") or []]
@@ -1316,10 +1340,47 @@ def _render_review_detail(record: CandidateRecord) -> None:
         for name, value in _top_weighted_signals(weighted):
             typer.echo(f"- {name.replace('_', ' ')}: {value:.1f}")
     typer.echo("Next steps:")
-    typer.echo(f"- Approve: xig review --approve {record.id}")
-    typer.echo(f"- Dismiss: xig review --dismiss {record.id}")
-    typer.echo(f"- Snooze: xig review --snooze {record.id}")
-    typer.echo(f"- Dry-run after approval: xig report --dry-run {record.id}")
+    typer.echo(
+        f"- Approve: {_review_command('approve', record.id, config_path, identity_handle)}"
+    )
+    typer.echo(
+        f"- Dismiss: {_review_command('dismiss', record.id, config_path, identity_handle)}"
+    )
+    typer.echo(
+        f"- Snooze: {_review_command('snooze', record.id, config_path, identity_handle)}"
+    )
+    typer.echo(
+        f"- Dry-run after approval: {_report_command(record.id, config_path, identity_handle, '--dry-run')}"
+    )
+
+
+def _command_identity_handle(
+    cfg: AppConfig,
+    selected_identity: Any,
+    record: CandidateRecord,
+) -> str | None:
+    if selected_identity is not None or len(cfg.protected_identities) > 1:
+        return record.identity_handle
+    return None
+
+
+def _review_command(
+    action: str, candidate_id: int, config_path: Path, identity_handle: str | None
+) -> str:
+    return f"xig review {_command_scope(config_path, identity_handle)} --{action} {candidate_id}"
+
+
+def _report_command(
+    candidate_id: int, config_path: Path, identity_handle: str | None, mode: str
+) -> str:
+    return f"xig report {_command_scope(config_path, identity_handle)} {mode} {candidate_id}"
+
+
+def _command_scope(config_path: Path, identity_handle: str | None) -> str:
+    parts = ["--config", shlex.quote(str(config_path.expanduser()))]
+    if identity_handle is not None:
+        parts.extend(["--identity", shlex.quote(identity_handle)])
+    return " ".join(parts)
 
 
 def _profile_payload(record: CandidateRecord) -> dict[str, Any]:

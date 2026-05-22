@@ -79,6 +79,10 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Broader `xig redact-report` secret scrubbing" in changelog
     assert "`xig review --next` shortcut" in changelog
     assert "Next-step reporting guidance" in changelog
+    assert (
+        "Config-aware and identity-aware generated review/report follow-up commands"
+        in changelog
+    )
     assert "`--confirm-live`" in changelog
 
 
