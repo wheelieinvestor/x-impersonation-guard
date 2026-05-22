@@ -104,6 +104,15 @@ class XHelpFormReporter(Reporter):
         (report_dir / "report.json").write_text(metadata.model_dump_json(indent=2))
 
         if self.dry_run:
+            (report_dir / "evidence_profile.png").write_text(
+                "dry-run profile screenshot"
+            )
+            (report_dir / "evidence_profile.html").write_text(
+                f"<html><body>dry run profile @{candidate.username}</body></html>"
+            )
+            (report_dir / "form_submission.png").write_text(
+                "dry-run form submission screenshot"
+            )
             (report_dir / "form_response.html").write_text(
                 "<html><body>dry run</body></html>"
             )
