@@ -62,6 +62,19 @@ Most existing options leave you stuck:
 
 `x-impersonation-guard` automates the full detection-to-report pipeline locally, with an explainable scoring model and a hard safety gate before any live submission.
 
+## What is verified
+
+This repo has been through a launch-readiness cleanup, not just a happy-path demo.
+
+| Evidence | What it proves |
+|----------|----------------|
+| [PR #1](https://github.com/wheelieinvestor/x-impersonation-guard/pull/1) | Alpha CLI, packaging, scoring, queue, docs, and CI foundation. |
+| [PR #2](https://github.com/wheelieinvestor/x-impersonation-guard/pull/2) | Audit response: fail-closed reporter, offline demo, docs alignment, repo polish. |
+| [PR #3](https://github.com/wheelieinvestor/x-impersonation-guard/pull/3) | PyPI install validation logs across Linux 3.11, Linux 3.12, and macOS 3.11. |
+| [docs/status.md](docs/status.md) | Current verification matrix: what is proven, pending, and intentionally not run yet. |
+
+MIT license, public CI, pinned dependencies, and a dry-run-first reporting path are part of the trust model.
+
 ## Use it for real
 
 After the offline demo works, set up against your actual handle.
