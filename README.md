@@ -166,7 +166,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
 - API-backed scans enforce the configured estimated request budget before making another live API call.
-- `xig calibrate --input <labeled.json>` reports precision, recall, F1, and misses for offline scorer calibration.
+- `xig calibrate --input <labeled.json> --output calibration-results.json` reports precision, recall, F1, misses, and optional JSON evidence for offline scorer calibration.
 
 ### Local readiness checks
 

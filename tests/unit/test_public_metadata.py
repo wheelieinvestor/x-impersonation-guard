@@ -73,4 +73,5 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Estimated X API scan cost guard" in changelog
     assert "Cached image-hash lookup in the default scan path" in changelog
     assert "Offline scorer calibration command" in changelog
+    assert "JSON calibration evidence export" in changelog
     assert "`--confirm-live`" in changelog

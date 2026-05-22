@@ -138,6 +138,41 @@ def test_calibrate_reports_precision_and_recall(runner: CliRunner) -> None:
     assert "No calibration misses." in result.output
 
 
+def test_calibrate_writes_json_evidence(tmp_path: Path, runner: CliRunner) -> None:
+    output = tmp_path / "validation" / "calibration-results.json"
+    result = runner.invoke(
+        app,
+        [
+            "calibrate",
+            "--config",
+            "examples/config.individual.yaml",
+            "--input",
+            "examples/calibration.sample.json",
+            "--output",
+            str(output),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert f"Calibration evidence written to {output}" in result.output
+    payload = json.loads(output.read_text())
+    assert payload["threshold"] == 70
+    assert payload["candidate_count"] == 4
+    assert payload["identity_handle"] == "examplecreator"
+    assert payload["metrics"] == {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "true_positive": 2,
+        "false_positive": 0,
+        "true_negative": 2,
+        "false_negative": 0,
+    }
+    assert payload["misses"] == []
+    assert payload["candidates"][0]["profile_url"].startswith("https://x.com/")
+    assert "signals" in payload["candidates"][0]
+
+
 def test_scan_fixture_lists_and_dry_run_report(
     tmp_path: Path,
     config_path: Path,
