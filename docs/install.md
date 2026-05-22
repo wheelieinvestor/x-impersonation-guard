@@ -5,6 +5,7 @@
 ```bash
 pip install --pre x-impersonation-guard
 playwright install chromium
+xig quickstart
 xig scan-fixture
 xig doctor
 xig list
@@ -42,6 +43,8 @@ xig report --dry-run 1
 Use `xig status` to see queue counts by status and 24-hour reporting usage. Use `xig review --show <id>` to inspect score reasons, mitigations, profile metadata, and the next safe commands. Use `xig review --snooze <id>` or the TUI `s` key to defer gray-area candidates, `xig list --status snoozed` to find deferred candidates, and `xig review --restore <id>` to move one back to pending. Use `xig list --status all` for a full local queue view. Use `xig export json` or `xig export zip --output queue-export.zip` to save a portable copy of the pending review queue. If you configure more than one protected identity, pass `--identity <handle>` to review and report commands to guard against acting on the wrong candidate. Live submission requires an approved candidate plus `--execute --confirm-live`.
 
 ## Setup check
+
+`xig quickstart` is the safest orientation command for new users. With no config, it prints the offline demo path and real-account setup commands. With a config, it shows the next scan, status, review, and dry-run commands without making network calls or submitting reports.
 
 `xig doctor` is safe to run before or after creating `config.yaml`. It verifies:
 

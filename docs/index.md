@@ -9,6 +9,7 @@ Detect and report X accounts impersonating you. Local-first, explainable, safe b
 ```bash
 pip install --pre x-impersonation-guard
 playwright install chromium
+xig quickstart
 xig scan-fixture
 xig doctor
 xig review
