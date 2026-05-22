@@ -6,6 +6,7 @@
 pip install --pre x-impersonation-guard
 playwright install chromium
 xig scan-fixture
+xig doctor
 xig list
 xig report --dry-run 1
 ```
@@ -24,12 +25,26 @@ Edit `config.yaml` with your handle, display name, reporter name, and reporter e
 Then run:
 
 ```bash
+xig doctor
 xig scan
 xig review
 xig report --dry-run 1
 ```
 
 Live submission requires an approved candidate and `--execute`.
+
+## Setup check
+
+`xig doctor` is safe to run before or after creating `config.yaml`. It verifies:
+
+- Python 3.11 or newer.
+- Playwright package availability.
+- Config validity when a config file exists.
+- Selected scan mode and whether the configured X API token environment variable is set.
+- Storage directory writability.
+- SQLite review queue access.
+
+It never prints token values.
 
 ## Troubleshooting
 
