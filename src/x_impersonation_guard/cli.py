@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import importlib.util
 import json
+import os
+import sys
 import time
 from datetime import UTC, datetime, timedelta
 from importlib.resources import files
@@ -13,6 +16,7 @@ from typing import Annotated
 import typer
 import yaml
 from pydantic import BaseModel, ValidationError
+from sqlalchemy import select
 
 from x_impersonation_guard.clients.mode_selector import select_scan_mode
 from x_impersonation_guard.clients.x_api import XApiClient
@@ -34,6 +38,7 @@ from x_impersonation_guard.reporters.rate_limit import check_report_limit
 from x_impersonation_guard.reporters.x_help_form import XHelpFormReporter
 from x_impersonation_guard.review.tui import ReviewQueueApp
 from x_impersonation_guard.scoring.scorer import score_candidate
+from x_impersonation_guard.storage.models import CandidateRecord
 from x_impersonation_guard.storage.repository import ReviewStore, profile_from_record
 from x_impersonation_guard.utils.logging import configure_logging
 
@@ -63,7 +68,12 @@ class DemoProtectedIdentity(BaseModel):
     handle: str
     display_name: str
     user_id: str
+    bio: str = ""
+    follower_count: int = 100_000
+    account_age_days: int = 2_000
+    verified: bool = False
     profile_image_hash: str
+    protected_pic: list[str] = []
 
 
 class DemoCandidate(BaseModel):
@@ -73,6 +83,14 @@ class DemoCandidate(BaseModel):
     follower_count: int
     account_age_days: int
     profile_image_hash: str
+    verified: bool = False
+    protected_followers_followed: int = 0
+    mutual_followers: int = 0
+    tweet_count: int | None = None
+    posts_containing_protected_handle: int | None = None
+    first_detected_hours_ago: float = 0.0
+    sample_posts: list[str] = []
+    candidate_pic: list[str] = []
     expected_score_range: tuple[int, int]
     expected_tier: str
 
@@ -87,8 +105,11 @@ class DemoFixture(BaseModel):
             id=self.demo_protected_identity.user_id,
             username=self.demo_protected_identity.handle,
             name=self.demo_protected_identity.display_name,
-            followers_count=100_000,
-            created_at=now - timedelta(days=2_000),
+            description=self.demo_protected_identity.bio,
+            followers_count=self.demo_protected_identity.follower_count,
+            verified=self.demo_protected_identity.verified,
+            created_at=now
+            - timedelta(days=self.demo_protected_identity.account_age_days),
             profile_image_phash=self.demo_protected_identity.profile_image_hash,
         )
         candidates = [
@@ -97,12 +118,23 @@ class DemoFixture(BaseModel):
                 username=candidate.handle,
                 name=candidate.display_name,
                 description=candidate.bio,
+                verified=candidate.verified,
                 followers_count=candidate.follower_count,
                 following_count=750 if candidate.follower_count < 50 else 200,
-                tweet_count=3 if candidate.account_age_days < 30 else 150,
-                recent_posts_containing_protected_handle=1
-                if "official" in candidate.bio.lower()
-                else 0,
+                tweet_count=candidate.tweet_count
+                if candidate.tweet_count is not None
+                else 3
+                if candidate.account_age_days < 30
+                else 150,
+                protected_followers_followed=candidate.protected_followers_followed,
+                mutual_followers=candidate.mutual_followers,
+                recent_posts_containing_protected_handle=candidate.posts_containing_protected_handle
+                if candidate.posts_containing_protected_handle is not None
+                else sum(
+                    1
+                    for post in candidate.sample_posts
+                    if self.demo_protected_identity.handle.lower() in post.lower()
+                ),
                 created_at=now - timedelta(days=candidate.account_age_days),
                 profile_image_phash=candidate.profile_image_hash,
             )
@@ -187,6 +219,7 @@ def scan_fixture_command(
     """Run the bundled offline demo fixture with no network calls."""
     if config.expanduser().exists():
         cfg = _load(config)
+        wrote_config = False
     else:
         cfg = _demo_config()
         config.expanduser().parent.mkdir(parents=True, exist_ok=True)
@@ -194,16 +227,27 @@ def scan_fixture_command(
             yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
         )
         typer.echo(f"Wrote demo config to {config}")
+        wrote_config = True
     fixture_path = _resolve_fixture_path(input)
     raw = json.loads(fixture_path.read_text())
     if "demo_protected_identity" in raw:
-        scan_fixture = DemoFixture.model_validate(raw).to_fixture_scan()
+        demo_fixture = DemoFixture.model_validate(raw)
+        scan_fixture = demo_fixture.to_fixture_scan()
         cfg = _config_for_demo_fixture(cfg, scan_fixture)
+        if wrote_config:
+            config.expanduser().write_text(
+                yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
+            )
     else:
+        demo_fixture = None
         scan_fixture = FixtureScan.model_validate(raw)
     store = ReviewStore(cfg.storage.db_path)
     lookup = FixtureLookup(scan_fixture.protected, scan_fixture.candidates)
     results = asyncio.run(run_scan(cfg, cfg.protected_identities[0], lookup, store))
+    if demo_fixture is not None:
+        _apply_demo_detection_times(
+            store, cfg.protected_identities[0].handle, demo_fixture
+        )
     high = sum(
         1
         for result in results
@@ -237,7 +281,7 @@ def list_command(
         return
     for record in records:
         typer.echo(
-            f"{record.id}: @{record.handle} score={record.score} priority={record.priority} status={record.status}"
+            f"{record.id}: @{record.handle} score={record.score} priority={record.priority} detected={_relative_age(record.created_at)} status={record.status}"
         )
 
 
@@ -371,6 +415,93 @@ def status(
 
 
 @app.command()
+def doctor(
+    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+) -> None:
+    """Check local install, config, scan mode, and storage readiness."""
+    failures = 0
+
+    def emit(state: str, label: str, detail: str) -> None:
+        typer.echo(f"{state}: {label}: {detail}")
+
+    emit("OK", "python", sys.version.split()[0])
+
+    if importlib.util.find_spec("playwright") is not None:
+        emit("OK", "playwright", "Python package is installed")
+    else:
+        failures += 1
+        emit("FAIL", "playwright", "install package dependencies first")
+
+    config_path = config.expanduser()
+    if not config_path.exists():
+        emit(
+            "WARN",
+            "config",
+            f"{config_path} not found; run `xig scan-fixture` for demo setup or `xig init` for real use",
+        )
+        raise typer.Exit(failures)
+
+    try:
+        cfg = load_config(config_path)
+    except (OSError, ValueError, ValidationError) as exc:
+        emit("FAIL", "config", str(exc))
+        raise typer.Exit(1) from exc
+
+    emit(
+        "OK",
+        "config",
+        f"{len(cfg.protected_identities)} protected identity configured",
+    )
+
+    try:
+        decision = select_scan_mode(cfg)
+    except ValueError as exc:
+        failures += 1
+        emit("FAIL", "scan mode", str(exc))
+    else:
+        token_state = "token set" if decision.bearer_token else "no token"
+        emit(
+            "OK",
+            "scan mode",
+            f"{decision.mode.value} ({decision.reason}; {token_state})",
+        )
+
+    token_name = cfg.x_api.bearer_token_env
+    emit(
+        "OK" if os.getenv(token_name) else "WARN",
+        "x api token",
+        f"{token_name} is {'set' if os.getenv(token_name) else 'not set'}",
+    )
+
+    storage_paths = [
+        ("database parent", cfg.storage.db_path.parent),
+        ("evidence dir", cfg.storage.evidence_dir),
+        ("reports dir", cfg.storage.reports_dir),
+    ]
+    for label, path in storage_paths:
+        if _is_writable_dir(path):
+            emit("OK", label, str(path.expanduser()))
+        else:
+            failures += 1
+            emit("FAIL", label, f"{path.expanduser()} is not writable")
+
+    try:
+        store = ReviewStore(cfg.storage.db_path)
+        pending = sum(
+            len(store.list_queue(identity.handle))
+            for identity in cfg.protected_identities
+        )
+    except Exception as exc:
+        failures += 1
+        emit("FAIL", "sqlite", str(exc))
+    else:
+        emit("OK", "sqlite", f"review queue reachable; pending={pending}")
+
+    if failures:
+        raise typer.Exit(1)
+
+
+@app.command()
 def daemon(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
     every_hours: Annotated[float, typer.Option("--every-hours")] = 6.0,
@@ -454,6 +585,71 @@ def _config_for_demo_fixture(cfg: AppConfig, fixture: FixtureScan) -> AppConfig:
         }
     )
     return AppConfig.model_validate(raw)
+
+
+def _apply_demo_detection_times(
+    store: ReviewStore, identity_handle: str, fixture: DemoFixture
+) -> None:
+    demo_by_handle = {
+        candidate.handle.lower(): candidate for candidate in fixture.demo_candidates
+    }
+    with store.session_factory() as session:
+        rows = session.scalars(
+            select(CandidateRecord).where(
+                CandidateRecord.identity_handle == identity_handle
+            )
+        ).all()
+        for row in rows:
+            demo_candidate = demo_by_handle.get(row.handle.lower())
+            if demo_candidate is None:
+                continue
+            detected_at = datetime.now(UTC) - timedelta(
+                hours=demo_candidate.first_detected_hours_ago
+            )
+            row.created_at = detected_at
+            row.updated_at = detected_at
+            profile = json.loads(row.profile_json)
+            profile.update(
+                {
+                    "sample_posts": demo_candidate.sample_posts,
+                    "candidate_pic": demo_candidate.candidate_pic,
+                    "expected_tier": demo_candidate.expected_tier,
+                }
+            )
+            row.profile_json = json.dumps(profile)
+            score = json.loads(row.score_breakdown_json or "{}")
+            score["protected_profile_image_phash"] = (
+                fixture.demo_protected_identity.profile_image_hash
+            )
+            row.score_breakdown_json = json.dumps(score)
+        session.commit()
+
+
+def _relative_age(value: datetime) -> str:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    seconds = max(0, int((datetime.now(UTC) - value).total_seconds()))
+    if seconds < 60:
+        return "now"
+    minutes = seconds // 60
+    if minutes < 60:
+        return f"{minutes}m"
+    hours = minutes // 60
+    if hours < 48:
+        return f"{hours}h"
+    return f"{hours // 24}d"
+
+
+def _is_writable_dir(path: Path) -> bool:
+    directory = path.expanduser()
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        probe = directory / ".xig-write-test"
+        probe.write_text("ok")
+        probe.unlink()
+    except OSError:
+        return False
+    return True
 
 
 def _load(path: Path) -> AppConfig:

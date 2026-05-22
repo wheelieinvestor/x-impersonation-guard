@@ -15,6 +15,7 @@ Published package: `x-impersonation-guard==0.2.0a0`
 | Offline demo pipeline | Verified | `tests/integration/test_offline_demo.py` |
 | Reporter fail-closed safety | Verified | `tests/unit/test_reporter_fail_closed.py` |
 | Mode selector | Verified | `tests/unit/test_mode_selector.py` |
+| Local setup doctor | Verified | `tests/unit/test_doctor.py` |
 | Image hash signal in default scan | Verified | `tests/integration/test_detection_pipeline.py` |
 | PyPI install on Linux Python 3.11 | Verified | `phase2.6/install-validation-A.log` |
 | PyPI install on Linux Python 3.12 | Verified | `phase2.6/install-validation-B.log` |
