@@ -5,11 +5,14 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
+import yaml
 from typer.testing import CliRunner
 
 from x_impersonation_guard.cli import app
-from x_impersonation_guard.config import load_config
-from x_impersonation_guard.models import AccountProfile
+from x_impersonation_guard.config import AppConfig, default_config_dict, load_config
+from x_impersonation_guard.models import AccountProfile, CandidateSource
+from x_impersonation_guard.scoring.scorer import score_candidate
+from x_impersonation_guard.storage.repository import ReviewStore
 
 
 def _fixture(path: Path) -> Path:
@@ -189,3 +192,80 @@ def test_scan_fixture_lists_and_dry_run_report(
     history = runner.invoke(app, ["log", "--config", str(config_path)])
     assert history.exit_code == 0
     assert "dry_run" in history.output
+
+
+def test_review_identity_filter_guards_approve_and_dismiss(
+    tmp_path: Path, runner: CliRunner
+) -> None:
+    raw = default_config_dict(
+        handle="firstcreator",
+        display_name="First Creator",
+        reporter_name="First Creator",
+        reporter_email="first@example.com",
+    )
+    raw["protected_identities"].append(
+        default_config_dict(
+            handle="secondcreator",
+            display_name="Second Creator",
+            reporter_name="Second Creator",
+            reporter_email="second@example.com",
+        )["protected_identities"][0]
+    )
+    raw["storage"]["db_path"] = str(tmp_path / "db.sqlite")
+    raw["storage"]["evidence_dir"] = str(tmp_path / "evidence")
+    raw["storage"]["reports_dir"] = str(tmp_path / "reports")
+    config = tmp_path / "config.yaml"
+    config.write_text(yaml.safe_dump(raw, sort_keys=False))
+    cfg = AppConfig.model_validate(raw)
+    store = ReviewStore(cfg.storage.db_path)
+    protected = AccountProfile(
+        id="first",
+        username="firstcreator",
+        name="First Creator",
+        followers_count=50_000,
+    )
+    candidate = AccountProfile(
+        id="candidate-first",
+        username="firstcreator_help",
+        name="First Creator",
+        followers_count=5,
+        following_count=800,
+        created_at=datetime(2026, 5, 1, tzinfo=UTC),
+    )
+    result = score_candidate(
+        protected, candidate, cfg.protected_identities[0], cfg.scoring
+    )
+    candidate_id = store.upsert_scored_candidate(
+        "firstcreator", CandidateSource.FIXTURE, result
+    )
+    assert candidate_id is not None
+
+    wrong_identity = runner.invoke(
+        app,
+        [
+            "review",
+            "--config",
+            str(config),
+            "--identity",
+            "secondcreator",
+            "--approve",
+            str(candidate_id),
+        ],
+    )
+    assert wrong_identity.exit_code != 0
+    assert "does not belong to @secondcreator" in wrong_identity.output
+
+    right_identity = runner.invoke(
+        app,
+        [
+            "review",
+            "--config",
+            str(config),
+            "--identity",
+            "firstcreator",
+            "--dismiss",
+            str(candidate_id),
+        ],
+    )
+    assert right_identity.exit_code == 0, right_identity.output
+    assert f"Dismissed candidate {candidate_id}" in right_identity.output
