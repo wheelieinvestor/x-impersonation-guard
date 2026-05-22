@@ -16,6 +16,7 @@ This avoids shared credentials, keeps evidence local, and makes every report tra
 
 - Use official X API reads for detection when `X_API_BEARER_TOKEN` is configured.
 - Request only needed profile fields.
+- Enforce the configured estimated API scan budget before making another API request.
 - Use fixture/offline mode for tests and demos.
 - Keep credentials outside source control.
 - Do not paste tokens, cookies, browser profiles, or evidence packages into issue reports.
@@ -59,6 +60,5 @@ False positives are expensive. News accounts, parody accounts, fan accounts, and
 
 - Live Help Center selector verification.
 - Richer Textual snooze controls.
-- API cost ceiling enforcement per scan.
 - Full image download and hash pipeline for new candidates.
 - Real-world scorer calibration against known impersonator and non-impersonator sets.

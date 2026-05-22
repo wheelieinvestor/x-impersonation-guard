@@ -165,6 +165,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip for public bug reports.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
+- API-backed scans enforce the configured estimated request budget before making another live API call.
 
 ### Local readiness checks
 
