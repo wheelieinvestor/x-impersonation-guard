@@ -368,6 +368,11 @@ def review(
     ] = None,
     approve: Annotated[int | None, typer.Option("--approve")] = None,
     dismiss: Annotated[int | None, typer.Option("--dismiss")] = None,
+    snooze: Annotated[int | None, typer.Option("--snooze")] = None,
+    restore: Annotated[
+        int | None,
+        typer.Option("--restore", help="Move a snoozed candidate back to pending."),
+    ] = None,
     tui: Annotated[bool, typer.Option("--tui/--no-tui")] = False,
 ) -> None:
     """Approve, dismiss, or open the review queue."""
@@ -389,6 +394,16 @@ def review(
         _get_review_candidate(store, dismiss, selected.handle if selected else None)
         store.set_status(dismiss, QueueStatus.DISMISSED)
         typer.echo(f"Dismissed candidate {dismiss}")
+        return
+    if snooze is not None:
+        _get_review_candidate(store, snooze, selected.handle if selected else None)
+        store.set_status(snooze, QueueStatus.SNOOZED)
+        typer.echo(f"Snoozed candidate {snooze}")
+        return
+    if restore is not None:
+        _get_review_candidate(store, restore, selected.handle if selected else None)
+        store.set_status(restore, QueueStatus.PENDING)
+        typer.echo(f"Restored candidate {restore} to pending")
         return
     if tui:
         ReviewQueueApp(store).run()
@@ -886,7 +901,7 @@ def _render_review_queue(records: list[CandidateRecord]) -> None:
         return
     typer.echo(f"Pending review candidates: {len(records)}")
     typer.echo(
-        "Use `xig review --show <id>` for evidence, `xig review --approve <id>` to approve, or `xig review --dismiss <id>` to dismiss."
+        "Use `xig review --show <id>` for evidence, `xig review --approve <id>` to approve, `xig review --dismiss <id>` to dismiss, or `xig review --snooze <id>` to defer."
     )
     for record in records:
         score = _score_payload(record)
@@ -951,6 +966,7 @@ def _render_review_detail(record: CandidateRecord) -> None:
     typer.echo("Next steps:")
     typer.echo(f"- Approve: xig review --approve {record.id}")
     typer.echo(f"- Dismiss: xig review --dismiss {record.id}")
+    typer.echo(f"- Snooze: xig review --snooze {record.id}")
     typer.echo(f"- Dry-run after approval: xig report --dry-run {record.id}")
 
 
