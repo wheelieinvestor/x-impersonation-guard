@@ -1,0 +1,185 @@
+# Environment C: macOS Python 3.11
+# Started: 2026-05-22T20:01:18Z
+Collecting x-impersonation-guard==0.2.0a0
+  Downloading x_impersonation_guard-0.2.0a0-py3-none-any.whl.metadata (7.1 kB)
+Collecting email-validator==2.3.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached email_validator-2.3.0-py3-none-any.whl.metadata (26 kB)
+Collecting httpx==0.28.1 (from x-impersonation-guard==0.2.0a0)
+  Using cached httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting imagehash==4.3.2 (from x-impersonation-guard==0.2.0a0)
+  Using cached ImageHash-4.3.2-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting pillow==12.0.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached pillow-12.0.0-cp311-cp311-macosx_11_0_arm64.whl.metadata (8.8 kB)
+Collecting playwright==1.56.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached playwright-1.56.0-py3-none-macosx_11_0_arm64.whl.metadata (3.5 kB)
+Collecting pydantic-settings==2.11.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached pydantic_settings-2.11.0-py3-none-any.whl.metadata (3.4 kB)
+Collecting pydantic==2.12.5 (from x-impersonation-guard==0.2.0a0)
+  Using cached pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+Collecting pyyaml==6.0.3 (from x-impersonation-guard==0.2.0a0)
+  Using cached pyyaml-6.0.3-cp311-cp311-macosx_11_0_arm64.whl.metadata (2.4 kB)
+Collecting rapidfuzz==3.14.3 (from x-impersonation-guard==0.2.0a0)
+  Using cached rapidfuzz-3.14.3-cp311-cp311-macosx_11_0_arm64.whl.metadata (12 kB)
+Collecting sqlalchemy==2.0.44 (from x-impersonation-guard==0.2.0a0)
+  Using cached sqlalchemy-2.0.44-cp311-cp311-macosx_11_0_arm64.whl.metadata (9.5 kB)
+Collecting structlog==25.5.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached structlog-25.5.0-py3-none-any.whl.metadata (9.5 kB)
+Collecting textual==6.7.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached textual-6.7.0-py3-none-any.whl.metadata (9.1 kB)
+Collecting tweepy==4.16.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached tweepy-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typer==0.20.0 (from x-impersonation-guard==0.2.0a0)
+  Using cached typer-0.20.0-py3-none-any.whl.metadata (16 kB)
+Collecting dnspython>=2.0.0 (from email-validator==2.3.0->x-impersonation-guard==0.2.0a0)
+  Using cached dnspython-2.8.0-py3-none-any.whl.metadata (5.7 kB)
+Collecting idna>=2.0.0 (from email-validator==2.3.0->x-impersonation-guard==0.2.0a0)
+  Using cached idna-3.16-py3-none-any.whl.metadata (6.4 kB)
+Collecting anyio (from httpx==0.28.1->x-impersonation-guard==0.2.0a0)
+  Using cached anyio-4.13.0-py3-none-any.whl.metadata (4.5 kB)
+Collecting certifi (from httpx==0.28.1->x-impersonation-guard==0.2.0a0)
+  Using cached certifi-2026.5.20-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx==0.28.1->x-impersonation-guard==0.2.0a0)
+  Using cached httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting PyWavelets (from imagehash==4.3.2->x-impersonation-guard==0.2.0a0)
+  Using cached pywavelets-1.9.0-cp311-cp311-macosx_11_0_arm64.whl.metadata (7.6 kB)
+Collecting numpy (from imagehash==4.3.2->x-impersonation-guard==0.2.0a0)
+  Using cached numpy-2.4.6-cp311-cp311-macosx_14_0_arm64.whl.metadata (6.6 kB)
+Collecting scipy (from imagehash==4.3.2->x-impersonation-guard==0.2.0a0)
+  Using cached scipy-1.17.1-cp311-cp311-macosx_14_0_arm64.whl.metadata (62 kB)
+Collecting pyee<14,>=13 (from playwright==1.56.0->x-impersonation-guard==0.2.0a0)
+  Using cached pyee-13.0.1-py3-none-any.whl.metadata (3.0 kB)
+Collecting greenlet<4.0.0,>=3.1.1 (from playwright==1.56.0->x-impersonation-guard==0.2.0a0)
+  Using cached greenlet-3.5.1-cp311-cp311-macosx_11_0_universal2.whl.metadata (3.8 kB)
+Collecting annotated-types>=0.6.0 (from pydantic==2.12.5->x-impersonation-guard==0.2.0a0)
+  Using cached annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.41.5 (from pydantic==2.12.5->x-impersonation-guard==0.2.0a0)
+  Using cached pydantic_core-2.41.5-cp311-cp311-macosx_11_0_arm64.whl.metadata (7.3 kB)
+Collecting typing-extensions>=4.14.1 (from pydantic==2.12.5->x-impersonation-guard==0.2.0a0)
+  Using cached typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.2 (from pydantic==2.12.5->x-impersonation-guard==0.2.0a0)
+  Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Collecting python-dotenv>=0.21.0 (from pydantic-settings==2.11.0->x-impersonation-guard==0.2.0a0)
+  Using cached python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Collecting markdown-it-py>=2.1.0 (from markdown-it-py[linkify]>=2.1.0->textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting mdit-py-plugins (from textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached mdit_py_plugins-0.6.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting platformdirs<5,>=3.6.0 (from textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached platformdirs-4.9.6-py3-none-any.whl.metadata (4.7 kB)
+Collecting pygments<3.0.0,>=2.19.2 (from textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting rich>=14.2.0 (from textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting oauthlib<4,>=3.2.0 (from tweepy==4.16.0->x-impersonation-guard==0.2.0a0)
+  Using cached oauthlib-3.3.1-py3-none-any.whl.metadata (7.9 kB)
+Collecting requests<3,>=2.27.0 (from tweepy==4.16.0->x-impersonation-guard==0.2.0a0)
+  Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting requests-oauthlib<3,>=1.2.0 (from tweepy==4.16.0->x-impersonation-guard==0.2.0a0)
+  Using cached requests_oauthlib-2.0.0-py2.py3-none-any.whl.metadata (11 kB)
+Collecting click>=8.0.0 (from typer==0.20.0->x-impersonation-guard==0.2.0a0)
+  Using cached click-8.4.1-py3-none-any.whl.metadata (2.6 kB)
+Collecting shellingham>=1.3.0 (from typer==0.20.0->x-impersonation-guard==0.2.0a0)
+  Using cached shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx==0.28.1->x-impersonation-guard==0.2.0a0)
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.1.0->markdown-it-py[linkify]>=2.1.0->textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting linkify-it-py<3,>=1 (from markdown-it-py[linkify]>=2.1.0->textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached linkify_it_py-2.1.0-py3-none-any.whl.metadata (8.5 kB)
+Collecting charset_normalizer<4,>=2 (from requests<3,>=2.27.0->tweepy==4.16.0->x-impersonation-guard==0.2.0a0)
+  Using cached charset_normalizer-3.4.7-cp311-cp311-macosx_10_9_universal2.whl.metadata (40 kB)
+Collecting urllib3<3,>=1.26 (from requests<3,>=2.27.0->tweepy==4.16.0->x-impersonation-guard==0.2.0a0)
+  Using cached urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting uc-micro-py (from linkify-it-py<3,>=1->markdown-it-py[linkify]>=2.1.0->textual==6.7.0->x-impersonation-guard==0.2.0a0)
+  Using cached uc_micro_py-2.0.0-py3-none-any.whl.metadata (2.2 kB)
+Downloading x_impersonation_guard-0.2.0a0-py3-none-any.whl (36 kB)
+Using cached email_validator-2.3.0-py3-none-any.whl (35 kB)
+Using cached httpx-0.28.1-py3-none-any.whl (73 kB)
+Using cached ImageHash-4.3.2-py2.py3-none-any.whl (296 kB)
+Using cached pillow-12.0.0-cp311-cp311-macosx_11_0_arm64.whl (4.7 MB)
+Using cached playwright-1.56.0-py3-none-macosx_11_0_arm64.whl (39.4 MB)
+Using cached pydantic-2.12.5-py3-none-any.whl (463 kB)
+Using cached pydantic_settings-2.11.0-py3-none-any.whl (48 kB)
+Using cached pyyaml-6.0.3-cp311-cp311-macosx_11_0_arm64.whl (175 kB)
+Using cached rapidfuzz-3.14.3-cp311-cp311-macosx_11_0_arm64.whl (1.4 MB)
+Using cached sqlalchemy-2.0.44-cp311-cp311-macosx_11_0_arm64.whl (2.1 MB)
+Using cached structlog-25.5.0-py3-none-any.whl (72 kB)
+Using cached textual-6.7.0-py3-none-any.whl (713 kB)
+Using cached tweepy-4.16.0-py3-none-any.whl (98 kB)
+Using cached typer-0.20.0-py3-none-any.whl (47 kB)
+Using cached httpcore-1.0.9-py3-none-any.whl (78 kB)
+Using cached pydantic_core-2.41.5-cp311-cp311-macosx_11_0_arm64.whl (1.9 MB)
+Using cached annotated_types-0.7.0-py3-none-any.whl (13 kB)
+Using cached click-8.4.1-py3-none-any.whl (116 kB)
+Using cached dnspython-2.8.0-py3-none-any.whl (331 kB)
+Using cached greenlet-3.5.1-cp311-cp311-macosx_11_0_universal2.whl (284 kB)
+Using cached idna-3.16-py3-none-any.whl (74 kB)
+Using cached markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Using cached oauthlib-3.3.1-py3-none-any.whl (160 kB)
+Using cached platformdirs-4.9.6-py3-none-any.whl (21 kB)
+Using cached pyee-13.0.1-py3-none-any.whl (15 kB)
+Using cached pygments-2.20.0-py3-none-any.whl (1.2 MB)
+Using cached python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+Using cached certifi-2026.5.20-py3-none-any.whl (134 kB)
+Using cached requests_oauthlib-2.0.0-py2.py3-none-any.whl (24 kB)
+Using cached rich-15.0.0-py3-none-any.whl (310 kB)
+Using cached shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+Using cached typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Using cached anyio-4.13.0-py3-none-any.whl (114 kB)
+Using cached mdit_py_plugins-0.6.1-py3-none-any.whl (66 kB)
+Using cached numpy-2.4.6-cp311-cp311-macosx_14_0_arm64.whl (5.5 MB)
+Using cached pywavelets-1.9.0-cp311-cp311-macosx_11_0_arm64.whl (4.3 MB)
+Using cached scipy-1.17.1-cp311-cp311-macosx_14_0_arm64.whl (20.3 MB)
+Using cached charset_normalizer-3.4.7-cp311-cp311-macosx_10_9_universal2.whl (309 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Using cached linkify_it_py-2.1.0-py3-none-any.whl (19 kB)
+Using cached mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Using cached urllib3-2.7.0-py3-none-any.whl (131 kB)
+Using cached uc_micro_py-2.0.0-py3-none-any.whl (6.4 kB)
+Installing collected packages: urllib3, uc-micro-py, typing-extensions, structlog, shellingham, rapidfuzz, pyyaml, python-dotenv, pygments, platformdirs, pillow, oauthlib, numpy, mdurl, idna, h11, greenlet, dnspython, click, charset_normalizer, certifi, annotated-types, typing-inspection, sqlalchemy, scipy, requests, PyWavelets, pyee, pydantic-core, markdown-it-py, linkify-it-py, httpcore, email-validator, anyio, rich, requests-oauthlib, pydantic, playwright, mdit-py-plugins, imagehash, httpx, typer, tweepy, textual, pydantic-settings, x-impersonation-guard
+Successfully installed PyWavelets-1.9.0 annotated-types-0.7.0 anyio-4.13.0 certifi-2026.5.20 charset_normalizer-3.4.7 click-8.4.1 dnspython-2.8.0 email-validator-2.3.0 greenlet-3.5.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.16 imagehash-4.3.2 linkify-it-py-2.1.0 markdown-it-py-4.2.0 mdit-py-plugins-0.6.1 mdurl-0.1.2 numpy-2.4.6 oauthlib-3.3.1 pillow-12.0.0 platformdirs-4.9.6 playwright-1.56.0 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.11.0 pyee-13.0.1 pygments-2.20.0 python-dotenv-1.2.2 pyyaml-6.0.3 rapidfuzz-3.14.3 requests-2.34.2 requests-oauthlib-2.0.0 rich-15.0.0 scipy-1.17.1 shellingham-1.5.4 sqlalchemy-2.0.44 structlog-25.5.0 textual-6.7.0 tweepy-4.16.0 typer-0.20.0 typing-extensions-4.15.0 typing-inspection-0.4.2 uc-micro-py-2.0.0 urllib3-2.7.0 x-impersonation-guard-0.2.0a0
+
+[notice] A new release of pip is available: 24.0 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-mac-arm64.zip[22m
+|                                                                                |   0% of 129.7 MiB
+|■■■■■■■■                                                                        |  10% of 129.7 MiB
+|■■■■■■■■■■■■■■■■                                                                |  20% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 129.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 129.7 MiB
+Chromium 141.0.7390.37 (playwright build v1194) downloaded to /Users/deanahrens/Library/Caches/ms-playwright/chromium-1194
+Downloading Chromium Headless Shell 141.0.7390.37 (playwright build v1194)[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-headless-shell-mac-arm64.zip[22m
+|                                                                                |   0% of 81.7 MiB
+|■■■■■■■■                                                                        |  10% of 81.7 MiB
+|■■■■■■■■■■■■■■■■                                                                |  20% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 81.7 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 81.7 MiB
+Chromium Headless Shell 141.0.7390.37 (playwright build v1194) downloaded to /Users/deanahrens/Library/Caches/ms-playwright/chromium_headless_shell-1194
+Wrote demo config to config.yaml
+Demo scan complete. 4 candidates queued (3 high, 1 medium). Run `xig review` to see them, or `xig list` for a summary.
+No reports were submitted. Review and report explicitly.
+3: @demouser_official score=100 priority=critical status=pending
+2: @real_demouser score=100 priority=critical status=pending
+1: @demouser1 score=100 priority=critical status=pending
+4: @demo_user_alerts score=78 priority=medium status=pending
+6: @demouser_news score=60 priority=low status=pending
+5: @demouser_fan score=60 priority=low status=pending
+Dry run evidence package only. Approve before live submission.
+dry-run evidence package created: /var/folders/rf/8mwxn9bx5ks9xhz4qqpldyp40000gn/T/tmp.ux9VVwlp1X/.x-impersonation-guard/reports/20260522T200205Z_demouser1
+20260522T200205Z_demouser1
+elapsed_seconds=48
+# Finished: 2026-05-22T20:02:06Z
