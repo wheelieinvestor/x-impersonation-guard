@@ -829,15 +829,40 @@ def redact_report(
 @app.command()
 def status(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Emit machine-readable queue and report status."),
+    ] = False,
 ) -> None:
     """Show queue status and 24-hour report counts."""
     cfg = _load(config)
     store = ReviewStore(cfg.storage.db_path)
+    identity_statuses: list[tuple[str, dict[str, int], int, int]] = []
     for identity in cfg.protected_identities:
         counts = store.queue_status_counts(identity.handle)
         reports = store.reports_in_window(identity.handle)
+        identity_statuses.append(
+            (identity.handle, counts, reports, cfg.reporting.max_reports_per_24h)
+        )
+    if json_output:
+        payload = {
+            "generated_at": datetime.now(UTC).isoformat(),
+            "identities": [
+                {
+                    "handle": handle,
+                    "queue": counts,
+                    "reports_24h": reports,
+                    "reports_limit_24h": reports_limit,
+                }
+                for handle, counts, reports, reports_limit in identity_statuses
+            ],
+            "max_reports_per_24h": cfg.reporting.max_reports_per_24h,
+        }
+        typer.echo(json.dumps(payload, indent=2, sort_keys=True))
+        return
+    for handle, counts, reports, reports_limit in identity_statuses:
         typer.echo(
-            f"@{identity.handle}: {_format_queue_counts(counts)} reports_24h={reports}/{cfg.reporting.max_reports_per_24h}"
+            f"@{handle}: {_format_queue_counts(counts)} reports_24h={reports}/{reports_limit}"
         )
 
 

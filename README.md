@@ -159,6 +159,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 - Reports require explicit review approval before live submission.
 - `xig status` shows queue counts by review status and 24-hour report usage.
+- `xig status --json` emits the same status in a scriptable format for validation records and automation.
 - `xig review --next` opens the highest-priority pending candidate without copying an ID.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
 - `xig review --snooze <id>` or the TUI `s` key defers gray-area candidates without approving or dismissing them.
