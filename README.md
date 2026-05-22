@@ -154,6 +154,7 @@ Parody, fan, satire, "not affiliated", and older-account mitigations reduce scor
 X does not provide an impersonation-report API. The reporter uses Playwright against X's official Help Center form. By default:
 
 - Reports require explicit review approval before live submission.
+- `xig status` shows queue counts by review status and 24-hour report usage.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
 - `xig review --snooze <id>` defers gray-area candidates without approving or dismissing them.
 - `xig list --status snoozed` and `xig list --status all` make deferred and historical queue items easy to rediscover.

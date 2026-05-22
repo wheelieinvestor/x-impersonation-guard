@@ -587,14 +587,14 @@ def redact_report(
 def status(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
 ) -> None:
-    """Show queue and 24-hour report counts."""
+    """Show queue status and 24-hour report counts."""
     cfg = _load(config)
     store = ReviewStore(cfg.storage.db_path)
     for identity in cfg.protected_identities:
-        pending = len(store.list_queue(identity.handle))
+        counts = store.queue_status_counts(identity.handle)
         reports = store.reports_in_window(identity.handle)
         typer.echo(
-            f"@{identity.handle}: pending={pending} reports_24h={reports}/{cfg.reporting.max_reports_per_24h}"
+            f"@{identity.handle}: {_format_queue_counts(counts)} reports_24h={reports}/{cfg.reporting.max_reports_per_24h}"
         )
 
 
@@ -900,6 +900,12 @@ def _parse_list_status(value: str) -> QueueStatus | None:
 
 def _status_label(status: QueueStatus | None) -> str:
     return status.value if status is not None else "queued"
+
+
+def _format_queue_counts(counts: dict[str, int]) -> str:
+    return " ".join(
+        f"{status.value}={counts.get(status.value, 0)}" for status in QueueStatus
+    )
 
 
 def _is_writable_dir(path: Path) -> bool:
