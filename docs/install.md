@@ -49,5 +49,6 @@ It never prints token values.
 ## Troubleshooting
 
 - If `xig` is not found, confirm your Python scripts directory is on `PATH`.
+- If you need to confirm the installed package version, run `xig --version`.
 - If Playwright browser install fails, rerun `playwright install chromium`.
 - If no candidates appear in fixture mode, remove the demo database at `~/.x-impersonation-guard/db.sqlite` and rerun `xig scan-fixture`.
