@@ -89,6 +89,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert (
         "Textual review UI now shell-quotes generated follow-up commands" in changelog
     )
+    assert "Public FAQ now covers safe trial, privacy, diagnostics" in changelog
     assert "Next-step reporting guidance" in changelog
     assert (
         "Config-aware and identity-aware generated review/report follow-up commands"
@@ -130,3 +131,17 @@ def test_issue_templates_request_privacy_safe_diagnostics() -> None:
     assert "xig doctor --json" in selector_drift
     assert "xig redact-report <report_dir>" in selector_drift
     assert "Public issue templates now request privacy-safe" in changelog
+
+
+def test_public_faq_answers_launch_trust_questions() -> None:
+    faq = Path("docs/faq.md").read_text()
+
+    assert "xig demo --reset" in faq
+    assert "xig support-bundle --output xig-support.zip" in faq
+    assert "xig doctor --json" in faq
+    assert "--execute` and `--confirm-live" in faq
+    assert "false positives" in faq
+    assert "parody, fan, commentary" in faq
+    assert "xig review --identity yourhandle" in faq
+    assert "controlled live validation runbook" in faq
+    assert "does not bypass rate limits" in faq
