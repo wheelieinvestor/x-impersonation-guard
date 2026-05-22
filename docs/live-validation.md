@@ -33,6 +33,7 @@ pip install --pre x-impersonation-guard
 playwright install chromium
 xig init --guided
 xig doctor --config config.yaml
+xig doctor --config config.yaml --json > doctor.json
 ```
 
 Confirm `xig doctor` reports:

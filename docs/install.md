@@ -59,7 +59,7 @@ Use `xig status` to see queue counts by status and 24-hour reporting usage, or `
 - Storage directory writability.
 - SQLite review queue access.
 
-It never prints token values.
+It never prints token values. Use `xig doctor --json` to save the same privacy-safe diagnostics for support issues, scripts, or live-validation records.
 
 ## Troubleshooting
 

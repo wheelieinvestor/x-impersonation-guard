@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -33,6 +34,42 @@ def test_doctor_checks_valid_config(
     assert "OK: chromium:" in result.output
     assert "OK: sqlite:" in result.output
     assert "X_API_BEARER_TOKEN is not set" in result.output
+
+
+def test_doctor_json_reports_setup_without_secret_values(
+    config_path: Path, runner: CliRunner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(cli, "_chromium_executable_path", lambda: config_path)
+    monkeypatch.setenv("X_API_BEARER_TOKEN", "secret-token-value")
+
+    result = runner.invoke(app, ["doctor", "--config", str(config_path), "--json"])
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["config"] == str(config_path)
+    assert "secret-token-value" not in result.output
+    checks = {(check["label"], check["state"]): check for check in payload["checks"]}
+    assert ("config", "OK") in checks
+    assert ("scan mode", "OK") in checks
+    assert ("sqlite", "OK") in checks
+    assert checks[("x api token", "OK")]["detail"] == "X_API_BEARER_TOKEN is set"
+
+
+def test_doctor_json_allows_missing_config_with_setup_guidance(
+    tmp_path: Path, runner: CliRunner
+) -> None:
+    missing = tmp_path / "missing.yaml"
+
+    result = runner.invoke(app, ["doctor", "--config", str(missing), "--json"])
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["ok"] is True
+    assert payload["config"] == str(missing)
+    assert payload["checks"][-1]["state"] == "WARN"
+    assert payload["checks"][-1]["label"] == "config"
+    assert "xig init" in payload["checks"][-1]["detail"]
 
 
 def test_doctor_warns_when_chromium_is_missing(
