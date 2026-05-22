@@ -20,15 +20,24 @@ Published package: `x-impersonation-guard==0.2.0a0`
 | PyPI install on Linux Python 3.11 | Verified | `phase2.6/install-validation-A.log` |
 | PyPI install on Linux Python 3.12 | Verified | `phase2.6/install-validation-B.log` |
 | PyPI install on macOS Python 3.11 | Verified | `phase2.6/install-validation-C.log` |
+| User-first config generation | Verified | `xig init --handle ... --reporter-email ...`; `tests/integration/test_cli.py` |
+| Dependency security posture | Verified | Dependabot alerts clear; grouped update policy in `.github/dependabot.yml` |
 
 ## Implemented but not yet verified live
 
 | Capability | Status | Notes |
 |------------|--------|-------|
-| Live X API scan | Pending Phase 2 | No live X API calls during Phase 2.6. |
-| Live help.x.com report submission | Pending Phase 2 | Dry-run only during Phase 2.6. |
-| Real-world scorer calibration | Pending Phase 2 | Current calibration is fixture-based. |
+| Live X API scan | Pending live validation | Requires an X API bearer token and a selected test identity. |
+| Live help.x.com report submission | Pending live validation | Dry-run packages are verified; live submission should start with one approved low-risk candidate. |
+| Real-world scorer calibration | Pending live validation | Current calibration is fixture-based and should be checked against labeled real accounts. |
 
-## Phase 2 entry gate
+## Next validation gate
 
-Phase 2 starts after the install validation PR lands and Dean answers the open Phase 2 questions about X API readiness, labeling time, first-report candidate selection, acceptable false-positive rate, and brand identity scope.
+The next gate is controlled live validation:
+
+1. Confirm X API token readiness and acceptable API budget.
+2. Pick one protected identity and a small labeled candidate set.
+3. Run a read-only live scan and compare scores against expected labels.
+4. Dry-run evidence for the highest-confidence candidate.
+5. Submit at most one live Help Center report after manual approval.
+6. Record selector drift, false positives, false negatives, and report outcome before expanding usage.
