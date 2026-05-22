@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -145,6 +146,34 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert "Reasons:" in detail.output
     assert "Top weighted signals:" in detail.output
     assert "Dry-run after approval: xig report --dry-run 1" in detail.output
+
+    exported_json = runner.invoke(app, ["export", "json", "--config", str(config_path)])
+    assert exported_json.exit_code == 0, exported_json.output
+    payload = json.loads(exported_json.output)
+    assert payload[0]["handle"] == "whee1ieinvestor"
+    assert payload[0]["profile"]["username"] == "whee1ieinvestor"
+    assert "score_breakdown" in payload[0]
+
+    export_zip = tmp_path / "queue-export.zip"
+    exported_zip = runner.invoke(
+        app,
+        [
+            "export",
+            "zip",
+            "--config",
+            str(config_path),
+            "--output",
+            str(export_zip),
+        ],
+    )
+    assert exported_zip.exit_code == 0, exported_zip.output
+    assert "Exported 1 queued candidates" in exported_zip.output
+    with zipfile.ZipFile(export_zip) as archive:
+        assert set(archive.namelist()) == {"queue.json", "EXPORT_MANIFEST.json"}
+        queue = json.loads(archive.read("queue.json"))
+        manifest = json.loads(archive.read("EXPORT_MANIFEST.json"))
+    assert queue[0]["handle"] == "whee1ieinvestor"
+    assert manifest["candidate_count"] == 1
 
     approved = runner.invoke(
         app, ["review", "--config", str(config_path), "--approve", "1"]

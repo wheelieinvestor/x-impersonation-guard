@@ -671,26 +671,41 @@ def daemon(
 def export(
     format: Annotated[str, typer.Argument(help="zip or json")],
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    output: Annotated[
+        Path | None,
+        typer.Option("--output", "-o", help="Destination file path."),
+    ] = None,
 ) -> None:
     """Export queued candidates."""
-    if format != "json":
-        raise typer.BadParameter("only json export is implemented in alpha")
+    normalized = format.lower()
+    if normalized not in {"json", "zip"}:
+        raise typer.BadParameter("format must be json or zip")
     cfg = _load(config)
     store = ReviewStore(cfg.storage.db_path)
-    records = store.list_queue()
-    payload = [
-        {
-            "id": record.id,
-            "identity": record.identity_handle,
-            "handle": record.handle,
-            "score": record.score,
-            "priority": record.priority,
-            "status": record.status,
-            "score_breakdown": json.loads(record.score_breakdown_json or "{}"),
-        }
-        for record in records
-    ]
-    typer.echo(json.dumps(payload, indent=2, default=str))
+    payload = _queue_export_payload(store.list_queue())
+    if normalized == "json":
+        rendered = json.dumps(payload, indent=2, default=str)
+        if output is None:
+            typer.echo(rendered)
+        else:
+            destination = output.expanduser()
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(rendered + "\n")
+            typer.echo(f"Exported {len(payload)} queued candidates to {destination}")
+        return
+
+    destination = output.expanduser() if output else Path("xig-queue-export.zip")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    manifest = {
+        "created_at": datetime.now(UTC).isoformat(),
+        "candidate_count": len(payload),
+        "format": "xig_queue_export_v1",
+        "files": ["queue.json", "EXPORT_MANIFEST.json"],
+    }
+    with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("queue.json", json.dumps(payload, indent=2, default=str))
+        archive.writestr("EXPORT_MANIFEST.json", json.dumps(manifest, indent=2))
+    typer.echo(f"Exported {len(payload)} queued candidates to {destination}")
 
 
 def _resolve_fixture_path(input_path: Path) -> Path:
@@ -981,6 +996,26 @@ def _redact_json(value: Any) -> Any:
         )
         return redacted
     return value
+
+
+def _queue_export_payload(records: list[CandidateRecord]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": record.id,
+            "identity": record.identity_handle,
+            "handle": record.handle,
+            "display_name": record.display_name,
+            "score": record.score,
+            "priority": record.priority,
+            "status": record.status,
+            "source": record.source,
+            "detected_at": record.created_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
+            "profile": _profile_payload(record),
+            "score_breakdown": _score_payload(record),
+        }
+        for record in records
+    ]
 
 
 def _starter_identity_warnings(cfg: AppConfig) -> list[str]:
