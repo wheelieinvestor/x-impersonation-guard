@@ -155,6 +155,7 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 - Reports require explicit review approval before live submission.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
+- `xig review --snooze <id>` defers gray-area candidates without approving or dismissing them.
 - `xig export json` or `xig export zip` gives you a portable review queue for handoff or local analysis.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
 - Live Help Center submission requires both `--execute` and `--confirm-live`.
