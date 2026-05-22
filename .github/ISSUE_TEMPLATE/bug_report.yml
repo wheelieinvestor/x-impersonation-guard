@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible bug in x-impersonation-guard
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the bug and what command you ran.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Include exact commands. Redact tokens, emails, and private handles if needed.
+      placeholder: |
+        1. xig scan-fixture
+        2. xig list
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: xig --version or package version
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: macOS 14, Ubuntu 24.04, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: redacted-log
+    attributes:
+      label: Redacted log output
+      description: Paste relevant logs with tokens, cookies, emails, and private data removed.
+      render: shell
+    validations:
+      required: false

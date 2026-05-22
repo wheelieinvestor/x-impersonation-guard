@@ -6,6 +6,7 @@ import asyncio
 import json
 import time
 from datetime import UTC, datetime, timedelta
+from importlib.resources import files
 from pathlib import Path
 from typing import Annotated
 
@@ -193,9 +194,7 @@ def scan_fixture_command(
             yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
         )
         typer.echo(f"Wrote demo config to {config}")
-    fixture_path = input.expanduser()
-    if not fixture_path.is_absolute() and not fixture_path.exists():
-        fixture_path = Path(__file__).resolve().parents[2] / fixture_path
+    fixture_path = _resolve_fixture_path(input)
     raw = json.loads(fixture_path.read_text())
     if "demo_protected_identity" in raw:
         scan_fixture = DemoFixture.model_validate(raw).to_fixture_scan()
@@ -406,6 +405,21 @@ def export(
         for record in records
     ]
     typer.echo(json.dumps(payload, indent=2, default=str))
+
+
+def _resolve_fixture_path(input_path: Path) -> Path:
+    fixture_path = input_path.expanduser()
+    if fixture_path.exists():
+        return fixture_path
+    if input_path == Path("examples/demo_fixture.json"):
+        return Path(
+            str(files("x_impersonation_guard.resources").joinpath("demo_fixture.json"))
+        )
+    if not fixture_path.is_absolute():
+        source_path = Path(__file__).resolve().parents[2] / fixture_path
+        if source_path.exists():
+            return source_path
+    return fixture_path
 
 
 def _demo_config() -> AppConfig:

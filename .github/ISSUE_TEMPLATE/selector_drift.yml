@@ -1,0 +1,30 @@
+name: Selector drift
+description: Report that X Help Center form selectors changed
+title: "selector drift: "
+labels: ["selector-drift", "reporting"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when the Playwright reporter can no longer find or fill the X Help Center form. Do not paste cookies, tokens, private email links, or unredacted personal data.
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      placeholder: xig report --dry-run 1
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic package notes
+      description: List generated diagnostic files. Attach redacted screenshots only.
+    validations:
+      required: false

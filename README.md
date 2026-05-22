@@ -1,14 +1,21 @@
-# X Impersonation Guard
+# x-impersonation-guard
 
-Automatically detect and report X accounts impersonating you.
+> Detect and report X accounts impersonating you. Local-first, explainable, safe by default.
+
+[![CI](https://github.com/wheelieinvestor/x-impersonation-guard/actions/workflows/test.yml/badge.svg)](https://github.com/wheelieinvestor/x-impersonation-guard/actions)
+[![PyPI](https://img.shields.io/pypi/v/x-impersonation-guard)](https://pypi.org/project/x-impersonation-guard/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
+**Status: Public alpha.** First scan path works end-to-end. Live reporting validated on one impersonator. Calibrating against more impersonators is in progress. Use the offline demo to evaluate; use the live path with the review queue, never auto-submit.
+
+![Offline demo of xig scan-fixture, xig list, and xig report dry-run](docs/demo/quickstart.gif)
+
+[Watch the asciinema-style terminal recording](docs/demo/quickstart.cast)
 
 Public figures get cloned constantly. Reporting each clone by hand is slow, repetitive, and easy to miss. X does not provide an API endpoint for impersonation reports, so this tool separates detection, review, and official Help Center submission.
 
 X Impersonation Guard is built for local control. Your credentials stay on your machine. You review candidates before reports are submitted by default.
-
-## Status
-
-Private alpha foundation. Core scoring, review queue storage, safety limits, and dry-run reporting are implemented. Live X API and Help Center form automation are structured behind adapters so they can be tested without live credentials.
 
 ## Quickstart
 
