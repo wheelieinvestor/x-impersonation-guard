@@ -1,28 +1,50 @@
 [build-system]
-requires = ["setuptools>=69"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling==1.28.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "x-impersonation-guard"
 version = "0.1.0"
-description = "Read-first X impersonation detector with optional user-approved blocking."
+description = "Locally runnable X impersonation detection, review, and reporting automation."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Wheelhouse Capital LLC" }]
 dependencies = [
-    "pydantic>=2.0",
+    "httpx==0.28.1",
+    "imagehash==4.3.2",
+    "pillow==12.0.0",
+    "playwright==1.56.0",
+    "pydantic==2.12.5",
+    "pydantic-settings==2.12.0",
+    "email-validator==2.3.0",
+    "pyyaml==6.0.3",
+    "rapidfuzz==3.14.3",
+    "sqlalchemy==2.0.44",
+    "structlog==25.5.0",
+    "textual==6.7.0",
+    "tweepy==4.16.0",
+    "typer==0.20.0",
 ]
 
 [project.scripts]
-x-impersonation-guard = "x_impersonation_guard.cli:main"
+xig = "x_impersonation_guard.cli:app"
+x-impersonation-guard = "x_impersonation_guard.cli:app"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "pytest>=8.0",
-    "ruff>=0.4.0",
+    "mypy==1.19.0",
+    "pytest==9.0.1",
+    "pytest-asyncio==1.3.0",
+    "pytest-cov==7.0.0",
+    "pytest-playwright==0.7.2",
+    "respx==0.22.0",
+    "ruff==0.14.6",
+    "types-pyyaml==6.0.12.20250915",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/x_impersonation_guard"]
 
 [tool.ruff]
 line-length = 88
@@ -30,12 +52,34 @@ src = ["src", "tests"]
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["B011"]
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 
+[tool.mypy]
+python_version = "3.11"
+strict = true
+mypy_path = "src"
+warn_return_any = true
+warn_unused_configs = true
+plugins = []
+
+[[tool.mypy.overrides]]
+module = ["imagehash", "tweepy", "playwright.*", "textual.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+asyncio_mode = "auto"
+markers = [
+    "slow: tests that require browser or network style setup",
+    "e2e: end-to-end tests skipped by default",
+]
+addopts = "-m 'not e2e'"

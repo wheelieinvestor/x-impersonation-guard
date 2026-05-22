@@ -1,0 +1,47 @@
+protected_identities:
+  - name: "Dean Ahrens"
+    handle: "wheelieinvestor"
+    display_name: "Wheelie Investor"
+    user_id: null
+    type: "individual"
+    report_as: "Me or someone I am authorized to represent"
+    reporter_name: "Dean Ahrens"
+    reporter_email: "dean@wheelhousecapital.com"
+    extra_handle_variants:
+      - "wheelie_*"
+      - "*_wheelie"
+      - "wheelchairinvestor*"
+    extra_display_variants:
+      - "Dean Ahrens"
+      - "Wheelie Capital"
+    auto_report_threshold: 95
+x_api:
+  mode: "auto"
+  bearer_token_env: "X_API_BEARER_TOKEN"
+  max_cost_per_scan_usd: 2.0
+scoring:
+  thresholds:
+    review_queue_medium: 70
+    review_queue_high: 90
+  weights:
+    handle_similarity: 20
+    name_similarity: 15
+    bio_similarity: 10
+    image_similarity: 25
+    account_age: 10
+    follower_ratio: 5
+    follow_back_pattern: 5
+    posting_behavior: 5
+    verified_status: 5
+reporting:
+  auto_submit: false
+  max_reports_per_24h: 5
+  delay_between_reports_seconds: [90, 300]
+  headless: false
+storage:
+  db_path: "~/.x-impersonation-guard/db.sqlite"
+  evidence_dir: "~/.x-impersonation-guard/evidence"
+  reports_dir: "~/.x-impersonation-guard/reports"
+logging:
+  level: "INFO"
+  format: "json"

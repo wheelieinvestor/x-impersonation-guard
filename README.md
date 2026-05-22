@@ -1,82 +1,114 @@
 # X Impersonation Guard
 
-Read-first X impersonation detector with optional user-approved blocking through the official X API via `xurl`.
+Automatically detect and report X accounts impersonating you.
 
-This project is designed for creators, founders, analysts, and public accounts that are being copied by low-quality/bought-looking accounts. It produces a ranked report first. Blocking is fail-closed and requires an explicit `--execute` flag.
+Public figures get cloned constantly. Reporting each clone by hand is slow, repetitive, and easy to miss. X does not provide an API endpoint for impersonation reports, so this tool separates detection, review, and official Help Center submission.
 
-## What it does
+X Impersonation Guard is built for local control. Your credentials stay on your machine. You review candidates before reports are submitted by default.
 
-- Scores candidate accounts against a protected/main account.
-- Flags common impersonation signals:
-  - matching or near-matching display name
-  - handle containing the protected handle
-  - copied/similar bio
-  - matching profile image URL
-  - low-follower / high-following profile shape
-- Mitigates false positives when a candidate is verified or has meaningful follower context.
-- Runs fixture/offline scans for repeatable review.
-- Wraps `xurl` for X API reads and blocking without storing credentials in this repo.
+## Status
 
-## What it does not do
+Private alpha foundation. Core scoring, review queue storage, safety limits, and dry-run reporting are implemented. Live X API and Help Center form automation are structured behind adapters so they can be tested without live credentials.
 
-- It does **not** prove an account was bought. The report says suspicious/impersonation risk, not platform-side ownership history.
-- It does **not** auto-block from detection alone.
-- It does **not** ship shared X credentials. Each user must authenticate their own X app/account.
-- It does **not** post public accusations.
-
-## Install locally
+## Quickstart
 
 ```bash
-python3.11 -m venv .venv
-./.venv/bin/python -m pip install -e '.[dev]'
+git clone https://github.com/wheelieinvestor/x-impersonation-guard.git
+cd x-impersonation-guard
+uv sync --all-groups
+uv run xig init --config config.yaml
+uv run xig scan --config config.yaml
+uv run xig list --config config.yaml
 ```
 
-## Offline fixture scan
-
-```bash
-x-impersonation-guard scan-fixture --input examples/sample_accounts.json
-```
-
-Output includes ranked candidates and ends with:
+## How it works
 
 ```text
-No accounts were blocked. Re-run a reviewed block action with --execute.
+config.yaml -> detectors -> scorer -> SQLite review queue -> user approval -> Playwright reporter -> audit log
 ```
 
-## Blocking after review
+Three pipelines stay separate:
 
-Dry run:
+1. Detection finds candidate accounts through handle variants, display-name matches, follower scans, cached image hashes, or scrape fallback.
+2. Scoring ranks each candidate from 0 to 100 with an explainable signal breakdown.
+3. Reporting uses Playwright to submit X's official Help Center impersonation form after approval.
+
+## Safety warning
+
+Mass reporting can put the reporter account at risk. X may flag accounts that submit too many reports.
+
+Defaults are conservative:
+
+- Manual review queue enabled.
+- `auto_submit: false`.
+- Maximum 5 reports per identity per rolling 24 hours.
+- Hard configuration cap of 20 reports per rolling 24 hours.
+- Random delay between submissions.
+- Evidence and audit package saved for every attempted report.
+
+If you enable auto-submit, you are accepting that risk explicitly.
+
+## Configuration
+
+Run:
 
 ```bash
-x-impersonation-guard block --authenticated-user-id YOUR_USER_ID --target-user-id TARGET_ID
+uv run xig init --config config.yaml
 ```
 
-Execute after manual review:
+The generated config is designed for `@wheelieinvestor` and can be edited for another individual identity.
+
+API mode is preferred when `X_API_BEARER_TOKEN` is configured. Scrape mode is slower and more fragile because X can change page markup.
+
+## Commands
 
 ```bash
-x-impersonation-guard block --authenticated-user-id YOUR_USER_ID --target-user-id TARGET_ID --execute
+xig init
+xig scan
+xig scan --identity wheelieinvestor
+xig list
+xig review
+xig report <candidate_id>
+xig log
+xig status
+xig daemon
+xig export json
 ```
 
-## X API / xurl setup
+## What this tool is not
 
-This project expects users to authenticate `xurl` themselves. Do not paste API keys into this repo or into an AI chat.
+- It is not a way to silence critics, parody accounts, or people you dislike.
+- It is not legal advice.
+- It is not a guarantee of removal. X decides enforcement outcomes.
+- It is not a bypass for X's rate limits.
+- It does not fabricate evidence or rotate credentials to evade platform limits.
 
-Required X capabilities:
+## Limits
 
-- read public users/posts for detection
-- OAuth user context for blocking
-- rate-limit handling for production scans
-
-See `docs/setup.md` for the operational setup and safety rules.
+There is no X API endpoint for impersonation reports. Reporting requires browser automation against X's Help Center form. The user may still need to confirm emailed verification links from X.
 
 ## Development
 
 ```bash
-./.venv/bin/python -m pytest -q
-./.venv/bin/python -m ruff check .
-./.venv/bin/python -m ruff format --check .
+uv sync --all-groups
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
 ```
 
-## Safety posture
+## Roadmap
 
-Default behavior is report-only. Any write action to X must be intentionally invoked by the authenticated account owner.
+- Harden Playwright selectors against live Help Center changes.
+- Add nightly selector e2e checks with staging credentials.
+- Add richer Textual review workflows.
+- Add Hermes adapter for agent-operated scans and summaries.
+- Add Threads and Bluesky detection support after X v1.0 is stable.
+
+## License
+
+MIT
+
+## Author
+
+Wheelhouse Capital LLC. Built for Dean Ahrens, @WheelieInvestor.
