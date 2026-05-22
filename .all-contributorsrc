@@ -1,0 +1,25 @@
+{
+  "projectName": "x-impersonation-guard",
+  "projectOwner": "wheelieinvestor",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": ["README.md"],
+  "imageSize": 100,
+  "commit": false,
+  "contributors": [
+    {
+      "login": "wheelieinvestor",
+      "name": "Dean Ahrens",
+      "avatar_url": "https://avatars.githubusercontent.com/u/231988753?v=4",
+      "profile": "https://x.com/WheelieInvestor",
+      "contributions": ["ideas", "maintenance", "projectManagement"]
+    },
+    {
+      "login": "hermes",
+      "name": "Hermes",
+      "avatar_url": "https://raw.githubusercontent.com/wheelieinvestor/x-impersonation-guard/main/docs/assets/favicon.png",
+      "profile": "https://github.com/wheelieinvestor/x-impersonation-guard",
+      "contributions": ["code", "doc", "test"]
+    }
+  ]
+}

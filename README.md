@@ -229,3 +229,11 @@ MIT
 ## Acknowledgements
 
 Built by [Dean Ahrens](https://x.com/WheelieInvestor) at Wheelhouse Capital. Powered by Hermes, a Claude-based coding agent.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START -->
+| [![Dean Ahrens](https://avatars.githubusercontent.com/u/231988753?v=4&s=100)<br />Dean Ahrens](https://x.com/WheelieInvestor) | [![Hermes](docs/assets/favicon.png)<br />Hermes](https://github.com/wheelieinvestor/x-impersonation-guard) |
+| :---: | :---: |
+| Ideas, maintenance, project management | Code, docs, tests |
+<!-- ALL-CONTRIBUTORS-LIST:END -->
