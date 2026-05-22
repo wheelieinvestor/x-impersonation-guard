@@ -18,6 +18,7 @@ import yaml
 from pydantic import BaseModel, ValidationError
 from sqlalchemy import select
 
+from x_impersonation_guard import __version__
 from x_impersonation_guard.clients.mode_selector import select_scan_mode
 from x_impersonation_guard.clients.x_api import XApiClient
 from x_impersonation_guard.clients.x_scrape import XScrapeClient
@@ -45,9 +46,27 @@ from x_impersonation_guard.utils.logging import configure_logging
 app = typer.Typer(help="X impersonation detection and reporting.")
 
 
+def _version_callback(value: bool) -> None:
+    if value:
+        typer.echo(f"x-impersonation-guard {__version__}")
+        raise typer.Exit()
+
+
 @app.callback(invoke_without_command=True)
-def main(ctx: typer.Context) -> None:
+def main(
+    ctx: typer.Context,
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            help="Show the installed x-impersonation-guard version and exit.",
+            callback=_version_callback,
+            is_eager=True,
+        ),
+    ] = False,
+) -> None:
     """X impersonation detection and reporting."""
+    del version
     if ctx.invoked_subcommand is not None:
         return
     if not Path("config.yaml").exists():
