@@ -1,0 +1,73 @@
+# Environment A: Linux Python 3.11
+# Started: 2026-05-22T20:03:25Z
+Unable to find image 'python:3.11-slim' locally
+3.11-slim: Pulling from library/python
+31b290acbac4: Pulling fs layer
+b2c22afaf507: Pulling fs layer
+5eab6366d324: Pulling fs layer
+cda3d70ae7d7: Pulling fs layer
+546f5c40fdab: Download complete
+3ebb7437d9cd: Download complete
+5eab6366d324: Download complete
+31b290acbac4: Download complete
+b2c22afaf507: Download complete
+cda3d70ae7d7: Download complete
+cda3d70ae7d7: Pull complete
+5eab6366d324: Pull complete
+31b290acbac4: Pull complete
+b2c22afaf507: Pull complete
+Digest: sha256:a3ab0b966bc4e91546a033e22093cb840908979487a9fc0e6e38295747e49ac0
+Status: Downloaded newer image for python:3.11-slim
+debconf: unable to initialize frontend: Dialog
+debconf: (TERM is not set, so the dialog frontend is not usable.)
+debconf: falling back to frontend: Readline
+debconf: unable to initialize frontend: Readline
+debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC entries checked: /etc/perl /usr/local/lib/aarch64-linux-gnu/perl/5.40.1 /usr/local/share/perl/5.40.1 /usr/lib/aarch64-linux-gnu/perl5/5.40 /usr/share/perl5 /usr/lib/aarch64-linux-gnu/perl-base /usr/lib/aarch64-linux-gnu/perl/5.40 /usr/share/perl/5.40 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 8, <STDIN> line 27.)
+debconf: falling back to frontend: Teletype
+debconf: unable to initialize frontend: Teletype
+debconf: (This frontend requires a controlling tty.)
+debconf: falling back to frontend: Noninteractive
+Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (16.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.0/16.0 MB 56.9 MB/s eta 0:00:00
+Downloading pywavelets-1.9.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (4.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.5/4.5 MB 54.5 MB/s eta 0:00:00
+Downloading scipy-1.17.1-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (33.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 33.1/33.1 MB 33.0 MB/s eta 0:00:00
+Downloading charset_normalizer-3.4.7-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (206 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 206.4/206.4 kB 49.1 MB/s eta 0:00:00
+Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading linkify_it_py-2.1.0-py3-none-any.whl (19 kB)
+Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 131.1/131.1 kB 41.9 MB/s eta 0:00:00
+Downloading uc_micro_py-2.0.0-py3-none-any.whl (6.4 kB)
+Installing collected packages: urllib3, uc-micro-py, typing-extensions, structlog, shellingham, rapidfuzz, pyyaml, python-dotenv, pygments, platformdirs, pillow, oauthlib, numpy, mdurl, idna, h11, greenlet, dnspython, click, charset_normalizer, certifi, annotated-types, typing-inspection, sqlalchemy, scipy, requests, PyWavelets, pyee, pydantic-core, markdown-it-py, linkify-it-py, httpcore, email-validator, anyio, rich, requests-oauthlib, pydantic, playwright, mdit-py-plugins, imagehash, httpx, typer, tweepy, textual, pydantic-settings, x-impersonation-guard
+Successfully installed PyWavelets-1.9.0 annotated-types-0.7.0 anyio-4.13.0 certifi-2026.5.20 charset_normalizer-3.4.7 click-8.4.1 dnspython-2.8.0 email-validator-2.3.0 greenlet-3.5.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.16 imagehash-4.3.2 linkify-it-py-2.1.0 markdown-it-py-4.2.0 mdit-py-plugins-0.6.1 mdurl-0.1.2 numpy-2.4.6 oauthlib-3.3.1 pillow-12.0.0 platformdirs-4.9.6 playwright-1.56.0 pydantic-2.12.5 pydantic-core-2.41.5 pydantic-settings-2.11.0 pyee-13.0.1 pygments-2.20.0 python-dotenv-1.2.2 pyyaml-6.0.3 rapidfuzz-3.14.3 requests-2.34.2 requests-oauthlib-2.0.0 rich-15.0.0 scipy-1.17.1 shellingham-1.5.4 sqlalchemy-2.0.44 structlog-25.5.0 textual-6.7.0 tweepy-4.16.0 typer-0.20.0 typing-extensions-4.15.0 typing-inspection-0.4.2 uc-micro-py-2.0.0 urllib3-2.7.0 x-impersonation-guard-0.2.0a0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+
+[notice] A new release of pip is available: 24.0 -> 26.1.1
+[notice] To update, run: pip install --upgrade pip
+|■■■■■■■■■■■■■■■■                                                                |  20% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 106.1 MiB
+|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 106.1 MiB
+Chromium Headless Shell 141.0.7390.37 (playwright build v1194) downloaded to /root/.cache/ms-playwright/chromium_headless_shell-1194
+Wrote demo config to config.yaml
+Demo scan complete. 4 candidates queued (3 high, 1 medium). Run `xig review` to see them, or `xig list` for a summary.
+No reports were submitted. Review and report explicitly.
+3: @demouser_official score=100 priority=critical status=pending
+2: @real_demouser score=100 priority=critical status=pending
+1: @demouser1 score=100 priority=critical status=pending
+4: @demo_user_alerts score=78 priority=medium status=pending
+6: @demouser_news score=60 priority=low status=pending
+5: @demouser_fan score=60 priority=low status=pending
+Dry run evidence package only. Approve before live submission.
+dry-run evidence package created: /root/.x-impersonation-guard/reports/20260522T200425Z_demouser1
+20260522T200425Z_demouser1
+elapsed_seconds=55
+# Finished: 2026-05-22T20:04:25Z
