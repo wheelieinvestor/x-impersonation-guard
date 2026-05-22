@@ -343,14 +343,30 @@ def scan_fixture_command(
 def list_command(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
     identity: Annotated[str | None, typer.Option("--identity")] = None,
+    status: Annotated[
+        str,
+        typer.Option(
+            "--status",
+            help="Queue status to list: pending, snoozed, approved, dismissed, reported, report_failed, failed, or all.",
+        ),
+    ] = QueueStatus.PENDING.value,
 ) -> None:
-    """List pending review queue."""
+    """List review queue candidates."""
     cfg = _load(config)
     selected = cfg.identity_for_handle(identity)
     store = ReviewStore(cfg.storage.db_path)
-    records = store.list_queue(selected.handle)
+    selected_status = _parse_list_status(status)
+    if selected_status is None:
+        records = [
+            record
+            for queue_status in QueueStatus
+            for record in store.list_queue(selected.handle, status=queue_status)
+        ]
+        records.sort(key=lambda record: (record.score, record.updated_at), reverse=True)
+    else:
+        records = store.list_queue(selected.handle, status=selected_status)
     if not records:
-        typer.echo("No pending candidates.")
+        typer.echo(f"No {_status_label(selected_status)} candidates.")
         return
     for record in records:
         typer.echo(
@@ -869,6 +885,21 @@ def _relative_age(value: datetime) -> str:
     if hours < 48:
         return f"{hours}h"
     return f"{hours // 24}d"
+
+
+def _parse_list_status(value: str) -> QueueStatus | None:
+    normalized = value.strip().lower().replace("-", "_")
+    if normalized == "all":
+        return None
+    try:
+        return QueueStatus(normalized)
+    except ValueError as exc:
+        allowed = ", ".join([status.value for status in QueueStatus] + ["all"])
+        raise typer.BadParameter(f"status must be one of: {allowed}") from exc
+
+
+def _status_label(status: QueueStatus | None) -> str:
+    return status.value if status is not None else "queued"
 
 
 def _is_writable_dir(path: Path) -> bool:

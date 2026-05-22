@@ -46,7 +46,8 @@ Use headed mode unless you have a specific reason to run headless. The first liv
 4. Store scores from 40 to 69 in low confidence.
 5. Store scores 70 and above in the review queue.
 6. Let reviewers approve, dismiss, or snooze candidates.
-7. Submit only approved reports.
+7. Use `xig list --status snoozed` or `xig list --status all` to revisit deferred or historical queue items.
+8. Submit only approved reports.
 
 ## Why reporting is not fully automatic by default
 
