@@ -37,7 +37,7 @@ xig export zip --output queue-export.zip
 xig report --dry-run 1
 ```
 
-Use `xig review --show <id>` to inspect score reasons, mitigations, profile metadata, and the next safe commands. Use `xig export json` or `xig export zip --output queue-export.zip` to save a portable copy of the pending review queue. Live submission requires an approved candidate and `--execute`.
+Use `xig review --show <id>` to inspect score reasons, mitigations, profile metadata, and the next safe commands. Use `xig export json` or `xig export zip --output queue-export.zip` to save a portable copy of the pending review queue. Live submission requires an approved candidate plus `--execute --confirm-live`.
 
 ## Setup check
 

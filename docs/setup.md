@@ -33,7 +33,7 @@ The command above is dry-run by default. Live submission requires review approva
 
 ```bash
 uv run xig review --config config.yaml --approve <candidate_id>
-uv run xig report <candidate_id> --config config.yaml --execute
+uv run xig report <candidate_id> --config config.yaml --execute --confirm-live
 ```
 
 Use headed mode unless you have a specific reason to run headless. The first live report may require manual login or form confirmation in the browser.
