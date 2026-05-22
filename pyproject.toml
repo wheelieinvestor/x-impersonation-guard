@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "x-impersonation-guard"
-version = "0.1.0"
+version = "0.2.0a0"
 description = "Locally runnable X impersonation detection, review, and reporting automation."
 readme = "README.md"
 requires-python = ">=3.11"
