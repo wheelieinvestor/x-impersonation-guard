@@ -59,6 +59,5 @@ False positives are expensive. News accounts, parody accounts, fan accounts, and
 ## Production hardening still needed before v1.0
 
 - Live Help Center selector verification.
-- Richer Textual snooze controls.
 - Full image download and hash pipeline for new candidates.
 - Real-world scorer calibration against known impersonator and non-impersonator sets.
