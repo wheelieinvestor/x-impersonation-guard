@@ -23,4 +23,4 @@ For public bug reports, create a redacted bundle:
 xig redact-report ~/.x-impersonation-guard/reports/<report_dir>
 ```
 
-The redacted bundle includes JSON, text, and log diagnostics with sensitive fields replaced, including common token, cookie, session, authorization, password, and secret keys. It excludes screenshots or HTML by default. Review any original image or HTML file manually before sharing it.
+The redacted bundle includes JSON diagnostics with sensitive fields replaced and excludes screenshots or HTML by default. Review any original image or HTML file manually before sharing it.

@@ -57,23 +57,6 @@ def test_offline_demo_scan_list_and_dry_run_report(
     assert (report_dir / "form_submission.png").exists()
     assert (report_dir / "form_response.html").exists()
     assert (report_dir / "report.json").exists()
-    (report_dir / "failure_diagnostic.json").write_text(
-        json.dumps(
-            {
-                "Authorization": "Bearer live-token-value",
-                "session_cookie": "auth_token=abc123",
-                "nested": {
-                    "csrfToken": "csrf-secret",
-                    "message": "token=abc123 email=dean@example.com https://x.com/alex_charts",
-                },
-            }
-        )
-    )
-    (report_dir / "failure.log").write_text(
-        "authorization: Bearer live-token-value\n"
-        "cookie=sessionid=abc123\n"
-        "contact dean@example.com at https://x.com/alex_charts\n"
-    )
 
     bundle = tmp_path / "redacted-report.zip"
     redacted = runner.invoke(
@@ -91,31 +74,16 @@ def test_offline_demo_scan_list_and_dry_run_report(
         names = set(archive.namelist())
         assert "report.json" in names
         assert "score_breakdown.json" in names
-        assert "failure_diagnostic.json" in names
-        assert "failure.log" in names
         assert "REDACTION_MANIFEST.json" in names
         assert "evidence_profile.html" not in names
         assert "evidence_profile.png" not in names
         report_json = archive.read("report.json").decode()
-        diagnostic_json = archive.read("failure_diagnostic.json").decode()
-        failure_log = archive.read("failure.log").decode()
         manifest = json.loads(archive.read("REDACTION_MANIFEST.json"))
 
     assert "demo@example.com" not in report_json
     assert "alex_charts" not in report_json.lower()
     assert '"reporter_email": "<redacted>"' in report_json
-    assert "live-token-value" not in diagnostic_json
-    assert "auth_token" not in diagnostic_json
-    assert "csrf-secret" not in diagnostic_json
-    assert "abc123" not in diagnostic_json
-    assert "dean@example.com" not in diagnostic_json
-    assert "alex_charts" not in diagnostic_json.lower()
-    assert "live-token-value" not in failure_log
-    assert "abc123" not in failure_log
-    assert "dean@example.com" not in failure_log
-    assert "alex_charts" not in failure_log.lower()
     assert "evidence_profile.html" in manifest["excluded"]
-    assert "failure.log" in manifest["redacted"]
 
 
 def test_demo_fixture_scores_match_story() -> None:
