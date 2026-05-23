@@ -83,7 +83,6 @@ Run a live scan without reporting anything:
 ```bash
 xig scan --config config.yaml
 xig status --config config.yaml
-xig status --config config.yaml --json > live-status.json
 xig list --config config.yaml --status all
 ```
 
