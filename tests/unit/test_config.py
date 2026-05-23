@@ -10,28 +10,8 @@ from x_impersonation_guard.config import AppConfig, default_config_dict, load_co
 
 def test_default_config_is_valid() -> None:
     cfg = AppConfig.model_validate(default_config_dict())
-    assert cfg.protected_identities[0].handle == "yourhandle"
-    assert cfg.protected_identities[0].display_name == "Your Name"
-    assert cfg.protected_identities[0].reporter_email == "you@example.com"
-    assert cfg.x_api.max_cost_per_scan_usd == 2.0
-    assert cfg.x_api.estimated_cost_per_request_usd == 0.01
+    assert cfg.protected_identities[0].handle == "wheelieinvestor"
     assert cfg.reporting.auto_submit is False
-
-
-def test_default_config_accepts_user_identity() -> None:
-    cfg = AppConfig.model_validate(
-        default_config_dict(
-            handle="@ExampleCreator",
-            display_name="Example Creator",
-            reporter_name="Example Legal",
-            reporter_email="reports@example.com",
-        )
-    )
-    identity = cfg.protected_identities[0]
-    assert identity.handle == "examplecreator"
-    assert identity.display_name == "Example Creator"
-    assert identity.reporter_name == "Example Legal"
-    assert identity.reporter_email == "reports@example.com"
 
 
 def test_reporting_cap_cannot_exceed_twenty() -> None:

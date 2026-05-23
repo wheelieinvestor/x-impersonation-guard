@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-import zipfile
 from pathlib import Path
 
 import pytest
@@ -45,14 +44,7 @@ def test_offline_demo_scan_list_and_dry_run_report(
     )
     assert report.exit_code == 0, report.output
     assert "dry-run evidence package created" in report.output
-    assert "xig redact-report" in report.output
-    assert (
-        f"Approve before live submission: xig review --config {config} --approve {first_id}"
-        in report.output
-    )
-    report_dir_match = re.search(
-        r"dry-run evidence package created: (/.*)$", report.output, re.MULTILINE
-    )
+    report_dir_match = re.search(r"(/.*)$", report.output.strip())
     assert report_dir_match is not None
     report_dir = Path(report_dir_match.group(1))
     assert (report_dir / "evidence_profile.png").exists()
@@ -61,97 +53,6 @@ def test_offline_demo_scan_list_and_dry_run_report(
     assert (report_dir / "form_submission.png").exists()
     assert (report_dir / "form_response.html").exists()
     assert (report_dir / "report.json").exists()
-    (report_dir / "failure_diagnostic.json").write_text(
-        json.dumps(
-            {
-                "Authorization": "Bearer live-token-value",
-                "session_cookie": "auth_token=abc123",
-                "nested": {
-                    "csrfToken": "csrf-secret",
-                    "message": "token=abc123 email=dean@example.com https://x.com/alex_charts",
-                },
-            }
-        )
-    )
-    (report_dir / "failure.log").write_text(
-        "authorization: Bearer live-token-value\n"
-        "cookie=sessionid=abc123\n"
-        "contact dean@example.com at https://x.com/alex_charts\n"
-    )
-
-    bundle = tmp_path / "redacted-report.zip"
-    redacted = runner.invoke(
-        app,
-        [
-            "redact-report",
-            str(report_dir),
-            "--output",
-            str(bundle),
-        ],
-    )
-    assert redacted.exit_code == 0, redacted.output
-    assert "Created redacted report bundle" in redacted.output
-    with zipfile.ZipFile(bundle) as archive:
-        names = set(archive.namelist())
-        assert "report.json" in names
-        assert "score_breakdown.json" in names
-        assert "failure_diagnostic.json" in names
-        assert "failure.log" in names
-        assert "REDACTION_MANIFEST.json" in names
-        assert "evidence_profile.html" not in names
-        assert "evidence_profile.png" not in names
-        report_json = archive.read("report.json").decode()
-        diagnostic_json = archive.read("failure_diagnostic.json").decode()
-        failure_log = archive.read("failure.log").decode()
-        manifest = json.loads(archive.read("REDACTION_MANIFEST.json"))
-
-    assert "demo@example.com" not in report_json
-    assert "alex_charts" not in report_json.lower()
-    assert '"reporter_email": "<redacted>"' in report_json
-    assert "live-token-value" not in diagnostic_json
-    assert "auth_token" not in diagnostic_json
-    assert "csrf-secret" not in diagnostic_json
-    assert "abc123" not in diagnostic_json
-    assert "dean@example.com" not in diagnostic_json
-    assert "alex_charts" not in diagnostic_json.lower()
-    assert "live-token-value" not in failure_log
-    assert "abc123" not in failure_log
-    assert "dean@example.com" not in failure_log
-    assert "alex_charts" not in failure_log.lower()
-    assert "evidence_profile.html" in manifest["excluded"]
-    assert "failure.log" in manifest["redacted"]
-
-
-def test_isolated_demo_uses_local_workspace(
-    tmp_path: Path,
-    runner: CliRunner,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.chdir(tmp_path)
-
-    result = runner.invoke(app, ["demo"])
-
-    assert result.exit_code == 0, result.output
-    assert "Demo workspace: .xig-demo" in result.output
-    assert "xig review --config .xig-demo/config.yaml --next" in result.output
-    assert "No live X calls were made" in result.output
-    config = tmp_path / ".xig-demo" / "config.yaml"
-    db = tmp_path / ".xig-demo" / "db.sqlite"
-    assert config.exists()
-    assert db.exists()
-
-    listed = runner.invoke(app, ["list", "--config", str(config)])
-    assert listed.exit_code == 0, listed.output
-    assert "@alex_charts1" in listed.output
-
-    marker = tmp_path / ".xig-demo" / "old.txt"
-    marker.write_text("old")
-    reset = runner.invoke(app, ["demo", "--reset"])
-    assert reset.exit_code == 0, reset.output
-    assert "Reset demo workspace: .xig-demo" in reset.output
-    assert not marker.exists()
-    assert config.exists()
-    assert db.exists()
 
 
 def test_demo_fixture_scores_match_story() -> None:

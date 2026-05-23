@@ -15,7 +15,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**Status: Public alpha.** Offline demo, dry-run reporting, fail-closed reporter safety, first-run config generation, dependency security posture, and three-environment PyPI install are verified. Live X API scans and live help.x.com submissions are implemented but still pending controlled live validation. See [docs/status.md](docs/status.md) and the [live validation runbook](docs/live-validation.md).
+**Status: Public alpha.** Offline demo, dry-run reporting, fail-closed reporter safety, and three-environment PyPI install are verified. Live X API scans and live help.x.com submissions are implemented but still pending Phase 2 validation. See [docs/status.md](docs/status.md).
 
 ---
 
@@ -34,24 +34,17 @@ No credentials. No live X calls. No reports submitted.
 ```bash
 pip install --pre x-impersonation-guard
 playwright install chromium
-xig quickstart
-xig demo
 xig scan-fixture
-xig config
 xig doctor
 xig review
-xig review --next
-xig validation-template
 ```
 
-The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. `xig demo` keeps that state in `.xig-demo/`; rerun `xig demo --reset` for a clean demo workspace. The point is judgment, not just detection.
+The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. The point is judgment, not just detection.
 
 To create a dry-run evidence package:
 
 ```bash
 xig list
-xig review --show 1
-xig export zip --output queue-export.zip
 xig report --dry-run 1
 ```
 
@@ -92,30 +85,22 @@ After the offline demo works, set up against your actual handle.
 export X_API_BEARER_TOKEN="your_token_here"
 
 # 2. Generate your config.
-xig init \
-  --handle yourhandle \
-  --display-name "Your Name" \
-  --reporter-name "Your Legal Name" \
-  --reporter-email you@example.com
+xig init
 
-# 3. Check your local setup before the first real scan.
+# 3. Edit config.yaml to set your handle, display name, and contact email.
+
+# 4. Check your local setup before the first real scan.
 xig doctor
-xig config
 
-# 4. Scan. This is read-only. No reports are filed.
+# 5. Scan. This is read-only. No reports are filed.
 xig scan
 
-# 5. Review candidates.
+# 6. Review candidates.
 xig review
-xig review --show 1
 
-# 6. Dry-run the first report package before any live submission.
+# 7. Dry-run the first report package before any live submission.
 xig report --dry-run 1
 ```
-
-Prefer prompts? Run `xig init --guided`. If you run `xig init` without identity options, it writes a generic starter config and tells you which fields to edit before live use.
-
-Unsure what to run next? `xig quickstart` prints the safe offline demo path when no config exists and the recommended real-account sequence after config is present.
 
 Live browser scanning and live Help Center reporting require `playwright install chromium`. The offline demo and dry-run evidence path do not submit reports.
 
@@ -137,7 +122,7 @@ flowchart LR
     Reporter --> Audit[(audit log)]
 ```
 
-Detection finds candidate accounts through handle variants, display-name search, follower sampling, and cached image-hash lookup. Profile image hashes are fetched when image URLs are available. Scoring ranks each candidate from 0 to 100, then stores reviewable accounts in SQLite.
+Detection finds candidate accounts through handle variants, display-name search, and follower sampling. Profile image hashes are fetched when image URLs are available. Scoring ranks each candidate from 0 to 100, then stores reviewable accounts in SQLite.
 
 ### The scoring model
 
@@ -162,32 +147,13 @@ Parody, fan, satire, "not affiliated", and older-account mitigations reduce scor
 X does not provide an impersonation-report API. The reporter uses Playwright against X's official Help Center form. By default:
 
 - Reports require explicit review approval before live submission.
-- `xig status` shows queue counts by review status and 24-hour report usage.
-- `xig status --identity <handle>` scopes queue counts for multi-identity configs.
-- `xig status --json` emits the same status in a scriptable format for validation records and automation.
-- `xig review --next` opens the highest-priority pending candidate without copying an ID.
-- `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
-- `xig review --snooze <id>` or the TUI `s` key defers gray-area candidates without approving or dismissing them.
-- `xig list --status snoozed` and `xig list --status all` make deferred and historical queue items easy to rediscover.
-- `xig export json` or `xig export zip` gives you a portable review queue for handoff or local analysis.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
-- `xig validation-template` writes a public-safe checklist for controlled live-validation evidence.
-- Approval and dry-run commands print the next safe reporting command, preserving config and identity flags where needed.
-- `xig report --identity <handle> <id>` fails closed if the candidate belongs to a different protected identity.
-- Live Help Center submission requires both `--execute` and `--confirm-live`.
-- `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip with JSON/text/log secret redaction for public bug reports.
 - Required Help Center fields fail closed if selectors drift.
 - Every report attempt writes an audit package under `~/.x-impersonation-guard/reports/`.
-- API-backed scans enforce the configured estimated request budget before making another live API call.
-- `xig calibrate --input <labeled.json> --output calibration-results.json` reports precision, recall, F1, misses, and optional JSON evidence for offline scorer calibration.
 
 ### Local readiness checks
 
-Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, Chromium browser installation, config validity, starter identity placeholders, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Use `xig doctor --json` for privacy-safe diagnostics in support issues or validation records. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
-
-Use `xig config` or `xig config --json` to inspect protected identity count, scan mode, reporting limits, scoring thresholds, storage paths, token environment-variable state, and starter-config warnings without printing reporter emails or token values.
-
-For GitHub issues, `xig support-bundle --output xig-support.zip` creates a small diagnostic zip with `doctor.json` and a manifest. It intentionally excludes config files, API tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
+Run `xig doctor` any time setup feels uncertain. It checks Python version, Playwright package availability, config validity, selected scan mode, token presence without printing the token, storage writability, and SQLite queue access. Missing config is treated as setup guidance, not a hard failure, so new users can run it before deciding whether to use the demo or a real account.
 
 ## Why I built this
 

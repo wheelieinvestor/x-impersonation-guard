@@ -11,16 +11,4 @@ A report package contains:
 - `form_response.html`
 - `report.json`
 
-Dry run mode creates an evidence package without submitting. Live submission requires an approved candidate plus `--execute --confirm-live`. If your config has more than one protected identity, use `xig report --identity <handle> <candidate_id>` so the command fails closed when the candidate belongs to a different identity.
-
-## Sharing diagnostics
-
-Report packages can include reporter contact fields, account handles, screenshots, and HTML from the browser session. Treat the original directory as private.
-
-For public bug reports, create a redacted bundle:
-
-```bash
-xig redact-report ~/.x-impersonation-guard/reports/<report_dir>
-```
-
-The redacted bundle includes JSON, text, and log diagnostics with sensitive fields replaced, including common token, cookie, session, authorization, password, and secret keys. It excludes screenshots or HTML by default. Review any original image or HTML file manually before sharing it.
+Dry run mode creates an evidence package without submitting. Live submission requires `--execute` and an approved candidate.

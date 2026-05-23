@@ -45,15 +45,7 @@ body:
     id: redacted-log
     attributes:
       label: Redacted log output
-      description: Paste relevant logs with tokens, cookies, emails, and private data removed. For report packages, attach output from `xig redact-report <report_dir>`, not the original report directory.
+      description: Paste relevant logs with tokens, cookies, emails, and private data removed.
       render: shell
-    validations:
-      required: false
-  - type: textarea
-    id: diagnostics
-    attributes:
-      label: Privacy-safe diagnostics
-      description: Paste output from `xig doctor --json` or attach `xig support-bundle --output xig-support.zip` if relevant. Do not paste token values, cookies, browser profiles, private DMs, or unredacted report packages.
-      render: json
     validations:
       required: false

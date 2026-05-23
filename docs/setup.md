@@ -16,7 +16,6 @@ This avoids shared credentials, keeps evidence local, and makes every report tra
 
 - Use official X API reads for detection when `X_API_BEARER_TOKEN` is configured.
 - Request only needed profile fields.
-- Enforce the configured estimated API scan budget before making another API request.
 - Use fixture/offline mode for tests and demos.
 - Keep credentials outside source control.
 - Do not paste tokens, cookies, browser profiles, or evidence packages into issue reports.
@@ -34,7 +33,7 @@ The command above is dry-run by default. Live submission requires review approva
 
 ```bash
 uv run xig review --config config.yaml --approve <candidate_id>
-uv run xig report <candidate_id> --config config.yaml --execute --confirm-live
+uv run xig report <candidate_id> --config config.yaml --execute
 ```
 
 Use headed mode unless you have a specific reason to run headless. The first live report may require manual login or form confirmation in the browser.
@@ -46,32 +45,7 @@ Use headed mode unless you have a specific reason to run headless. The first liv
 3. Score each candidate with an explainable multi-signal model.
 4. Store scores from 40 to 69 in low confidence.
 5. Store scores 70 and above in the review queue.
-6. Let reviewers approve, dismiss, or snooze candidates.
-7. Use `xig status` to monitor pending, snoozed, approved, reported, and failed counts.
-8. Use `xig list --status snoozed` or `xig list --status all` to revisit deferred or historical queue items.
-9. Pass `--identity <handle>` to review and report commands when more than one protected identity is configured.
-10. Submit only approved reports.
-
-## Scorer calibration
-
-Use `xig calibrate` with a labeled offline set before widening live usage:
-
-```bash
-uv run xig calibrate --config examples/config.individual.yaml --input examples/calibration.sample.json
-```
-
-The command prints precision, recall, F1, and any false positives or false negatives at the selected threshold. Use `--threshold <score>` to test a stricter or looser review threshold against the same labels.
-
-Write a JSON evidence file when you want to compare calibration runs or share a redacted validation artifact:
-
-```bash
-uv run xig calibrate \
-  --config examples/config.individual.yaml \
-  --input examples/calibration.sample.json \
-  --output calibration-results.json
-```
-
-The JSON includes the threshold, precision, recall, F1, confusion-matrix counts, every scored candidate, and any misses.
+6. Submit only approved reports.
 
 ## Why reporting is not fully automatic by default
 
@@ -80,4 +54,7 @@ False positives are expensive. News accounts, parody accounts, fan accounts, and
 ## Production hardening still needed before v1.0
 
 - Live Help Center selector verification.
+- Richer Textual approve/dismiss/snooze UI.
+- API cost ceiling enforcement per scan.
+- Full image download and hash pipeline for new candidates.
 - Real-world scorer calibration against known impersonator and non-impersonator sets.

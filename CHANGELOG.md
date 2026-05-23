@@ -4,52 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses prerelease alpha tags while live validation is in progress.
 
-## [Unreleased]
-
-### Added
-
-- Guided setup prompts and starter-config warnings for safer first runs.
-- `xig demo` isolated offline demo workspace with `--reset` for repeatable local demos.
-- `xig config` privacy-safe config summary with optional JSON output.
-- `xig doctor` checks for Playwright Chromium, starter identity placeholders, token presence, storage access, and SQLite queue access.
-- `xig doctor --json` privacy-safe setup diagnostics for support issues and validation records.
-- `xig support-bundle` privacy-safe diagnostic zip for public support issues.
-- `xig review --show <id>` evidence details with score reasons, mitigations, weighted signals, profile metadata, and next safe commands.
-- Review queue snooze and restore workflow in both CLI and Textual TUI.
-- `xig list --status ...` and `xig status` queue visibility for pending, snoozed, approved, dismissed, reported, and failed candidates.
-- `xig status --json` machine-readable queue and report usage output for validation records and automation.
-- JSON and zip queue exports with manifests for handoff and local analysis.
-- Redacted diagnostic report bundles for safer public issue reports.
-- Estimated X API scan cost guard with configurable per-request estimate.
-- Cached image-hash lookup in the default scan path.
-- Offline scorer calibration command with precision, recall, F1, and miss reporting.
-- JSON calibration evidence export for comparing scorer validation runs.
-- Controlled live-validation runbook and issue template for recording launch-gate results.
-- `xig quickstart` onboarding command for safe demo and real-account next steps.
-- `xig validation-template` command for public-safe controlled live-validation checklists.
-- Broader `xig redact-report` secret scrubbing for JSON, text, and log diagnostics.
-- `xig status --identity <handle>` filtering for multi-identity validation and generated runbook commands.
-- `xig review --next` shortcut for inspecting the highest-priority pending candidate.
-- Next-step reporting guidance after approval and dry-run evidence creation.
-- Config-aware and identity-aware generated review/report follow-up commands.
-
-### Changed
-
-- Textual review UI now binds `o` to open the selected candidate profile, matching the detail panel hint.
-- Textual review UI now respects `--identity` and preserves config/identity flags in follow-up commands.
-- Textual review UI now shell-quotes generated follow-up commands for config paths with spaces.
-- Public FAQ now covers safe trial, privacy, diagnostics, live-report gates, false positives, multi-identity use, and validation boundaries.
-- Quickstart now shell-quotes config paths and prints scoped commands for multi-identity configs.
-- Public issue templates now request privacy-safe `xig doctor --json`, `xig status --json`, and redacted report diagnostics where relevant.
-- Live Help Center submissions now require both `--execute` and `--confirm-live`.
-- Multi-identity review and report actions fail closed when `--identity` does not own the candidate.
-- Dry-run report output points users toward redacted report bundles before sharing diagnostics.
-
-### Verified
-
-- Local CLI, docs, lint, mypy, and test gates cover the added review, export, redaction, queue status, cost guard, and cached image lookup workflows.
-- GitHub Actions `docs`, `lint`, and `test` checks pass on `main` after each merged hardening PR.
-
 ## [0.2.0-alpha] - 2026-05-22
 
 ### Added

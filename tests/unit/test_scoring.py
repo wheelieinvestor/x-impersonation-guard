@@ -11,14 +11,7 @@ from x_impersonation_guard.scoring.signals import (
 
 
 def _cfg() -> AppConfig:
-    return AppConfig.model_validate(
-        default_config_dict(
-            handle="wheelieinvestor",
-            display_name="Wheelie Investor",
-            reporter_name="Dean Ahrens",
-            reporter_email="dean@example.com",
-        )
-    )
+    return AppConfig.model_validate(default_config_dict())
 
 
 def _protected() -> AccountProfile:

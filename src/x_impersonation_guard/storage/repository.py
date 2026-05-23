@@ -6,7 +6,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from sqlalchemy import create_engine, func, select
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
 from x_impersonation_guard.models import (
@@ -86,18 +86,6 @@ class ReviewStore:
             )
             return list(session.scalars(stmt).all())
 
-    def queue_status_counts(self, identity_handle: str | None = None) -> dict[str, int]:
-        counts = {status.value: 0 for status in QueueStatus}
-        with self.session_factory() as session:
-            stmt = select(CandidateRecord.status, func.count()).group_by(
-                CandidateRecord.status
-            )
-            if identity_handle:
-                stmt = stmt.where(CandidateRecord.identity_handle == identity_handle)
-            for status, count in session.execute(stmt):
-                counts[str(status)] = int(count)
-        return counts
-
     def get_candidate(self, candidate_id: int) -> CandidateRecord | None:
         with self.session_factory() as session:
             return session.get(CandidateRecord, candidate_id)
@@ -154,16 +142,6 @@ class ReviewStore:
                 stmt = stmt.where(ReportRecord.identity_handle == identity_handle)
             stmt = stmt.order_by(ReportRecord.created_at.desc())
             return list(session.scalars(stmt).all())
-
-    def cached_profiles(
-        self, identity_handle: str | None = None
-    ) -> list[AccountProfile]:
-        with self.session_factory() as session:
-            stmt = select(CandidateRecord)
-            if identity_handle:
-                stmt = stmt.where(CandidateRecord.identity_handle == identity_handle)
-            records = session.scalars(stmt).all()
-            return [profile_from_record(record) for record in records]
 
 
 def profile_from_record(record: CandidateRecord) -> AccountProfile:

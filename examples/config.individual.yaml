@@ -1,19 +1,19 @@
 protected_identities:
-  - name: "Example Creator"
-    handle: "examplecreator"
-    display_name: "Example Creator"
+  - name: "Dean Ahrens"
+    handle: "wheelieinvestor"
+    display_name: "Wheelie Investor"
     user_id: null
     type: "individual"
     report_as: "Me or someone I am authorized to represent"
-    reporter_name: "Example Creator"
-    reporter_email: "creator@example.com"
+    reporter_name: "Dean Ahrens"
+    reporter_email: "dean@wheelhousecapital.com"
     extra_handle_variants:
-      - "example_creator"
-      - "examplecreator_*"
-      - "*_examplecreator"
+      - "wheelie_*"
+      - "*_wheelie"
+      - "wheelchairinvestor*"
     extra_display_variants:
-      - "Example Charts"
-      - "Example Creator Official"
+      - "Dean Ahrens"
+      - "Wheelie Capital"
     auto_report_threshold: 95
 x_api:
   mode: "auto"

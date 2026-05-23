@@ -6,19 +6,8 @@ from x_impersonation_guard.scoring.scorer import score_candidate
 from x_impersonation_guard.storage.repository import ReviewStore, profile_from_record
 
 
-def _wheelie_config() -> AppConfig:
-    return AppConfig.model_validate(
-        default_config_dict(
-            handle="wheelieinvestor",
-            display_name="Wheelie Investor",
-            reporter_name="Dean Ahrens",
-            reporter_email="dean@example.com",
-        )
-    )
-
-
 def test_review_store_inserts_and_updates_scored_candidate(tmp_path) -> None:  # type: ignore[no-untyped-def]
-    cfg = _wheelie_config()
+    cfg = AppConfig.model_validate(default_config_dict())
     protected = AccountProfile(
         id="1",
         username="wheelieinvestor",
@@ -48,10 +37,6 @@ def test_review_store_inserts_and_updates_scored_candidate(tmp_path) -> None:  #
     rows = store.list_queue("wheelieinvestor")
     assert len(rows) == 1
     assert profile_from_record(rows[0]).username == "whee1ieinvestor"
-    assert store.cached_profiles("wheelieinvestor")[0].username == "whee1ieinvestor"
-    assert store.cached_profiles("unknown") == []
-    assert store.queue_status_counts("wheelieinvestor")["pending"] == 1
-    assert store.queue_status_counts("unknown")["pending"] == 0
 
 
 def test_review_store_status_and_report_window(tmp_path) -> None:  # type: ignore[no-untyped-def]

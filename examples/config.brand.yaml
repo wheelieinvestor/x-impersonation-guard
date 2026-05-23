@@ -1,7 +1,7 @@
 protected_identities:
-  - name: "Example Brand LLC"
-    handle: "examplebrand"
-    display_name: "Example Brand"
+  - name: "Wheelhouse Capital LLC"
+    handle: "wheelhousecap"
+    display_name: "Wheelhouse Capital"
     type: "brand"
     report_as: "My company, brand, or organization"
     reporter_name: "Authorized Reporter"

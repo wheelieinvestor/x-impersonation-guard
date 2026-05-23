@@ -25,6 +25,6 @@ body:
     id: diagnostics
     attributes:
       label: Diagnostic package notes
-      description: List generated diagnostic files. Attach redacted screenshots only. Paste `xig doctor --json` output if setup may be involved, and attach only `xig redact-report <report_dir>` output for report packages.
+      description: List generated diagnostic files. Attach redacted screenshots only.
     validations:
       required: false
