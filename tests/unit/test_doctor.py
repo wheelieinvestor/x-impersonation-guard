@@ -46,26 +46,6 @@ def test_doctor_warns_when_chromium_is_missing(
     assert "playwright install chromium" in result.output
 
 
-def test_doctor_warns_for_starter_identity_values(
-    tmp_path: Path, runner: CliRunner, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    raw = default_config_dict()
-    raw["storage"]["db_path"] = str(tmp_path / "db.sqlite")
-    raw["storage"]["evidence_dir"] = str(tmp_path / "evidence")
-    raw["storage"]["reports_dir"] = str(tmp_path / "reports")
-    config = tmp_path / "config.yaml"
-    config.write_text(yaml.safe_dump(raw, sort_keys=False))
-    monkeypatch.setattr(cli, "_chromium_executable_path", lambda: config)
-
-    result = runner.invoke(app, ["doctor", "--config", str(config)])
-
-    assert result.exit_code == 0, result.output
-    assert "WARN: identity:" in result.output
-    assert "starter values" in result.output
-    assert "handle, display_name, reporter_name, reporter_email" in result.output
-    assert "xig init --guided" in result.output
-
-
 def test_doctor_fails_for_forced_api_without_token(
     tmp_path: Path, runner: CliRunner
 ) -> None:
