@@ -36,7 +36,7 @@ Published package: `x-impersonation-guard==0.2.0a0`
 
 ## Next validation gate
 
-The next gate is controlled live validation. Use the [live validation runbook](live-validation.md) and record the result with the live validation issue template.
+The next gate is controlled live validation:
 
 1. Confirm X API token readiness and acceptable API budget.
 2. Pick one protected identity and a small labeled candidate set.
