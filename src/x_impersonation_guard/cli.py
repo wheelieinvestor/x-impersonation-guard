@@ -89,17 +89,6 @@ class FixtureScan(BaseModel):
     candidates: list[AccountProfile]
 
 
-class CalibrationCandidate(BaseModel):
-    profile: AccountProfile
-    expected_impersonator: bool
-    note: str | None = None
-
-
-class CalibrationSet(BaseModel):
-    protected: AccountProfile
-    candidates: list[CalibrationCandidate]
-
-
 class DemoProtectedIdentity(BaseModel):
     handle: str
     display_name: str
@@ -365,75 +354,6 @@ def scan_fixture_command(
         "Run `xig review` to see them, or `xig list` for a summary."
     )
     typer.echo("No reports were submitted. Review and report explicitly.")
-
-
-@app.command()
-def calibrate(
-    input: Annotated[Path, typer.Option("--input")] = Path(
-        "examples/calibration.sample.json"
-    ),
-    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
-    identity: Annotated[str | None, typer.Option("--identity")] = None,
-    threshold: Annotated[
-        int | None,
-        typer.Option(
-            "--threshold",
-            help="Score threshold treated as predicted impersonation.",
-        ),
-    ] = None,
-) -> None:
-    """Evaluate scorer precision and recall against a labeled offline set."""
-    cfg = _load(config)
-    selected = cfg.identity_for_handle(identity)
-    calibration = CalibrationSet.model_validate_json(input.expanduser().read_text())
-    cutoff = threshold or cfg.scoring.thresholds.review_queue_medium
-    if cutoff < 0 or cutoff > 100:
-        raise typer.BadParameter("threshold must be between 0 and 100")
-
-    rows = []
-    true_positive = false_positive = true_negative = false_negative = 0
-    for item in calibration.candidates:
-        result = score_candidate(
-            calibration.protected,
-            item.profile,
-            selected,
-            cfg.scoring,
-        )
-        predicted = result.score >= cutoff
-        if predicted and item.expected_impersonator:
-            true_positive += 1
-        elif predicted and not item.expected_impersonator:
-            false_positive += 1
-        elif not predicted and item.expected_impersonator:
-            false_negative += 1
-        else:
-            true_negative += 1
-        rows.append((item, result, predicted))
-
-    precision = _ratio(true_positive, true_positive + false_positive)
-    recall = _ratio(true_positive, true_positive + false_negative)
-    f1 = _ratio(2 * precision * recall, precision + recall)
-    typer.echo(f"Calibration candidates: {len(calibration.candidates)}")
-    typer.echo(
-        f"threshold={cutoff} precision={precision:.2f} recall={recall:.2f} f1={f1:.2f} "
-        f"tp={true_positive} fp={false_positive} tn={true_negative} fn={false_negative}"
-    )
-    misses = [
-        (item, result, predicted)
-        for item, result, predicted in rows
-        if predicted != item.expected_impersonator
-    ]
-    if not misses:
-        typer.echo("No calibration misses.")
-        return
-    typer.echo("Calibration misses:")
-    for item, result, predicted in misses:
-        expected = "impersonator" if item.expected_impersonator else "benign"
-        actual = "impersonator" if predicted else "benign"
-        note = f" note={item.note}" if item.note else ""
-        typer.echo(
-            f"- @{item.profile.username} score={result.score} expected={expected} predicted={actual}{note}"
-        )
 
 
 @app.command("list")
@@ -1007,12 +927,6 @@ def _format_queue_counts(counts: dict[str, int]) -> str:
     return " ".join(
         f"{status.value}={counts.get(status.value, 0)}" for status in QueueStatus
     )
-
-
-def _ratio(numerator: float, denominator: float) -> float:
-    if denominator == 0:
-        return 0.0
-    return numerator / denominator
 
 
 def _is_writable_dir(path: Path) -> bool:

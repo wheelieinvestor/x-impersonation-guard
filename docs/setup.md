@@ -52,16 +52,6 @@ Use headed mode unless you have a specific reason to run headless. The first liv
 9. Pass `--identity <handle>` to review and report commands when more than one protected identity is configured.
 10. Submit only approved reports.
 
-## Scorer calibration
-
-Use `xig calibrate` with a labeled offline set before widening live usage:
-
-```bash
-uv run xig calibrate --config examples/config.individual.yaml --input examples/calibration.sample.json
-```
-
-The command prints precision, recall, F1, and any false positives or false negatives at the selected threshold. Use `--threshold <score>` to test a stricter or looser review threshold against the same labels.
-
 ## Why reporting is not fully automatic by default
 
 False positives are expensive. News accounts, parody accounts, fan accounts, and legitimate support accounts can look similar by text alone. X also may flag reporters that file too many reports. Manual review is the safe default.

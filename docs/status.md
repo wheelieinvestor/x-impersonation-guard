@@ -24,7 +24,6 @@ Published package: `x-impersonation-guard==0.2.0a0`
 | User-first config generation | Verified | `xig init --handle ... --reporter-email ...`; `tests/integration/test_cli.py` |
 | Dependency security posture | Verified | Dependabot alerts clear; grouped update policy in `.github/dependabot.yml` |
 | Estimated API scan budget guard | Verified | `tests/unit/test_cost_guard.py` |
-| Offline scorer calibration command | Verified | `tests/integration/test_cli.py`; `examples/calibration.sample.json` |
 
 ## Implemented but not yet verified live
 
