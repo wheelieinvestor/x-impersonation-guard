@@ -6,10 +6,8 @@ import asyncio
 import importlib.util
 import json
 import os
-import re
 import sys
 import time
-import zipfile
 from datetime import UTC, datetime, timedelta
 from importlib.resources import files
 from pathlib import Path
@@ -466,10 +464,6 @@ def report(
     if result.submitted:
         store.set_status(candidate_id, QueueStatus.REPORTED)
     typer.echo(f"{result.message}: {result.report_dir}")
-    if not execute:
-        typer.echo(
-            f"For public bug reports, share `xig redact-report {result.report_dir}` output instead of the original package."
-        )
     if execute:
         low, high = cfg.reporting.delay_between_reports_seconds
         typer.echo(f"Pacing enabled. Next submission should wait {low}-{high} seconds.")
@@ -487,59 +481,6 @@ def log(
     for record in store.list_reports(selected.handle if selected else None):
         typer.echo(
             f"{record.created_at.isoformat()} candidate={record.candidate_id} @{record.candidate_handle} status={record.status} dir={record.report_dir}"
-        )
-
-
-@app.command("redact-report")
-def redact_report(
-    report_dir: Annotated[
-        Path,
-        typer.Argument(help="Report package directory created by `xig report`."),
-    ],
-    output: Annotated[
-        Path | None,
-        typer.Option("--output", "-o", help="Destination .zip path."),
-    ] = None,
-) -> None:
-    """Create a privacy-safe report bundle for public bug reports."""
-    source = report_dir.expanduser()
-    if not source.is_dir():
-        raise typer.BadParameter(f"report directory not found: {source}")
-    bundle_path = (
-        output.expanduser()
-        if output
-        else source.with_name(f"{source.name}_redacted.zip")
-    )
-    bundle_path.parent.mkdir(parents=True, exist_ok=True)
-    included = []
-    redacted = []
-    excluded = []
-    with zipfile.ZipFile(bundle_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(source.iterdir()):
-            if not path.is_file():
-                continue
-            if path.suffix == ".json":
-                payload = json.loads(path.read_text())
-                archive.writestr(path.name, json.dumps(_redact_json(payload), indent=2))
-                included.append(path.name)
-                redacted.append(path.name)
-            elif path.suffix in {".txt", ".log"}:
-                archive.write(path, path.name)
-                included.append(path.name)
-            else:
-                excluded.append(path.name)
-        manifest = {
-            "source": source.name,
-            "included": included,
-            "redacted": redacted,
-            "excluded": excluded,
-            "note": "Screenshots and HTML are excluded because they can contain logged-in account data, cookies, email links, or private page content.",
-        }
-        archive.writestr("REDACTION_MANIFEST.json", json.dumps(manifest, indent=2))
-    typer.echo(f"Created redacted report bundle: {bundle_path}")
-    if excluded:
-        typer.echo(
-            "Excluded screenshots/HTML by default. Review them manually before sharing any originals."
         )
 
 
@@ -943,44 +884,6 @@ def _top_weighted_signals(weighted: dict[Any, Any]) -> list[tuple[str, float]]:
         except (TypeError, ValueError):
             continue
     return sorted(signals, key=lambda item: item[1], reverse=True)[:5]
-
-
-SENSITIVE_REPORT_FIELDS = {
-    "candidate_handle",
-    "description",
-    "display_name",
-    "handle",
-    "id",
-    "identity_handle",
-    "name",
-    "profile_image_url",
-    "reporter_email",
-    "reporter_name",
-    "user_id",
-    "username",
-    "x_user_id",
-}
-
-
-def _redact_json(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {
-            str(key): "<redacted>"
-            if str(key) in SENSITIVE_REPORT_FIELDS
-            else _redact_json(item)
-            for key, item in value.items()
-        }
-    if isinstance(value, list):
-        return [_redact_json(item) for item in value]
-    if isinstance(value, str):
-        redacted = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}", "<redacted-email>", value)
-        redacted = re.sub(
-            r"https?://(?:www\.)?(?:x|twitter)\.com/[A-Za-z0-9_]+",
-            "https://x.com/<redacted>",
-            redacted,
-        )
-        return redacted
-    return value
 
 
 def _starter_identity_warnings(cfg: AppConfig) -> list[str]:

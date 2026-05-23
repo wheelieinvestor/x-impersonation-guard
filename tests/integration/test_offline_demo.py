@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import re
-import zipfile
 from pathlib import Path
 
 import pytest
@@ -45,10 +44,7 @@ def test_offline_demo_scan_list_and_dry_run_report(
     )
     assert report.exit_code == 0, report.output
     assert "dry-run evidence package created" in report.output
-    assert "xig redact-report" in report.output
-    report_dir_match = re.search(
-        r"dry-run evidence package created: (/.*)$", report.output, re.MULTILINE
-    )
+    report_dir_match = re.search(r"(/.*)$", report.output.strip())
     assert report_dir_match is not None
     report_dir = Path(report_dir_match.group(1))
     assert (report_dir / "evidence_profile.png").exists()
@@ -57,33 +53,6 @@ def test_offline_demo_scan_list_and_dry_run_report(
     assert (report_dir / "form_submission.png").exists()
     assert (report_dir / "form_response.html").exists()
     assert (report_dir / "report.json").exists()
-
-    bundle = tmp_path / "redacted-report.zip"
-    redacted = runner.invoke(
-        app,
-        [
-            "redact-report",
-            str(report_dir),
-            "--output",
-            str(bundle),
-        ],
-    )
-    assert redacted.exit_code == 0, redacted.output
-    assert "Created redacted report bundle" in redacted.output
-    with zipfile.ZipFile(bundle) as archive:
-        names = set(archive.namelist())
-        assert "report.json" in names
-        assert "score_breakdown.json" in names
-        assert "REDACTION_MANIFEST.json" in names
-        assert "evidence_profile.html" not in names
-        assert "evidence_profile.png" not in names
-        report_json = archive.read("report.json").decode()
-        manifest = json.loads(archive.read("REDACTION_MANIFEST.json"))
-
-    assert "demo@example.com" not in report_json
-    assert "alex_charts" not in report_json.lower()
-    assert '"reporter_email": "<redacted>"' in report_json
-    assert "evidence_profile.html" in manifest["excluded"]
 
 
 def test_demo_fixture_scores_match_story() -> None:

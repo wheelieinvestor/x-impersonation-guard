@@ -2,8 +2,6 @@
 
 Do not paste tokens, cookies, browser profiles, or unredacted evidence packages into public issues.
 
-Use `xig redact-report <report_dir>` before attaching report diagnostics to a public issue. It creates a zip with redacted JSON diagnostics and excludes screenshots or HTML by default.
-
 ## Reporting vulnerabilities
 
 Use GitHub Security Advisories for private vulnerability reports once enabled for the repository. Until then, contact the maintainer privately through the repository owner profile.
