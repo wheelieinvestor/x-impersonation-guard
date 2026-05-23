@@ -1537,7 +1537,7 @@ wheels = [
 
 [[package]]
 name = "textual"
-version = "6.7.0"
+version = "8.2.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown-it-py", extra = ["linkify"] },
@@ -1547,9 +1547,9 @@ dependencies = [
     { name = "rich" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/8d/c269da513f5c9edd4e82dd78ad02ab68150efaa40740cfd7b3086410fb75/textual-6.7.0.tar.gz", hash = "sha256:ef1fd587a3b5b29777d4b03037e0a8f10d174e63366e99a5d8518a74b5382e38", size = 1580798, upload-time = "2025-11-29T16:33:44.035Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/7a/c519db0aba5024f86e71e9631810bfdd6866ed2c8695bd7fa34b90e7ef59/textual-8.2.7.tar.gz", hash = "sha256:658f568ff81e30ed43890c3e07520390e5cf1b4763822006e060656b0a88f105", size = 1859249, upload-time = "2026-05-19T10:52:49.531Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/67/f2dc967db68b984dd71fc0092dc906ddf5d09eea8c22830e02267ce18e19/textual-6.7.0-py3-none-any.whl", hash = "sha256:c5ed36840187c0bdfeb9bd46217d18fe26dca3befcdc695edc848cf24b3133a4", size = 713994, upload-time = "2025-11-29T16:33:42.107Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/f5/c1e18bc0707300a0e90204343abbf7d7acd6fb7ebe03a6d4893b99a234b8/textual-8.2.7-py3-none-any.whl", hash = "sha256:4caaa13a90bc4cf9c6c862c067ccd34fe84e9c161710a2a907a8026313b6bd73", size = 731129, upload-time = "2026-05-19T10:52:51.773Z" },
 ]
 
 [[package]]
@@ -1729,7 +1729,7 @@ requires-dist = [
     { name = "rapidfuzz", specifier = "==3.14.5" },
     { name = "sqlalchemy", specifier = "==2.0.49" },
     { name = "structlog", specifier = "==25.5.0" },
-    { name = "textual", specifier = "==6.7.0" },
+    { name = "textual", specifier = "==8.2.7" },
     { name = "tweepy", specifier = "==4.16.0" },
     { name = "typer", specifier = "==0.20.0" },
 ]
