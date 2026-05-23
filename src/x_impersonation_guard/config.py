@@ -173,57 +173,32 @@ def load_config(path: Path) -> AppConfig:
     return AppConfig.model_validate(raw)
 
 
-def write_default_config(
-    path: Path,
-    *,
-    handle: str | None = None,
-    display_name: str | None = None,
-    reporter_name: str | None = None,
-    reporter_email: str | None = None,
-) -> None:
+def write_default_config(path: Path) -> None:
     path = path.expanduser()
     if path.exists():
         raise FileExistsError(f"config already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    raw = default_config_dict(
-        handle=handle,
-        display_name=display_name,
-        reporter_name=reporter_name,
-        reporter_email=reporter_email,
-    )
-    cfg = AppConfig.model_validate(raw)
-    path.write_text(
-        yaml.safe_dump(
-            cfg.model_dump(mode="json"),
-            sort_keys=False,
-        )
-    )
+    path.write_text(yaml.safe_dump(default_config_dict(), sort_keys=False))
 
 
-def default_config_dict(
-    *,
-    handle: str | None = None,
-    display_name: str | None = None,
-    reporter_name: str | None = None,
-    reporter_email: str | None = None,
-) -> dict[str, Any]:
-    resolved_handle = handle or "yourhandle"
-    resolved_display_name = display_name or "Your Name"
-    resolved_reporter_name = reporter_name or resolved_display_name
-    resolved_reporter_email = reporter_email or "you@example.com"
+def default_config_dict() -> dict[str, Any]:
     return {
         "protected_identities": [
             {
-                "name": resolved_display_name,
-                "handle": resolved_handle,
-                "display_name": resolved_display_name,
+                "name": "Dean Ahrens",
+                "handle": "wheelieinvestor",
+                "display_name": "Wheelie Investor",
                 "user_id": None,
                 "type": "individual",
                 "report_as": "Me or someone I am authorized to represent",
-                "reporter_name": resolved_reporter_name,
-                "reporter_email": resolved_reporter_email,
-                "extra_handle_variants": [],
-                "extra_display_variants": [],
+                "reporter_name": "Dean Ahrens",
+                "reporter_email": "dean@wheelhousecapital.com",
+                "extra_handle_variants": [
+                    "wheelie_*",
+                    "*_wheelie",
+                    "wheelchairinvestor*",
+                ],
+                "extra_display_variants": ["Dean Ahrens", "Wheelie Capital"],
                 "auto_report_threshold": 95,
             }
         ],

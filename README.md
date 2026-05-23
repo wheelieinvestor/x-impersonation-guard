@@ -85,26 +85,22 @@ After the offline demo works, set up against your actual handle.
 export X_API_BEARER_TOKEN="your_token_here"
 
 # 2. Generate your config.
-xig init \
-  --handle yourhandle \
-  --display-name "Your Name" \
-  --reporter-name "Your Legal Name" \
-  --reporter-email you@example.com
+xig init
 
-# 3. Check your local setup before the first real scan.
+# 3. Edit config.yaml to set your handle, display name, and contact email.
+
+# 4. Check your local setup before the first real scan.
 xig doctor
 
-# 4. Scan. This is read-only. No reports are filed.
+# 5. Scan. This is read-only. No reports are filed.
 xig scan
 
-# 5. Review candidates.
+# 6. Review candidates.
 xig review
 
-# 6. Dry-run the first report package before any live submission.
+# 7. Dry-run the first report package before any live submission.
 xig report --dry-run 1
 ```
-
-If you run `xig init` without identity options, it writes a generic starter config and tells you which fields to edit before live use.
 
 Live browser scanning and live Help Center reporting require `playwright install chromium`. The offline demo and dry-run evidence path do not submit reports.
 

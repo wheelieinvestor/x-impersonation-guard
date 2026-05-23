@@ -192,48 +192,10 @@ def init(
     config: Annotated[Path, typer.Option("--config", help="Config path.")] = Path(
         "config.yaml"
     ),
-    handle: Annotated[
-        str | None,
-        typer.Option(
-            "--handle",
-            help="Protected X handle, with or without @.",
-        ),
-    ] = None,
-    display_name: Annotated[
-        str | None,
-        typer.Option(
-            "--display-name",
-            help="Public display name to protect.",
-        ),
-    ] = None,
-    reporter_name: Annotated[
-        str | None,
-        typer.Option(
-            "--reporter-name",
-            help="Name to use in Help Center report contact fields.",
-        ),
-    ] = None,
-    reporter_email: Annotated[
-        str | None,
-        typer.Option(
-            "--reporter-email",
-            help="Email to use in Help Center report contact fields.",
-        ),
-    ] = None,
 ) -> None:
-    """Create a starter config for your protected account."""
-    write_default_config(
-        config,
-        handle=handle,
-        display_name=display_name,
-        reporter_name=reporter_name,
-        reporter_email=reporter_email,
-    )
+    """Create a default config for @wheelieinvestor."""
+    write_default_config(config)
     typer.echo(f"Wrote {config}")
-    if handle is None or display_name is None or reporter_email is None:
-        typer.echo(
-            "Edit the starter identity fields before running a live scan, or rerun with `--handle`, `--display-name`, and `--reporter-email`."
-        )
     _print_safety_warning()
 
 

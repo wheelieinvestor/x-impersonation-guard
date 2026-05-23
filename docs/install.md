@@ -17,14 +17,10 @@ Fixture mode does not call the live X API and does not submit reports.
 
 ```bash
 export X_API_BEARER_TOKEN="your_token_here"
-xig init \
-  --handle yourhandle \
-  --display-name "Your Name" \
-  --reporter-name "Your Legal Name" \
-  --reporter-email you@example.com
+xig init
 ```
 
-If you skip those identity options, `xig init` writes a generic starter config and tells you which fields to edit before live use.
+Edit `config.yaml` with your handle, display name, reporter name, and reporter email.
 
 Then run:
 
