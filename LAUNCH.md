@@ -10,7 +10,7 @@
 ## Phase 2: Public beta, week 2 to 3
 
 - Add Playwright reporter.
-- Add user-first `xig init` setup, including guided prompts.
+- Add user-first `xig init` setup.
 - Complete docs.
 - Recruit 5 to 10 finance and crypto creators with known impersonation problems.
 - Publish to PyPI as `x-impersonation-guard`.

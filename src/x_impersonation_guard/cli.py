@@ -192,13 +192,6 @@ def init(
     config: Annotated[Path, typer.Option("--config", help="Config path.")] = Path(
         "config.yaml"
     ),
-    guided: Annotated[
-        bool,
-        typer.Option(
-            "--guided/--no-guided",
-            help="Prompt for the identity fields instead of writing placeholders.",
-        ),
-    ] = False,
     handle: Annotated[
         str | None,
         typer.Option(
@@ -229,13 +222,6 @@ def init(
     ] = None,
 ) -> None:
     """Create a starter config for your protected account."""
-    if guided:
-        handle, display_name, reporter_name, reporter_email = _prompt_init_fields(
-            handle=handle,
-            display_name=display_name,
-            reporter_name=reporter_name,
-            reporter_email=reporter_email,
-        )
     write_default_config(
         config,
         handle=handle,
@@ -246,7 +232,7 @@ def init(
     typer.echo(f"Wrote {config}")
     if handle is None or display_name is None or reporter_email is None:
         typer.echo(
-            "Edit the starter identity fields before running a live scan, or rerun with `--guided`, `--handle`, `--display-name`, and `--reporter-email`."
+            "Edit the starter identity fields before running a live scan, or rerun with `--handle`, `--display-name`, and `--reporter-email`."
         )
     _print_safety_warning()
 
@@ -656,31 +642,6 @@ def _config_for_demo_fixture(cfg: AppConfig, fixture: FixtureScan) -> AppConfig:
         }
     )
     return AppConfig.model_validate(raw)
-
-
-def _prompt_init_fields(
-    *,
-    handle: str | None,
-    display_name: str | None,
-    reporter_name: str | None,
-    reporter_email: str | None,
-) -> tuple[str, str, str, str]:
-    resolved_handle = handle or typer.prompt("Protected X handle")
-    resolved_display_name = display_name or typer.prompt("Public display name")
-    resolved_reporter_name = reporter_name or typer.prompt(
-        "Reporter name",
-        default=resolved_display_name,
-        show_default=True,
-    )
-    resolved_reporter_email = reporter_email or typer.prompt(
-        "Reporter email for Help Center reports"
-    )
-    return (
-        resolved_handle,
-        resolved_display_name,
-        resolved_reporter_name,
-        resolved_reporter_email,
-    )
 
 
 def _apply_demo_detection_times(

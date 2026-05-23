@@ -80,40 +80,6 @@ def test_init_accepts_identity_options(tmp_path: Path, runner: CliRunner) -> Non
     assert "Edit the starter identity fields" not in result.output
 
 
-def test_init_guided_prompts_for_identity_fields(
-    tmp_path: Path, runner: CliRunner
-) -> None:
-    config = tmp_path / "config.yaml"
-    result = runner.invoke(
-        app,
-        ["init", "--guided", "--config", str(config)],
-        input="@GuidedCreator\nGuided Creator\nGuided Legal\nguided@example.com\n",
-    )
-    assert result.exit_code == 0, result.output
-    cfg = load_config(config)
-    identity = cfg.protected_identities[0]
-    assert identity.handle == "guidedcreator"
-    assert identity.display_name == "Guided Creator"
-    assert identity.reporter_name == "Guided Legal"
-    assert identity.reporter_email == "guided@example.com"
-    assert "Edit the starter identity fields" not in result.output
-
-
-def test_init_guided_accepts_default_reporter_name(
-    tmp_path: Path, runner: CliRunner
-) -> None:
-    config = tmp_path / "config.yaml"
-    result = runner.invoke(
-        app,
-        ["init", "--guided", "--config", str(config)],
-        input="@GuidedCreator\nGuided Creator\n\nguided@example.com\n",
-    )
-    assert result.exit_code == 0, result.output
-    cfg = load_config(config)
-    identity = cfg.protected_identities[0]
-    assert identity.reporter_name == "Guided Creator"
-
-
 def test_scan_fixture_lists_and_dry_run_report(
     tmp_path: Path,
     config_path: Path,
