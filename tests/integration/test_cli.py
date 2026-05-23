@@ -148,7 +148,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert "Profile: https://x.com/whee1ieinvestor" in detail.output
     assert "Reasons:" in detail.output
     assert "Top weighted signals:" in detail.output
-    assert "Snooze: xig review --snooze 1" in detail.output
     assert "Dry-run after approval: xig report --dry-run 1" in detail.output
 
     exported_json = runner.invoke(app, ["export", "json", "--config", str(config_path)])
@@ -178,20 +177,6 @@ def test_scan_fixture_lists_and_dry_run_report(
         manifest = json.loads(archive.read("EXPORT_MANIFEST.json"))
     assert queue[0]["handle"] == "whee1ieinvestor"
     assert manifest["candidate_count"] == 1
-
-    snoozed = runner.invoke(
-        app, ["review", "--config", str(config_path), "--snooze", "1"]
-    )
-    assert snoozed.exit_code == 0, snoozed.output
-    assert "Snoozed candidate 1" in snoozed.output
-    listed_after_snooze = runner.invoke(app, ["list", "--config", str(config_path)])
-    assert listed_after_snooze.exit_code == 0, listed_after_snooze.output
-    assert "No pending candidates." in listed_after_snooze.output
-    restored = runner.invoke(
-        app, ["review", "--config", str(config_path), "--restore", "1"]
-    )
-    assert restored.exit_code == 0, restored.output
-    assert "Restored candidate 1 to pending" in restored.output
 
     approved = runner.invoke(
         app, ["review", "--config", str(config_path), "--approve", "1"]

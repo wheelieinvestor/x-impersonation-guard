@@ -45,8 +45,7 @@ Use headed mode unless you have a specific reason to run headless. The first liv
 3. Score each candidate with an explainable multi-signal model.
 4. Store scores from 40 to 69 in low confidence.
 5. Store scores 70 and above in the review queue.
-6. Let reviewers approve, dismiss, or snooze candidates.
-7. Submit only approved reports.
+6. Submit only approved reports.
 
 ## Why reporting is not fully automatic by default
 
@@ -55,7 +54,7 @@ False positives are expensive. News accounts, parody accounts, fan accounts, and
 ## Production hardening still needed before v1.0
 
 - Live Help Center selector verification.
-- Richer Textual snooze controls.
+- Richer Textual approve/dismiss/snooze UI.
 - API cost ceiling enforcement per scan.
 - Full image download and hash pipeline for new candidates.
 - Real-world scorer calibration against known impersonator and non-impersonator sets.
