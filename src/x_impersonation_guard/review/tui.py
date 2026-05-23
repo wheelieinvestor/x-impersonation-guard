@@ -110,7 +110,6 @@ class ReviewQueueApp(App[None]):
         ("down,j", "cursor_down", "Down"),
         ("a", "approve", "Approve"),
         ("d", "dismiss", "Dismiss"),
-        ("s", "snooze", "Snooze"),
         ("r", "refresh_queue", "Refresh"),
         ("q", "quit", "Quit"),
     ]
@@ -134,9 +133,7 @@ class ReviewQueueApp(App[None]):
 
     def on_mount(self) -> None:
         self._load_records()
-        self._render_all(
-            "Review queue loaded. Use j/k to move, a to approve, s to snooze."
-        )
+        self._render_all("Review queue loaded. Use j/k to move, a to approve.")
 
     def action_refresh_queue(self) -> None:
         self._load_records()
@@ -174,17 +171,6 @@ class ReviewQueueApp(App[None]):
         self._load_records()
         self.selected_index = min(self.selected_index, max(0, len(self.records) - 1))
         self._render_all(f"Dismissed @{record.handle}.")
-
-    def action_snooze(self) -> None:
-        if not self.records:
-            return
-        record = self.records[self.selected_index]
-        self.store.set_status(record.id, QueueStatus.SNOOZED)
-        self._load_records()
-        self.selected_index = min(self.selected_index, max(0, len(self.records) - 1))
-        self._render_all(
-            f"Snoozed @{record.handle}. Restore later with `xig review --restore {record.id}`."
-        )
 
     def _load_records(self) -> None:
         self.records = self.store.list_queue()
@@ -262,7 +248,7 @@ class ReviewQueueApp(App[None]):
             "[b]Sample post[/b]",
             f"  {posts[0] if posts else 'No sample post in fixture.'}",
             "",
-            "Open profile: o  Approve: a  Dismiss: d  Snooze: s",
+            "Open profile: o  Approve: a  Dismiss: d",
         ]
         return "\n".join(lines)
 
