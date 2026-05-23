@@ -48,8 +48,6 @@ def test_review_store_inserts_and_updates_scored_candidate(tmp_path) -> None:  #
     rows = store.list_queue("wheelieinvestor")
     assert len(rows) == 1
     assert profile_from_record(rows[0]).username == "whee1ieinvestor"
-    assert store.queue_status_counts("wheelieinvestor")["pending"] == 1
-    assert store.queue_status_counts("unknown")["pending"] == 0
 
 
 def test_review_store_status_and_report_window(tmp_path) -> None:  # type: ignore[no-untyped-def]

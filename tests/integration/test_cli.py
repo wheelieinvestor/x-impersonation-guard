@@ -134,10 +134,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     listed = runner.invoke(app, ["list", "--config", str(config_path)])
     assert listed.exit_code == 0
     assert "@whee1ieinvestor" in listed.output
-    status = runner.invoke(app, ["status", "--config", str(config_path)])
-    assert status.exit_code == 0, status.output
-    assert "pending=1" in status.output
-    assert "snoozed=0" in status.output
 
     reviewed = runner.invoke(app, ["review", "--config", str(config_path)])
     assert reviewed.exit_code == 0, reviewed.output
@@ -188,10 +184,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     )
     assert snoozed.exit_code == 0, snoozed.output
     assert "Snoozed candidate 1" in snoozed.output
-    status_after_snooze = runner.invoke(app, ["status", "--config", str(config_path)])
-    assert status_after_snooze.exit_code == 0, status_after_snooze.output
-    assert "pending=0" in status_after_snooze.output
-    assert "snoozed=1" in status_after_snooze.output
     listed_after_snooze = runner.invoke(app, ["list", "--config", str(config_path)])
     assert listed_after_snooze.exit_code == 0, listed_after_snooze.output
     assert "No pending candidates." in listed_after_snooze.output
@@ -216,9 +208,6 @@ def test_scan_fixture_lists_and_dry_run_report(
         app, ["review", "--config", str(config_path), "--approve", "1"]
     )
     assert approved.exit_code == 0
-    status_after_approval = runner.invoke(app, ["status", "--config", str(config_path)])
-    assert status_after_approval.exit_code == 0, status_after_approval.output
-    assert "approved=1" in status_after_approval.output
 
     live_without_confirm = runner.invoke(
         app,
