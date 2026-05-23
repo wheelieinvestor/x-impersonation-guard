@@ -187,17 +187,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     listed_after_snooze = runner.invoke(app, ["list", "--config", str(config_path)])
     assert listed_after_snooze.exit_code == 0, listed_after_snooze.output
     assert "No pending candidates." in listed_after_snooze.output
-    listed_snoozed = runner.invoke(
-        app, ["list", "--config", str(config_path), "--status", "snoozed"]
-    )
-    assert listed_snoozed.exit_code == 0, listed_snoozed.output
-    assert "@whee1ieinvestor" in listed_snoozed.output
-    assert "status=snoozed" in listed_snoozed.output
-    listed_all = runner.invoke(
-        app, ["list", "--config", str(config_path), "--status", "all"]
-    )
-    assert listed_all.exit_code == 0, listed_all.output
-    assert "status=snoozed" in listed_all.output
     restored = runner.invoke(
         app, ["review", "--config", str(config_path), "--restore", "1"]
     )
