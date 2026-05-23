@@ -73,7 +73,7 @@ dev = [
     "pytest-playwright==0.7.2",
     "respx==0.22.0",
     "ruff==0.14.6",
-    "types-pyyaml==6.0.12.20250915",
+    "types-pyyaml==6.0.12.20260518",
 ]
 
 [tool.hatch.build.targets.wheel]
