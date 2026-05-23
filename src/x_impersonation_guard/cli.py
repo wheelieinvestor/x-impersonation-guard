@@ -866,36 +866,6 @@ def status(
         )
 
 
-@app.command("validation-template")
-def validation_template(
-    output: Annotated[
-        Path,
-        typer.Option("--output", "-o", help="Destination Markdown file path."),
-    ] = Path("live-validation-result.md"),
-    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
-    identity: Annotated[str | None, typer.Option("--identity")] = None,
-    force: Annotated[
-        bool,
-        typer.Option("--force", help="Overwrite the destination if it already exists."),
-    ] = False,
-) -> None:
-    """Write a controlled live-validation evidence checklist."""
-    destination = output.expanduser()
-    if destination.exists() and not force:
-        typer.echo(
-            f"{destination} already exists; pass --force to replace it",
-            err=True,
-        )
-        raise typer.Exit(1)
-    if destination.parent != Path("."):
-        destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(
-        _render_validation_template(config.expanduser(), identity) + "\n"
-    )
-    typer.echo(f"Validation template written to {destination}")
-    typer.echo("Do not paste API tokens, cookies, browser profiles, or private DMs.")
-
-
 @app.command()
 def quickstart(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
@@ -957,12 +927,10 @@ def quickstart(
             f"xig doctor --config {config_path}",
             f"xig scan --config {config_path}",
             f"xig status --config {config_path}",
-            f"xig status --config {config_path} --json",
             f"xig review --config {config_path}",
             f"xig review --config {config_path} --next",
             f"xig review --config {config_path} --show <candidate_id>",
             f"xig report --config {config_path} --dry-run <candidate_id>",
-            f"xig validation-template --config {config_path}",
         ]
     )
     typer.echo("")
@@ -1302,128 +1270,6 @@ def _is_writable_dir(path: Path) -> bool:
 def _echo_commands(commands: list[str]) -> None:
     for command in commands:
         typer.echo(f"  {command}")
-
-
-def _render_validation_template(config_path: Path, identity_handle: str | None) -> str:
-    scope = _command_scope(config_path, identity_handle)
-    identity_line = (
-        f"@{identity_handle}" if identity_handle else "N/A or single identity"
-    )
-    generated_at = datetime.now(UTC).isoformat()
-    return f"""# X Impersonation Guard live-validation result
-
-Generated: {generated_at}
-Config: `{config_path}`
-Identity: `{identity_line}`
-
-## Safety rules
-
-- [ ] Do not paste X API tokens, cookies, browser profiles, private DMs, private emails, or unredacted report packages.
-- [ ] Do not run live reporting until a candidate has been reviewed, approved, and dry-run evidence has been inspected.
-- [ ] Submit at most one controlled live Help Center report for this validation run.
-- [ ] Share only redacted diagnostics created with `xig redact-report`.
-
-## Environment
-
-- [ ] Installed package version:
-- [ ] Install method: pipx / uvx / source checkout / other:
-- [ ] Python version:
-- [ ] OS:
-- [ ] Browser automation available: yes / no:
-- [ ] Token presence checked without printing token: yes / no:
-
-Recommended commands:
-
-```bash
-xig doctor {scope}
-xig validation-template {scope} --output live-validation-result.md
-```
-
-## Calibration
-
-- [ ] Labeled benign and impersonator examples prepared.
-- [ ] Calibration command completed.
-- [ ] Precision:
-- [ ] Recall:
-- [ ] F1:
-- [ ] False positives:
-- [ ] False negatives:
-- [ ] Calibration evidence file:
-
-Recommended command:
-
-```bash
-xig calibrate {scope} --input labeled-calibration.json --output calibration-results.json
-```
-
-## Read-only live scan
-
-- [ ] Scan mode:
-- [ ] Configured request budget:
-- [ ] Estimated spend:
-- [ ] Scan completed without live reports.
-- [ ] Candidate count:
-- [ ] Pending:
-- [ ] Snoozed:
-- [ ] Approved:
-- [ ] Dismissed:
-- [ ] Reported:
-- [ ] Failed:
-- [ ] Notes on false positives or false negatives:
-
-Recommended commands:
-
-```bash
-xig scan {scope}
-xig status {scope}
-xig status {scope} --json > live-status.json
-xig list {scope} --status all
-```
-
-## Review and dry-run package
-
-- [ ] Highest-priority candidate reviewed.
-- [ ] Candidate ID:
-- [ ] Candidate handle:
-- [ ] Approval decision:
-- [ ] Dry-run package path:
-- [ ] Redacted diagnostic zip path:
-- [ ] Dry-run package contains no secrets intended for public sharing: yes / no:
-
-Recommended commands:
-
-```bash
-xig review {scope} --next
-xig review {scope} --approve <candidate_id>
-xig report {scope} --dry-run <candidate_id>
-xig redact-report <report_dir>
-```
-
-## Controlled live report
-
-- [ ] Live report intentionally selected: yes / no:
-- [ ] Candidate was approved before live reporting: yes / no:
-- [ ] Dry-run evidence was inspected before live reporting: yes / no:
-- [ ] Command used `--execute --confirm-live`: yes / no:
-- [ ] Help Center selector status: passed / failed:
-- [ ] Submission status: submitted / failed / skipped:
-- [ ] Report package path:
-- [ ] Follow-up needed:
-
-Recommended command only after approval and dry-run review:
-
-```bash
-xig report {scope} --execute --confirm-live <candidate_id>
-```
-
-## Public launch decision
-
-- [ ] Keep live validation pending.
-- [ ] Mark one or more gates verified in `docs/status.md` with evidence.
-- [ ] Open a bug with redacted diagnostics.
-
-Summary:
-"""
 
 
 def _load(path: Path) -> AppConfig:

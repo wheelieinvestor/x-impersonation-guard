@@ -77,7 +77,6 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "`xig status --json` machine-readable queue" in changelog
     assert "Controlled live-validation runbook" in changelog
     assert "`xig quickstart` onboarding command" in changelog
-    assert "`xig validation-template` command" in changelog
     assert "Broader `xig redact-report` secret scrubbing" in changelog
     assert "`xig review --next` shortcut" in changelog
     assert "Next-step reporting guidance" in changelog
@@ -101,7 +100,6 @@ def test_live_validation_runbook_is_publicly_linked() -> None:
     assert "live-validation.md" in status
     assert "Live validation: live-validation.md" in mkdocs
     assert "Do not paste X API tokens" in runbook
-    assert "xig validation-template" in runbook
     assert "xig calibrate" in runbook
     assert "xig report" in runbook
     assert "API tokens, cookies, browser profiles" in issue_template
