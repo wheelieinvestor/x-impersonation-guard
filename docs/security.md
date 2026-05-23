@@ -25,7 +25,7 @@ Treat those files as private.
 
 ## Supply-chain controls
 
-- Dependabot opens weekly update PRs for Python/uv dependencies and GitHub Actions, grouped by ecosystem to keep routine maintenance PRs reviewable.
+- Dependabot opens weekly update PRs for Python/uv dependencies and GitHub Actions.
 - Dependency review runs on pull requests and fails on newly introduced high-severity vulnerable dependencies.
 - GPL-family licenses are denied in dependency review to keep the MIT package distribution straightforward.
 - Release workflows use OIDC-capable permissions rather than committed package credentials.
