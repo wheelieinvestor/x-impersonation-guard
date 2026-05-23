@@ -18,7 +18,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Estimated X API scan cost guard with configurable per-request estimate.
 - Cached image-hash lookup in the default scan path.
 - Offline scorer calibration command with precision, recall, F1, and miss reporting.
-- JSON calibration evidence export for comparing scorer validation runs.
 
 ### Changed
 

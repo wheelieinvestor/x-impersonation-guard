@@ -381,23 +381,12 @@ def calibrate(
             help="Score threshold treated as predicted impersonation.",
         ),
     ] = None,
-    output: Annotated[
-        Path | None,
-        typer.Option(
-            "--output",
-            help="Optional JSON file for calibration evidence.",
-        ),
-    ] = None,
 ) -> None:
     """Evaluate scorer precision and recall against a labeled offline set."""
     cfg = _load(config)
     selected = cfg.identity_for_handle(identity)
     calibration = CalibrationSet.model_validate_json(input.expanduser().read_text())
-    cutoff = (
-        threshold
-        if threshold is not None
-        else cfg.scoring.thresholds.review_queue_medium
-    )
+    cutoff = threshold or cfg.scoring.thresholds.review_queue_medium
     if cutoff < 0 or cutoff > 100:
         raise typer.BadParameter("threshold must be between 0 and 100")
 
@@ -434,24 +423,6 @@ def calibrate(
         for item, result, predicted in rows
         if predicted != item.expected_impersonator
     ]
-    if output is not None:
-        _write_calibration_output(
-            output=output,
-            input_path=input,
-            config_path=config,
-            identity_handle=selected.handle,
-            cutoff=cutoff,
-            precision=precision,
-            recall=recall,
-            f1=f1,
-            true_positive=true_positive,
-            false_positive=false_positive,
-            true_negative=true_negative,
-            false_negative=false_negative,
-            rows=rows,
-            misses=misses,
-        )
-        typer.echo(f"Calibration evidence written to {output.expanduser()}")
     if not misses:
         typer.echo("No calibration misses.")
         return
@@ -463,73 +434,6 @@ def calibrate(
         typer.echo(
             f"- @{item.profile.username} score={result.score} expected={expected} predicted={actual}{note}"
         )
-
-
-def _write_calibration_output(
-    *,
-    output: Path,
-    input_path: Path,
-    config_path: Path,
-    identity_handle: str,
-    cutoff: int,
-    precision: float,
-    recall: float,
-    f1: float,
-    true_positive: int,
-    false_positive: int,
-    true_negative: int,
-    false_negative: int,
-    rows: list[tuple[CalibrationCandidate, ScoreResult, bool]],
-    misses: list[tuple[CalibrationCandidate, ScoreResult, bool]],
-) -> None:
-    output_path = output.expanduser()
-    if output_path.parent != Path("."):
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "generated_at": datetime.now(UTC).isoformat(),
-        "input": str(input_path.expanduser()),
-        "config": str(config_path.expanduser()),
-        "identity_handle": identity_handle,
-        "threshold": cutoff,
-        "candidate_count": len(rows),
-        "metrics": {
-            "precision": precision,
-            "recall": recall,
-            "f1": f1,
-            "true_positive": true_positive,
-            "false_positive": false_positive,
-            "true_negative": true_negative,
-            "false_negative": false_negative,
-        },
-        "misses": [
-            _calibration_row_payload(item, result, predicted)
-            for item, result, predicted in misses
-        ],
-        "candidates": [
-            _calibration_row_payload(item, result, predicted)
-            for item, result, predicted in rows
-        ],
-    }
-    output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-
-
-def _calibration_row_payload(
-    item: CalibrationCandidate, result: ScoreResult, predicted: bool
-) -> dict[str, Any]:
-    return {
-        "handle": item.profile.username,
-        "profile_url": item.profile.handle_url,
-        "score": result.score,
-        "priority": result.priority.value if result.priority else None,
-        "expected_impersonator": item.expected_impersonator,
-        "predicted_impersonator": predicted,
-        "correct": predicted == item.expected_impersonator,
-        "note": item.note,
-        "reasons": result.reasons,
-        "mitigations": result.mitigations,
-        "signals": result.signals.model_dump(mode="json"),
-        "weighted_scores": result.weighted_scores,
-    }
 
 
 @app.command("list")
