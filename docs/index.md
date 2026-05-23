@@ -32,6 +32,6 @@ Creators get cloned constantly. Impersonators DM followers, run scams, and erode
 
 Current public alpha: `v0.2.0-alpha`.
 
-Offline demo and PyPI install are verified. Live X API scans and live report submission are pending Phase 2 validation.
+Offline demo and PyPI install are verified. Live X API scans and live report submission are pending controlled live validation.
 
 [Read the status matrix](status.md)

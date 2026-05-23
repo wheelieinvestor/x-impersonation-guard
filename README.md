@@ -15,7 +15,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 
-**Status: Public alpha.** Offline demo, dry-run reporting, fail-closed reporter safety, and three-environment PyPI install are verified. Live X API scans and live help.x.com submissions are implemented but still pending Phase 2 validation. See [docs/status.md](docs/status.md).
+**Status: Public alpha.** Offline demo, dry-run reporting, fail-closed reporter safety, and three-environment PyPI install are verified. Live X API scans and live help.x.com submissions are implemented but still pending controlled live validation. See [docs/status.md](docs/status.md).
 
 ---
 

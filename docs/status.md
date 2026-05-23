@@ -25,10 +25,15 @@ Published package: `x-impersonation-guard==0.2.0a0`
 
 | Capability | Status | Notes |
 |------------|--------|-------|
-| Live X API scan | Pending Phase 2 | No live X API calls during Phase 2.6. |
-| Live help.x.com report submission | Pending Phase 2 | Dry-run only during Phase 2.6. |
-| Real-world scorer calibration | Pending Phase 2 | Current calibration is fixture-based. |
+| Live X API scan | Pending controlled live validation | No live X API evidence has been recorded in this repo yet. |
+| Live help.x.com report submission | Pending controlled live validation | Dry-run reporting is verified; live submission still needs a tightly scoped first report. |
+| Real-world scorer calibration | Pending controlled live validation | Current calibration is fixture-based. |
 
-## Phase 2 entry gate
+## Controlled live-validation gate
 
-Phase 2 starts after the install validation PR lands and Dean answers the open Phase 2 questions about X API readiness, labeling time, first-report candidate selection, acceptable false-positive rate, and brand identity scope.
+Before this repo should be promoted as live-ready, record evidence for one controlled validation pass:
+
+- one real X API scan with no reports submitted;
+- one reviewed dry-run evidence package for a real candidate;
+- real-world scorer calibration against labeled impersonator and non-impersonator examples;
+- at most one approved live Help Center report, only after the dry-run evidence is inspected.
