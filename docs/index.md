@@ -10,14 +10,13 @@ Detect and report X accounts impersonating you. Local-first, explainable, safe b
 pip install --pre x-impersonation-guard
 playwright install chromium
 xig quickstart
-xig demo
 xig scan-fixture
 xig doctor
 xig review
 xig review --next
 ```
 
-The offline demo runs against fictional `@alex_charts` candidates and never touches the real X. `xig demo` keeps its state under `.xig-demo/` so you can reset it with `xig demo --reset`.
+The offline demo runs against fictional `@alex_charts` candidates and never touches the real X.
 
 ## Why it exists
 

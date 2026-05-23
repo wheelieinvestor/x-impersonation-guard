@@ -6,7 +6,6 @@
 pip install --pre x-impersonation-guard
 playwright install chromium
 xig quickstart
-xig demo
 xig scan-fixture
 xig config
 xig doctor
@@ -14,7 +13,7 @@ xig list
 xig report --dry-run 1
 ```
 
-Fixture mode does not call the live X API and does not submit reports. `xig demo` keeps demo config, queue, evidence, and reports inside `.xig-demo/`; use `xig demo --reset` for a clean repeatable demo.
+Fixture mode does not call the live X API and does not submit reports.
 
 ## Real account setup
 
@@ -69,4 +68,4 @@ It never prints token values. Use `xig doctor --json` to save the same privacy-s
 - If `xig` is not found, confirm your Python scripts directory is on `PATH`.
 - If you need to confirm the installed package version, run `xig --version`.
 - If Playwright browser install fails, rerun `playwright install chromium`.
-- If no candidates appear in fixture mode, rerun the isolated demo with `xig demo --reset`.
+- If no candidates appear in fixture mode, remove the demo database at `~/.x-impersonation-guard/db.sqlite` and rerun `xig scan-fixture`.
