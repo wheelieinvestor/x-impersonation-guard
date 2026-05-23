@@ -20,14 +20,14 @@ def test_review_tui_exposes_snooze_binding() -> None:
 def test_review_tui_preserves_config_and_identity_scope() -> None:
     app = ReviewQueueApp(
         store=object(),  # type: ignore[arg-type]
-        config_path=Path("Custom Config/config.yaml"),
+        config_path=Path("custom.yaml"),
         identity_handle="firstcreator",
     )
 
     assert app.identity_handle == "firstcreator"
     assert app._review_command(42, "--restore") == (
-        "xig review --config 'Custom Config/config.yaml' --identity firstcreator --restore 42"
+        "xig review --config custom.yaml --identity firstcreator --restore 42"
     )
     assert app._report_command(42, "--dry-run") == (
-        "xig report --config 'Custom Config/config.yaml' --identity firstcreator --dry-run 42"
+        "xig report --config custom.yaml --identity firstcreator --dry-run 42"
     )

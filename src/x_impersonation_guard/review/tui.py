@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shlex
 import webbrowser
 from datetime import UTC, datetime
 from pathlib import Path
@@ -295,9 +294,9 @@ class ReviewQueueApp(App[None]):
         return "\n".join(lines)
 
     def _command_scope(self) -> str:
-        parts = ["--config", shlex.quote(str(self.config_path.expanduser()))]
+        parts = [f"--config {self.config_path}"]
         if self.identity_handle is not None:
-            parts.extend(["--identity", shlex.quote(self.identity_handle)])
+            parts.append(f"--identity {self.identity_handle}")
         return " ".join(parts)
 
     def _review_command(self, candidate_id: int, action: str) -> str:
