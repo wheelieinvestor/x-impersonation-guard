@@ -50,7 +50,7 @@ Use `xig config` or `xig config --json` to inspect the active config without pri
 
 ## Setup check
 
-`xig quickstart` is the safest orientation command for new users. With no config, it prints the offline demo path and real-account setup commands. With a config, it shows the next scan, status, review, and dry-run commands without making network calls or submitting reports. For multi-identity configs, it prints scoped commands with `--identity <handle>` so you can repeat the sequence for each protected account.
+`xig quickstart` is the safest orientation command for new users. With no config, it prints the offline demo path and real-account setup commands. With a config, it shows the next scan, status, review, and dry-run commands without making network calls or submitting reports.
 
 `xig doctor` is safe to run before or after creating `config.yaml`. It verifies:
 
