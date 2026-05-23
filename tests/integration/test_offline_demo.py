@@ -6,9 +6,10 @@ import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
 from typer.testing import CliRunner
 
-from x_impersonation_guard.cli import DemoFixture, app
+from x_impersonation_guard.cli import DemoFixture, _demo_config, app
 from x_impersonation_guard.config import AppConfig, default_config_dict
 from x_impersonation_guard.scoring.scorer import score_candidate
 
@@ -107,6 +108,35 @@ def test_list_json_and_since_filter(
     invalid = runner.invoke(app, ["list", "--config", str(config), "--since", "soon"])
     assert invalid.exit_code != 0
     assert "expected ISO date/time or relative value" in invalid.output
+
+
+def test_scan_fixture_updates_existing_demo_config_for_bundled_fixture(
+    tmp_path: Path,
+    runner: CliRunner,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    config = tmp_path / "config.yaml"
+    stale_cfg = _demo_config()
+    config.write_text(
+        yaml.safe_dump(stale_cfg.model_dump(mode="json"), sort_keys=False)
+    )
+
+    scan = runner.invoke(app, ["scan-fixture", "--config", str(config)])
+    assert scan.exit_code == 0, scan.output
+    assert "Updated demo config" in scan.output
+
+    listed = runner.invoke(app, ["list", "--config", str(config)])
+    assert listed.exit_code == 0, listed.output
+    assert "@alex_charts1" in listed.output
+    first_id_match = re.search(r"^(\d+):", listed.output, re.MULTILINE)
+    assert first_id_match is not None
+
+    report = runner.invoke(
+        app, ["report", "--dry-run", first_id_match.group(1), "--config", str(config)]
+    )
+    assert report.exit_code == 0, report.output
+    assert "dry-run evidence package created" in report.output
 
 
 def test_list_json_empty_queue(config_path: Path, runner: CliRunner) -> None:

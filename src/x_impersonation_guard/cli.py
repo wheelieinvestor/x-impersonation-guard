@@ -265,10 +265,11 @@ def scan_fixture_command(
         demo_fixture = DemoFixture.model_validate(raw)
         scan_fixture = demo_fixture.to_fixture_scan()
         cfg = _config_for_demo_fixture(cfg, scan_fixture)
-        if wrote_config:
-            config.expanduser().write_text(
-                yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
-            )
+        config.expanduser().write_text(
+            yaml.safe_dump(cfg.model_dump(mode="json"), sort_keys=False)
+        )
+        if not wrote_config:
+            typer.echo(f"Updated demo config at {config}")
     else:
         demo_fixture = None
         scan_fixture = FixtureScan.model_validate(raw)
