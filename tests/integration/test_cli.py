@@ -83,23 +83,6 @@ def test_init_accepts_identity_options(tmp_path: Path, runner: CliRunner) -> Non
     assert identity.reporter_email == "reports@example.com"
     assert "Edit the starter identity fields" not in result.output
 
-    summary = runner.invoke(app, ["config", "--config", str(config)])
-    assert summary.exit_code == 0, summary.output
-    assert "Protected identities: 1" in summary.output
-    assert "@examplecreator" in summary.output
-    assert "reports@example.com" not in summary.output
-
-    summary_json = runner.invoke(app, ["config", "--config", str(config), "--json"])
-    assert summary_json.exit_code == 0, summary_json.output
-    payload = json.loads(summary_json.output)
-    assert payload["protected_identity_count"] == 1
-    assert payload["identities"][0]["handle"] == "examplecreator"
-    assert payload["identities"][0]["reporter_email_configured"] is True
-    assert payload["x_api"]["bearer_token_env"] == "X_API_BEARER_TOKEN"
-    assert payload["x_api"]["bearer_token_set"] is False
-    assert payload["scoring"]["weights_total"] == 100
-    assert "reports@example.com" not in summary_json.output
-
 
 def test_init_guided_prompts_for_identity_fields(
     tmp_path: Path, runner: CliRunner

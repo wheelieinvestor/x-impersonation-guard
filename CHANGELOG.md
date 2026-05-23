@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ### Added
 
 - Guided setup prompts and starter-config warnings for safer first runs.
-- `xig config` privacy-safe config summary with optional JSON output.
 - `xig doctor` checks for Playwright Chromium, starter identity placeholders, token presence, storage access, and SQLite queue access.
 - `xig doctor --json` privacy-safe setup diagnostics for support issues and validation records.
 - `xig support-bundle` privacy-safe diagnostic zip for public support issues.

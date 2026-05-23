@@ -7,7 +7,6 @@ pip install --pre x-impersonation-guard
 playwright install chromium
 xig quickstart
 xig scan-fixture
-xig config
 xig doctor
 xig list
 xig report --dry-run 1
@@ -33,7 +32,6 @@ Then run:
 ```bash
 xig doctor
 xig scan
-xig config
 xig status
 xig status --json
 xig review
@@ -45,7 +43,7 @@ xig validation-template
 xig report --dry-run 1
 ```
 
-Use `xig config` or `xig config --json` to inspect the active config without printing reporter emails or token values. Use `xig status` to see queue counts by status and 24-hour reporting usage, or `xig status --json` to save the same data for scripts and validation records. Use `xig review --next` to inspect the highest-priority pending candidate without copying an ID, or `xig review --show <id>` to inspect a specific account. Use `xig review --snooze <id>` or the TUI `s` key to defer gray-area candidates, `xig list --status snoozed` to find deferred candidates, and `xig review --restore <id>` to move one back to pending. Use `xig list --status all` for a full local queue view. Use `xig export json` or `xig export zip --output queue-export.zip` to save a portable copy of the pending review queue. Use `xig validation-template` to write a public-safe checklist before controlled live validation. If you configure more than one protected identity, pass `--identity <handle>` to review and report commands to guard against acting on the wrong candidate. Approval and dry-run commands print the next safe reporting command, preserving config and identity flags where needed. Live submission requires an approved candidate plus `--execute --confirm-live`.
+Use `xig status` to see queue counts by status and 24-hour reporting usage, or `xig status --json` to save the same data for scripts and validation records. Use `xig review --next` to inspect the highest-priority pending candidate without copying an ID, or `xig review --show <id>` to inspect a specific account. Use `xig review --snooze <id>` or the TUI `s` key to defer gray-area candidates, `xig list --status snoozed` to find deferred candidates, and `xig review --restore <id>` to move one back to pending. Use `xig list --status all` for a full local queue view. Use `xig export json` or `xig export zip --output queue-export.zip` to save a portable copy of the pending review queue. Use `xig validation-template` to write a public-safe checklist before controlled live validation. If you configure more than one protected identity, pass `--identity <handle>` to review and report commands to guard against acting on the wrong candidate. Approval and dry-run commands print the next safe reporting command, preserving config and identity flags where needed. Live submission requires an approved candidate plus `--execute --confirm-live`.
 
 ## Setup check
 
