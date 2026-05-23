@@ -46,7 +46,6 @@ To create a dry-run evidence package:
 ```bash
 xig list
 xig review --show 1
-xig export zip --output queue-export.zip
 xig report --dry-run 1
 ```
 
@@ -155,7 +154,6 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 - Reports require explicit review approval before live submission.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
-- `xig export json` or `xig export zip` gives you a portable review queue for handoff or local analysis.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
 - `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip for public bug reports.
 - Required Help Center fields fail closed if selectors drift.

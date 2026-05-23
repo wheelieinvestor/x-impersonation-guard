@@ -24,7 +24,6 @@ Creators get cloned constantly. Impersonators DM followers, run scams, and erode
 
 - Multi-signal scoring for likely impersonators.
 - SQLite review queue with explainable signal breakdowns and `xig review --show <id>` evidence details.
-- JSON and zip queue exports for handoff, audit, or local analysis.
 - `xig doctor` setup checks for Python, Playwright, Chromium, config, starter identity fields, storage, token state, and SQLite.
 - Dry-run evidence packages before live submission.
 - Playwright Help Center reporter that fails closed when selectors drift.
