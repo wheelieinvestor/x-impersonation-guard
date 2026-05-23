@@ -79,6 +79,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Offline scorer calibration command" in changelog
     assert "JSON calibration evidence export" in changelog
     assert "`xig status --json` machine-readable queue" in changelog
+    assert "`xig status --identity <handle>` filtering" in changelog
     assert "Controlled live-validation runbook" in changelog
     assert "`xig quickstart` onboarding command" in changelog
     assert "`xig validation-template` command" in changelog
@@ -90,6 +91,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
         "Textual review UI now shell-quotes generated follow-up commands" in changelog
     )
     assert "Public FAQ now covers safe trial, privacy, diagnostics" in changelog
+    assert "Quickstart now shell-quotes config paths" in changelog
     assert "Next-step reporting guidance" in changelog
     assert (
         "Config-aware and identity-aware generated review/report follow-up commands"

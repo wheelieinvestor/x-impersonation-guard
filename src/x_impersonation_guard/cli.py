@@ -938,6 +938,7 @@ def redact_report(
 @app.command()
 def status(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    identity: Annotated[str | None, typer.Option("--identity")] = None,
     json_output: Annotated[
         bool,
         typer.Option("--json", help="Emit machine-readable queue and report status."),
@@ -945,13 +946,20 @@ def status(
 ) -> None:
     """Show queue status and 24-hour report counts."""
     cfg = _load(config)
+    selected = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
     identity_statuses: list[tuple[str, dict[str, int], int, int]] = []
-    for identity in cfg.protected_identities:
-        counts = store.queue_status_counts(identity.handle)
-        reports = store.reports_in_window(identity.handle)
+    identities = [selected] if selected else cfg.protected_identities
+    for protected_identity in identities:
+        counts = store.queue_status_counts(protected_identity.handle)
+        reports = store.reports_in_window(protected_identity.handle)
         identity_statuses.append(
-            (identity.handle, counts, reports, cfg.reporting.max_reports_per_24h)
+            (
+                protected_identity.handle,
+                counts,
+                reports,
+                cfg.reporting.max_reports_per_24h,
+            )
         )
     if json_output:
         payload = {
@@ -1060,19 +1068,31 @@ def quickstart(
     token_state = "set" if os.getenv(token_name) else "not set"
     typer.echo(f"{token_name}: {token_state}")
     typer.echo("")
+    command_identity = (
+        cfg.protected_identities[0].handle
+        if len(cfg.protected_identities) > 1
+        else None
+    )
+    config_scope = f"--config {shlex.quote(str(config_path))}"
+    action_scope = _command_scope(config_path, command_identity)
+    if command_identity is not None:
+        typer.echo(
+            f"Multiple identities configured. Showing scoped commands for @{command_identity}; repeat with each protected handle."
+        )
+        typer.echo("")
     typer.echo("Recommended next commands:")
     _echo_commands(
         [
-            f"xig doctor --config {config_path}",
-            f"xig config --config {config_path}",
-            f"xig scan --config {config_path}",
-            f"xig status --config {config_path}",
-            f"xig status --config {config_path} --json",
-            f"xig review --config {config_path}",
-            f"xig review --config {config_path} --next",
-            f"xig review --config {config_path} --show <candidate_id>",
-            f"xig report --config {config_path} --dry-run <candidate_id>",
-            f"xig validation-template --config {config_path}",
+            f"xig doctor {config_scope}",
+            f"xig config {config_scope}",
+            f"xig scan {action_scope}",
+            f"xig status {action_scope}",
+            f"xig status {action_scope} --json",
+            f"xig review {action_scope}",
+            f"xig review {action_scope} --next",
+            f"xig review {action_scope} --show <candidate_id>",
+            f"xig report {action_scope} --dry-run <candidate_id>",
+            f"xig validation-template {action_scope}",
         ]
     )
     typer.echo("")

@@ -220,6 +220,23 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert payload["identities"][0]["reports_24h"] == 0
     assert payload["identities"][0]["reports_limit_24h"] == 5
 
+    scoped_status_json = runner.invoke(
+        app,
+        [
+            "status",
+            "--config",
+            str(config_path),
+            "--identity",
+            "wheelieinvestor",
+            "--json",
+        ],
+    )
+    assert scoped_status_json.exit_code == 0, scoped_status_json.output
+    scoped_payload = json.loads(scoped_status_json.output)
+    assert [item["handle"] for item in scoped_payload["identities"]] == [
+        "wheelieinvestor"
+    ]
+
     reviewed = runner.invoke(app, ["review", "--config", str(config_path)])
     assert reviewed.exit_code == 0, reviewed.output
     assert "Pending review candidates: 1" in reviewed.output
