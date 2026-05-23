@@ -30,8 +30,8 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: OS, Python version, install method, and whether Playwright Chromium was installed. Prefer redacted output from `xig doctor --json`.
-      placeholder: "Attach/paste redacted `xig doctor --json` output or summarize: macOS 15, Python 3.12, pip prerelease install, Chromium installed."
+      description: OS, Python version, install method, and whether Playwright Chromium was installed.
+      placeholder: "macOS 15, Python 3.12, pip prerelease install, Chromium installed"
     validations:
       required: true
   - type: textarea
@@ -46,8 +46,8 @@ body:
     id: scan_result
     attributes:
       label: Live scan result
-      description: Candidate counts, estimated API budget/spend, and any redacted false-positive or false-negative notes. Prefer redacted output from `xig status --json`.
-      placeholder: "Attach/paste redacted `xig status --json` output or summarize: pending=... snoozed=... approved=... estimated_spend=..."
+      description: Candidate counts, estimated API budget/spend, and any redacted false-positive or false-negative notes.
+      placeholder: "pending=... snoozed=... approved=... estimated_spend=..."
     validations:
       required: true
   - type: textarea
