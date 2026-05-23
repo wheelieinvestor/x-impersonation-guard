@@ -754,11 +754,7 @@ def review(
         typer.echo(f"Restored candidate {restore} to pending")
         return
     if tui:
-        ReviewQueueApp(
-            store,
-            config_path=config,
-            identity_handle=selected.handle if selected else None,
-        ).run()
+        ReviewQueueApp(store).run()
         return
     records = store.list_queue(selected.handle if selected else None)
     _render_review_queue(records)

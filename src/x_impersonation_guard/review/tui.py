@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import webbrowser
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 from textual.app import App, ComposeResult
@@ -120,17 +119,9 @@ class ReviewQueueApp(App[None]):
 
     selected_index: reactive[int] = reactive(0)
 
-    def __init__(
-        self,
-        store: ReviewStore,
-        *,
-        config_path: Path = Path("config.yaml"),
-        identity_handle: str | None = None,
-    ) -> None:
+    def __init__(self, store: ReviewStore) -> None:
         super().__init__()
         self.store = store
-        self.config_path = config_path
-        self.identity_handle = identity_handle
         self.records: list[CandidateRecord] = []
 
     def compose(self) -> ComposeResult:
@@ -174,7 +165,7 @@ class ReviewQueueApp(App[None]):
         self._load_records()
         self.selected_index = min(self.selected_index, max(0, len(self.records) - 1))
         self._render_all(
-            f"Approved @{record.handle}. Dry-run with `{self._report_command(record.id, '--dry-run')}`."
+            f"Approved @{record.handle}. Dry-run or submit from `xig report {record.id}`."
         )
 
     def action_dismiss(self) -> None:
@@ -194,7 +185,7 @@ class ReviewQueueApp(App[None]):
         self._load_records()
         self.selected_index = min(self.selected_index, max(0, len(self.records) - 1))
         self._render_all(
-            f"Snoozed @{record.handle}. Restore later with `{self._review_command(record.id, '--restore')}`."
+            f"Snoozed @{record.handle}. Restore later with `xig review --restore {record.id}`."
         )
 
     def action_open_profile(self) -> None:
@@ -210,7 +201,7 @@ class ReviewQueueApp(App[None]):
             self._render_all(f"Open manually: {url}")
 
     def _load_records(self) -> None:
-        self.records = self.store.list_queue(self.identity_handle)
+        self.records = self.store.list_queue()
 
     def _render_all(self, notice: str | None = None) -> None:
         self.query_one("#summary", Static).update(self._summary())
@@ -226,7 +217,6 @@ class ReviewQueueApp(App[None]):
                 counts[record.priority] += 1
         return (
             "[b]x-impersonation-guard[/b]  review queue  "
-            f"identity={self.identity_handle or 'all'}  "
             f"candidates={len(self.records)}  "
             f"[critical]critical={counts['critical']}[/]  "
             f"[high]high={counts['high']}[/]  "
@@ -251,10 +241,7 @@ class ReviewQueueApp(App[None]):
 
     def _detail(self) -> str:
         if not self.records:
-            return (
-                f"No candidates yet for {self.identity_handle or 'all identities'}. "
-                "Run `xig demo` for the offline demo."
-            )
+            return "No candidates yet. Run `xig scan-fixture` for the offline demo."
         record = self.records[self.selected_index]
         profile = _profile_payload(record)
         score = _score_payload(record)
@@ -292,18 +279,6 @@ class ReviewQueueApp(App[None]):
             "Open profile: o  Approve: a  Dismiss: d  Snooze: s",
         ]
         return "\n".join(lines)
-
-    def _command_scope(self) -> str:
-        parts = [f"--config {self.config_path}"]
-        if self.identity_handle is not None:
-            parts.append(f"--identity {self.identity_handle}")
-        return " ".join(parts)
-
-    def _review_command(self, candidate_id: int, action: str) -> str:
-        return f"xig review {self._command_scope()} {action} {candidate_id}"
-
-    def _report_command(self, candidate_id: int, mode: str) -> str:
-        return f"xig report {self._command_scope()} {mode} {candidate_id}"
 
 
 def _profile_payload(record: CandidateRecord) -> dict[str, Any]:
