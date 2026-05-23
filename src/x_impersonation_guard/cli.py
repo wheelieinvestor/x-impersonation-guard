@@ -408,13 +408,6 @@ def report(
             help="Create evidence only or submit the live Help Center form.",
         ),
     ] = True,
-    confirm_live: Annotated[
-        bool,
-        typer.Option(
-            "--confirm-live",
-            help="Required with --execute to acknowledge a live Help Center submission.",
-        ),
-    ] = False,
 ) -> None:
     """Create evidence package or submit an approved candidate."""
     cfg = _load(config)
@@ -427,10 +420,6 @@ def report(
         typer.echo("Dry run evidence package only. Approve before live submission.")
     if execute and record.status != QueueStatus.APPROVED.value:
         raise typer.BadParameter("live reports require approved review status")
-    if execute and not confirm_live:
-        raise typer.BadParameter(
-            "live Help Center submissions require --confirm-live in addition to --execute"
-        )
     decision = check_report_limit(store, record.identity_handle, cfg.reporting)
     if execute and not decision.allowed:
         raise typer.BadParameter(decision.message)
