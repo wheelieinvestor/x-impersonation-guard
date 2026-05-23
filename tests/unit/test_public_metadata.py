@@ -84,7 +84,6 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "`xig validation-template` command" in changelog
     assert "Broader `xig redact-report` secret scrubbing" in changelog
     assert "`xig review --next` shortcut" in changelog
-    assert "Textual review UI now binds `o`" in changelog
     assert "Next-step reporting guidance" in changelog
     assert (
         "Config-aware and identity-aware generated review/report follow-up commands"

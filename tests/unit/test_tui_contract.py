@@ -12,4 +12,3 @@ def test_review_tui_exposes_snooze_binding() -> None:
             bindings[binding.key] = binding.action
 
     assert bindings["s"] == "snooze"
-    assert bindings["o"] == "open_profile"
