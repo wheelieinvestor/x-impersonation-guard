@@ -38,7 +38,6 @@ xig quickstart
 xig scan-fixture
 xig doctor
 xig review
-xig review --next
 ```
 
 The bundled demo uses a fictional finance creator, `@alex_charts`, and eight realistic fake candidates: obvious scam clones, suspicious gray-area accounts, a fan account, an older unrelated account, and a random follower. The point is judgment, not just detection.
@@ -159,7 +158,6 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 
 - Reports require explicit review approval before live submission.
 - `xig status` shows queue counts by review status and 24-hour report usage.
-- `xig review --next` opens the highest-priority pending candidate without copying an ID.
 - `xig review --show <id>` explains the account, score reasons, mitigations, and next safe commands.
 - `xig review --snooze <id>` or the TUI `s` key defers gray-area candidates without approving or dismissing them.
 - `xig list --status snoozed` and `xig list --status all` make deferred and historical queue items easy to rediscover.

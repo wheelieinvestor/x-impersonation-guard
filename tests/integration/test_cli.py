@@ -201,11 +201,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert "@whee1ieinvestor" in reviewed.output
     assert "handle is highly similar" in reviewed.output
 
-    next_detail = runner.invoke(app, ["review", "--config", str(config_path), "--next"])
-    assert next_detail.exit_code == 0, next_detail.output
-    assert "Candidate 1: @whee1ieinvestor" in next_detail.output
-    assert "Next steps:" in next_detail.output
-
     detail = runner.invoke(app, ["review", "--config", str(config_path), "--show", "1"])
     assert detail.exit_code == 0, detail.output
     assert "Candidate 1: @whee1ieinvestor" in detail.output
@@ -255,11 +250,6 @@ def test_scan_fixture_lists_and_dry_run_report(
     listed_after_snooze = runner.invoke(app, ["list", "--config", str(config_path)])
     assert listed_after_snooze.exit_code == 0, listed_after_snooze.output
     assert "No pending candidates." in listed_after_snooze.output
-    next_after_snooze = runner.invoke(
-        app, ["review", "--config", str(config_path), "--next"]
-    )
-    assert next_after_snooze.exit_code == 0, next_after_snooze.output
-    assert "No pending candidates." in next_after_snooze.output
     listed_snoozed = runner.invoke(
         app, ["list", "--config", str(config_path), "--status", "snoozed"]
     )
