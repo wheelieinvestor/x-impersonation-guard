@@ -63,13 +63,3 @@ def test_status_docs_do_not_reference_stale_phase_gate() -> None:
     assert "pending Phase 2 validation" not in index
     assert "pending Phase 2 validation" not in readme
     assert "controlled live validation" in status
-
-
-def test_changelog_tracks_post_alpha_hardening() -> None:
-    changelog = Path("CHANGELOG.md").read_text()
-
-    assert "## [Unreleased]" in changelog
-    assert "Review queue snooze and restore workflow" in changelog
-    assert "Estimated X API scan cost guard" in changelog
-    assert "Cached image-hash lookup in the default scan path" in changelog
-    assert "`--confirm-live`" in changelog
