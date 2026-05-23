@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+import importlib.metadata
 import importlib.util
 import json
 import os
+import platform
+import re
 import sys
 import time
+import zipfile
 from datetime import UTC, datetime, timedelta
 from importlib.resources import files
 from pathlib import Path
@@ -30,6 +34,7 @@ from x_impersonation_guard.config import (
 )
 from x_impersonation_guard.detection import run_scan
 from x_impersonation_guard.detectors.base import XProfileLookup
+from x_impersonation_guard.i18n import t
 from x_impersonation_guard.models import (
     AccountProfile,
     QueueStatus,
@@ -70,12 +75,19 @@ def main(
     if ctx.invoked_subcommand is not None:
         return
     if not Path("config.yaml").exists():
-        typer.echo(
-            "It looks like this is your first run. Try `xig scan-fixture` for an offline demo, or `xig init` to set up against your real account."
-        )
+        typer.echo(t("first_run"))
         raise typer.Exit()
     typer.echo(ctx.get_help())
     raise typer.Exit()
+
+
+@app.command()
+def version() -> None:
+    """Show package, Python, platform, and key dependency versions."""
+    typer.echo(f"x-impersonation-guard {__version__}")
+    typer.echo(f"python {platform.python_version()}")
+    typer.echo(f"platform {platform.platform()}")
+    typer.echo(f"playwright {_package_version('playwright')}")
 
 
 class FixtureScan(BaseModel):
@@ -289,14 +301,43 @@ def scan_fixture_command(
 def list_command(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
     identity: Annotated[str | None, typer.Option("--identity")] = None,
+    since: Annotated[
+        str | None,
+        typer.Option(
+            "--since",
+            help="Only show candidates detected since an ISO date or relative value like 24h or 7d.",
+        ),
+    ] = None,
+    json_output: Annotated[
+        bool,
+        typer.Option("--json", help="Emit review queue entries as JSON."),
+    ] = False,
 ) -> None:
     """List pending review queue."""
     cfg = _load(config)
     selected = cfg.identity_for_handle(identity)
     store = ReviewStore(cfg.storage.db_path)
     records = store.list_queue(selected.handle)
+    if since:
+        try:
+            since_dt = _parse_since(since)
+        except ValueError as exc:
+            raise typer.BadParameter(str(exc)) from exc
+        records = [
+            record
+            for record in records
+            if _aware_datetime(record.created_at) >= since_dt
+        ]
+    if json_output:
+        typer.echo(
+            json.dumps(
+                [_candidate_record_payload(record) for record in records],
+                indent=2,
+            )
+        )
+        return
     if not records:
-        typer.echo("No pending candidates.")
+        typer.echo(t("no_pending_candidates"))
         return
     for record in records:
         typer.echo(
@@ -401,6 +442,32 @@ def report(
     if execute:
         low, high = cfg.reporting.delay_between_reports_seconds
         typer.echo(f"Pacing enabled. Next submission should wait {low}-{high} seconds.")
+
+
+@app.command("export-report")
+def export_report(
+    report_id: Annotated[
+        str,
+        typer.Argument(help="Report id, candidate id, or report directory name."),
+    ],
+    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
+    output: Annotated[Path | None, typer.Option("--output", "-o")] = None,
+) -> None:
+    """Zip an existing report evidence directory for sharing."""
+    cfg = _load(config)
+    store = ReviewStore(cfg.storage.db_path)
+    report_dir = _find_report_dir(store, report_id)
+    if report_dir is None:
+        raise typer.BadParameter(f"report not found: {report_id}")
+    if not report_dir.exists() or not report_dir.is_dir():
+        raise typer.BadParameter(f"report directory not found: {report_dir}")
+    zip_path = output.expanduser() if output else Path(f"{report_dir}.zip")
+    zip_path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(report_dir.rglob("*")):
+            if path.is_file():
+                archive.write(path, arcname=path.relative_to(report_dir))
+    typer.echo(f"exported report package: {zip_path}")
 
 
 @app.command()
@@ -657,6 +724,71 @@ def _relative_age(value: datetime) -> str:
     if hours < 48:
         return f"{hours}h"
     return f"{hours // 24}d"
+
+
+def _parse_since(value: str) -> datetime:
+    raw = value.strip()
+    relative = re.fullmatch(r"(?P<count>\d+)(?P<unit>[mhdw])", raw.lower())
+    if relative:
+        count = int(relative.group("count"))
+        unit = relative.group("unit")
+        delta = {
+            "m": timedelta(minutes=count),
+            "h": timedelta(hours=count),
+            "d": timedelta(days=count),
+            "w": timedelta(weeks=count),
+        }[unit]
+        return datetime.now(UTC) - delta
+    try:
+        parsed = datetime.fromisoformat(raw)
+    except ValueError as exc:
+        raise ValueError(
+            "expected ISO date/time or relative value like 24h or 7d"
+        ) from exc
+    return _aware_datetime(parsed)
+
+
+def _aware_datetime(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _candidate_record_payload(record: CandidateRecord) -> dict[str, object]:
+    return {
+        "id": record.id,
+        "identity": record.identity_handle,
+        "handle": record.handle,
+        "score": record.score,
+        "priority": record.priority,
+        "status": record.status,
+        "detected_at": _aware_datetime(record.created_at).isoformat(),
+    }
+
+
+def _find_report_dir(store: ReviewStore, report_id: str) -> Path | None:
+    reports = store.list_reports()
+    numeric = int(report_id) if report_id.isdigit() else None
+    for report in reports:
+        if numeric is not None and report.id == numeric and report.report_dir:
+            return Path(report.report_dir).expanduser()
+    for report in reports:
+        if numeric is not None and report.candidate_id == numeric and report.report_dir:
+            return Path(report.report_dir).expanduser()
+    for report in reports:
+        if report.report_dir is None:
+            continue
+        report_dir = Path(report.report_dir).expanduser()
+        if report_id == report_dir.name or report_id in str(report_dir):
+            return report_dir
+    return None
+
+
+def _package_version(package: str) -> str:
+    try:
+        return importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
+        return "not installed"
 
 
 def _is_writable_dir(path: Path) -> bool:

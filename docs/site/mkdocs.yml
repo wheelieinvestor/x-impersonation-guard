@@ -41,7 +41,9 @@ nav:
   - Configuration: configuration.md
   - Setup: setup.md
   - Scoring explained: scoring.md
+  - How impersonators evolve: impersonator-evolution.md
   - Scoring reference: scoring-explained.md
+  - CLI localization: i18n.md
   - Reporting flow: reporting-flow.md
   - Rate limits and safety: rate-limits-and-safety.md
   - Legacy installation notes: installation.md
