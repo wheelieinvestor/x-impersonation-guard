@@ -160,7 +160,6 @@ X does not provide an impersonation-report API. The reporter uses Playwright aga
 - `xig list --status snoozed` and `xig list --status all` make deferred and historical queue items easy to rediscover.
 - `xig export json` or `xig export zip` gives you a portable review queue for handoff or local analysis.
 - `xig report --dry-run <id>` creates an evidence package without submitting.
-- `xig report --identity <handle> <id>` fails closed if the candidate belongs to a different protected identity.
 - Live Help Center submission requires both `--execute` and `--confirm-live`.
 - `xig redact-report <report_dir>` creates a privacy-safe diagnostic zip for public bug reports.
 - Required Help Center fields fail closed if selectors drift.

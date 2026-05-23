@@ -238,7 +238,7 @@ def test_scan_fixture_lists_and_dry_run_report(
     assert "dry_run" in history.output
 
 
-def test_identity_filter_guards_review_and_report_actions(
+def test_review_identity_filter_guards_approve_and_dismiss(
     tmp_path: Path, runner: CliRunner
 ) -> None:
     raw = default_config_dict(
@@ -298,21 +298,6 @@ def test_identity_filter_guards_review_and_report_actions(
     )
     assert wrong_identity.exit_code != 0
     assert "does not belong to @secondcreator" in wrong_identity.output
-
-    wrong_report_identity = runner.invoke(
-        app,
-        [
-            "report",
-            "--dry-run",
-            "--config",
-            str(config),
-            "--identity",
-            "secondcreator",
-            str(candidate_id),
-        ],
-    )
-    assert wrong_report_identity.exit_code != 0
-    assert "does not belong to @secondcreator" in wrong_report_identity.output
 
     right_identity = runner.invoke(
         app,

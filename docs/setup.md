@@ -48,8 +48,7 @@ Use headed mode unless you have a specific reason to run headless. The first liv
 6. Let reviewers approve, dismiss, or snooze candidates.
 7. Use `xig status` to monitor pending, snoozed, approved, reported, and failed counts.
 8. Use `xig list --status snoozed` or `xig list --status all` to revisit deferred or historical queue items.
-9. Pass `--identity <handle>` to review and report commands when more than one protected identity is configured.
-10. Submit only approved reports.
+9. Submit only approved reports.
 
 ## Why reporting is not fully automatic by default
 
