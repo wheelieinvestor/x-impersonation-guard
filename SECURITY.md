@@ -32,10 +32,3 @@ Out of scope:
 ## Handling sensitive files
 
 Do not paste tokens, cookies, browser profiles, or unredacted evidence packages into GitHub issues, discussions, pull requests, or chat transcripts.
-
-## Supply-chain controls
-
-- Dependabot checks Python/uv dependencies and GitHub Actions weekly.
-- Pull requests that change dependency manifests run GitHub dependency review.
-- Dependency review fails on newly introduced high-severity vulnerabilities and on GPL-family licenses that are not compatible with this project's MIT distribution model.
-- Release builds use GitHub OIDC permissions for trusted publishing workflows; package credentials should not be committed or stored in the repo.
