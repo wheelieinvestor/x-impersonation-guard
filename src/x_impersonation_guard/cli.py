@@ -375,18 +375,20 @@ def review(
     selected = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
     if show is not None:
-        record = _get_review_candidate(
-            store, show, selected.handle if selected else None
-        )
+        record = store.get_candidate(show)
+        if record is None:
+            raise typer.BadParameter(f"candidate not found: {show}")
+        if selected is not None and record.identity_handle != selected.handle:
+            raise typer.BadParameter(
+                f"candidate {show} does not belong to @{selected.handle}"
+            )
         _render_review_detail(record)
         return
     if approve is not None:
-        _get_review_candidate(store, approve, selected.handle if selected else None)
         store.set_status(approve, QueueStatus.APPROVED)
         typer.echo(f"Approved candidate {approve}")
         return
     if dismiss is not None:
-        _get_review_candidate(store, dismiss, selected.handle if selected else None)
         store.set_status(dismiss, QueueStatus.DISMISSED)
         typer.echo(f"Dismissed candidate {dismiss}")
         return
@@ -885,19 +887,6 @@ def _render_review_queue(records: list[CandidateRecord]) -> None:
         typer.echo(
             f"{record.id}: @{record.handle} ({record.display_name}) score={record.score} priority={record.priority} detected={_relative_age(record.created_at)}{suffix}"
         )
-
-
-def _get_review_candidate(
-    store: ReviewStore, candidate_id: int, identity_handle: str | None
-) -> CandidateRecord:
-    record = store.get_candidate(candidate_id)
-    if record is None:
-        raise typer.BadParameter(f"candidate not found: {candidate_id}")
-    if identity_handle is not None and record.identity_handle != identity_handle:
-        raise typer.BadParameter(
-            f"candidate {candidate_id} does not belong to @{identity_handle}"
-        )
-    return record
 
 
 def _render_review_detail(record: CandidateRecord) -> None:
