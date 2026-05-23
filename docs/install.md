@@ -32,11 +32,10 @@ Then run:
 xig doctor
 xig scan
 xig review
-xig review --show 1
 xig report --dry-run 1
 ```
 
-Use `xig review --show <id>` to inspect score reasons, mitigations, profile metadata, and the next safe commands. Live submission requires an approved candidate and `--execute`.
+Live submission requires an approved candidate and `--execute`.
 
 ## Setup check
 

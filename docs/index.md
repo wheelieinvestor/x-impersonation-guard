@@ -23,7 +23,7 @@ Creators get cloned constantly. Impersonators DM followers, run scams, and erode
 `x-impersonation-guard` keeps detection, review, and reporting local:
 
 - Multi-signal scoring for likely impersonators.
-- SQLite review queue with explainable signal breakdowns and `xig review --show <id>` evidence details.
+- SQLite review queue with explainable signal breakdowns.
 - `xig doctor` setup checks for Python, Playwright, Chromium, config, storage, token state, and SQLite.
 - Dry-run evidence packages before live submission.
 - Playwright Help Center reporter that fails closed when selectors drift.

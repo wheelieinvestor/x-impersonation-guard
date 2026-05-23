@@ -11,7 +11,7 @@ import time
 from datetime import UTC, datetime, timedelta
 from importlib.resources import files
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated
 
 import typer
 import yaml
@@ -359,29 +359,13 @@ def list_command(
 @app.command()
 def review(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
-    identity: Annotated[str | None, typer.Option("--identity")] = None,
-    show: Annotated[
-        int | None,
-        typer.Option("--show", help="Show detailed evidence for a candidate ID."),
-    ] = None,
     approve: Annotated[int | None, typer.Option("--approve")] = None,
     dismiss: Annotated[int | None, typer.Option("--dismiss")] = None,
     tui: Annotated[bool, typer.Option("--tui/--no-tui")] = False,
 ) -> None:
     """Approve, dismiss, or open the review queue."""
     cfg = _load(config)
-    selected = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
-    if show is not None:
-        record = store.get_candidate(show)
-        if record is None:
-            raise typer.BadParameter(f"candidate not found: {show}")
-        if selected is not None and record.identity_handle != selected.handle:
-            raise typer.BadParameter(
-                f"candidate {show} does not belong to @{selected.handle}"
-            )
-        _render_review_detail(record)
-        return
     if approve is not None:
         store.set_status(approve, QueueStatus.APPROVED)
         typer.echo(f"Approved candidate {approve}")
@@ -393,8 +377,10 @@ def review(
     if tui:
         ReviewQueueApp(store).run()
         return
-    records = store.list_queue(selected.handle if selected else None)
-    _render_review_queue(records)
+    for record in store.list_queue():
+        typer.echo(
+            f"{record.id}: @{record.handle} score={record.score} priority={record.priority}"
+        )
 
 
 @app.command()
@@ -793,95 +779,6 @@ def _load(path: Path) -> AppConfig:
     if cfg.reporting.auto_submit:
         _print_safety_warning()
     return cfg
-
-
-def _render_review_queue(records: list[CandidateRecord]) -> None:
-    if not records:
-        typer.echo("No pending candidates.")
-        return
-    typer.echo(f"Pending review candidates: {len(records)}")
-    typer.echo(
-        "Use `xig review --show <id>` for evidence, `xig review --approve <id>` to approve, or `xig review --dismiss <id>` to dismiss."
-    )
-    for record in records:
-        score = _score_payload(record)
-        reasons = score.get("reasons") or []
-        reason_text = "; ".join(str(reason) for reason in reasons[:2])
-        suffix = f" | {reason_text}" if reason_text else ""
-        typer.echo(
-            f"{record.id}: @{record.handle} ({record.display_name}) score={record.score} priority={record.priority} detected={_relative_age(record.created_at)}{suffix}"
-        )
-
-
-def _render_review_detail(record: CandidateRecord) -> None:
-    profile = _profile_payload(record)
-    score = _score_payload(record)
-    reasons = [str(reason) for reason in score.get("reasons") or []]
-    mitigations = [str(item) for item in score.get("mitigations") or []]
-    weighted = score.get("weighted_scores") or {}
-
-    typer.echo(f"Candidate {record.id}: @{record.handle}")
-    typer.echo(f"Display name: {record.display_name}")
-    typer.echo(f"Protected identity: @{record.identity_handle}")
-    typer.echo(f"Profile: https://x.com/{record.handle}")
-    typer.echo(
-        f"Score: {record.score} | Priority: {record.priority or 'n/a'} | Status: {record.status} | Source: {record.source}"
-    )
-    typer.echo(f"Detected: {_relative_age(record.created_at)}")
-    typer.echo(
-        "Account: "
-        f"followers={profile.get('followers_count', 0):,} "
-        f"following={profile.get('following_count', 0):,} "
-        f"posts={profile.get('tweet_count', 0):,} "
-        f"verified={profile.get('verified', False)}"
-    )
-    description = str(profile.get("description") or "").strip()
-    if description:
-        typer.echo(f"Bio: {description}")
-    if reasons:
-        typer.echo("Reasons:")
-        for reason in reasons:
-            typer.echo(f"- {reason}")
-    if mitigations:
-        typer.echo("Mitigations:")
-        for mitigation in mitigations:
-            typer.echo(f"- {mitigation}")
-    if isinstance(weighted, dict) and weighted:
-        typer.echo("Top weighted signals:")
-        for name, value in _top_weighted_signals(weighted):
-            typer.echo(f"- {name.replace('_', ' ')}: {value:.1f}")
-    typer.echo("Next steps:")
-    typer.echo(f"- Approve: xig review --approve {record.id}")
-    typer.echo(f"- Dismiss: xig review --dismiss {record.id}")
-    typer.echo(f"- Dry-run after approval: xig report --dry-run {record.id}")
-
-
-def _profile_payload(record: CandidateRecord) -> dict[str, Any]:
-    try:
-        payload = json.loads(record.profile_json)
-    except json.JSONDecodeError:
-        return {}
-    return payload if isinstance(payload, dict) else {}
-
-
-def _score_payload(record: CandidateRecord) -> dict[str, Any]:
-    if not record.score_breakdown_json:
-        return {}
-    try:
-        payload = json.loads(record.score_breakdown_json)
-    except json.JSONDecodeError:
-        return {}
-    return payload if isinstance(payload, dict) else {}
-
-
-def _top_weighted_signals(weighted: dict[Any, Any]) -> list[tuple[str, float]]:
-    signals = []
-    for name, value in weighted.items():
-        try:
-            signals.append((str(name), float(value)))
-        except (TypeError, ValueError):
-            continue
-    return sorted(signals, key=lambda item: item[1], reverse=True)[:5]
 
 
 def _render_scores(results: list[ScoreResult]) -> None:
