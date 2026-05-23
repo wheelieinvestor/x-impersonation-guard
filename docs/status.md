@@ -22,7 +22,6 @@ Published package: `x-impersonation-guard==0.2.0a0`
 | PyPI install on macOS Python 3.11 | Verified | `phase2.6/install-validation-C.log` |
 | User-first config generation | Verified | `xig init --handle ... --reporter-email ...`; `tests/integration/test_cli.py` |
 | Dependency security posture | Verified | Dependabot alerts clear; grouped update policy in `.github/dependabot.yml` |
-| Estimated API scan budget guard | Verified | `tests/unit/test_cost_guard.py` |
 
 ## Implemented but not yet verified live
 

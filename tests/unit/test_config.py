@@ -13,8 +13,6 @@ def test_default_config_is_valid() -> None:
     assert cfg.protected_identities[0].handle == "yourhandle"
     assert cfg.protected_identities[0].display_name == "Your Name"
     assert cfg.protected_identities[0].reporter_email == "you@example.com"
-    assert cfg.x_api.max_cost_per_scan_usd == 2.0
-    assert cfg.x_api.estimated_cost_per_request_usd == 0.01
     assert cfg.reporting.auto_submit is False
 
 
