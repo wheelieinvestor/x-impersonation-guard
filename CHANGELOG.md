@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ### Added
 
 - Launch support runbook covering triage labels, clean-install reproduction, hotfix workflow, secret exposure response, and live-validation guardrails.
+- Launch readiness checklist and public-post draft copy with explicit alpha/live-validation caveats.
 
 ## [0.2.0-alpha] - 2026-05-22
 
