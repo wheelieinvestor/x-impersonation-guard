@@ -49,6 +49,7 @@ nav:
   - Legacy installation notes: installation.md
   - FAQ: faq.md
   - Security: security.md
+  - Launch readiness: launch-readiness.md
   - Launch support: launch-support.md
   - Changelog: changelog.md
   - Status: status.md
