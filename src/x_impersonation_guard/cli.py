@@ -946,41 +946,36 @@ def status(
 ) -> None:
     """Show queue status and 24-hour report counts."""
     cfg = _load(config)
-    selected = cfg.identity_for_handle(identity) if identity else None
     store = ReviewStore(cfg.storage.db_path)
-    identity_statuses: list[tuple[str, dict[str, int], int, int]] = []
-    identities = [selected] if selected else cfg.protected_identities
-    for protected_identity in identities:
-        counts = store.queue_status_counts(protected_identity.handle)
-        reports = store.reports_in_window(protected_identity.handle)
-        identity_statuses.append(
-            (
-                protected_identity.handle,
-                counts,
-                reports,
-                cfg.reporting.max_reports_per_24h,
-            )
-        )
+    payload = _status_payload(cfg, store, identity)
     if json_output:
-        payload = {
-            "generated_at": datetime.now(UTC).isoformat(),
-            "identities": [
-                {
-                    "handle": handle,
-                    "queue": counts,
-                    "reports_24h": reports,
-                    "reports_limit_24h": reports_limit,
-                }
-                for handle, counts, reports, reports_limit in identity_statuses
-            ],
-            "max_reports_per_24h": cfg.reporting.max_reports_per_24h,
-        }
         typer.echo(json.dumps(payload, indent=2, sort_keys=True))
         return
-    for handle, counts, reports, reports_limit in identity_statuses:
+    for item in payload["identities"]:
         typer.echo(
-            f"@{handle}: {_format_queue_counts(counts)} reports_24h={reports}/{reports_limit}"
+            f"@{item['handle']}: {_format_queue_counts(item['queue'])} "
+            f"reports_24h={item['reports_24h']}/{item['reports_limit_24h']}"
         )
+
+
+def _status_payload(
+    cfg: AppConfig, store: ReviewStore, identity_handle: str | None = None
+) -> dict[str, Any]:
+    selected = cfg.identity_for_handle(identity_handle) if identity_handle else None
+    identities = [selected] if selected else cfg.protected_identities
+    return {
+        "generated_at": datetime.now(UTC).isoformat(),
+        "identities": [
+            {
+                "handle": protected_identity.handle,
+                "queue": store.queue_status_counts(protected_identity.handle),
+                "reports_24h": store.reports_in_window(protected_identity.handle),
+                "reports_limit_24h": cfg.reporting.max_reports_per_24h,
+            }
+            for protected_identity in identities
+        ],
+        "max_reports_per_24h": cfg.reporting.max_reports_per_24h,
+    }
 
 
 @app.command("validation-template")
@@ -1149,11 +1144,27 @@ def support_bundle(
         destination.parent.mkdir(parents=True, exist_ok=True)
     config_path = config.expanduser()
     checks, doctor_exit_code = _doctor_diagnostics(config_path)
+    status_payload: dict[str, Any] | None = None
+    if config_path.exists():
+        try:
+            cfg = load_config(config_path)
+            status_payload = _status_payload(cfg, ReviewStore(cfg.storage.db_path))
+        except Exception as exc:
+            status_payload = {
+                "generated_at": datetime.now(UTC).isoformat(),
+                "ok": False,
+                "error": str(exc),
+            }
     manifest = {
         "generated_at": datetime.now(UTC).isoformat(),
         "config": str(config_path),
         "doctor_ok": doctor_exit_code == 0,
-        "files": ["SUPPORT_README.md", "doctor.json", "MANIFEST.json"],
+        "files": [
+            "SUPPORT_README.md",
+            "doctor.json",
+            "status.json",
+            "MANIFEST.json",
+        ],
         "privacy": "This bundle intentionally excludes config files, tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.",
     }
     with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -1162,6 +1173,20 @@ def support_bundle(
             "doctor.json",
             json.dumps(
                 _doctor_payload(config_path, checks, doctor_exit_code),
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+        )
+        archive.writestr(
+            "status.json",
+            json.dumps(
+                status_payload
+                or {
+                    "generated_at": datetime.now(UTC).isoformat(),
+                    "ok": False,
+                    "error": "config file not found",
+                },
                 indent=2,
                 sort_keys=True,
             )
@@ -1288,6 +1313,7 @@ This zip is designed for public GitHub issues and maintainer support.
 Included:
 
 - `doctor.json`: privacy-safe setup diagnostics from `xig doctor --json`.
+- `status.json`: privacy-safe queue counts and 24-hour report usage from `xig status --json`.
 - `MANIFEST.json`: bundle metadata.
 
 Not included:

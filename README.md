@@ -187,7 +187,7 @@ Run `xig doctor` any time setup feels uncertain. It checks Python version, Playw
 
 Use `xig config` or `xig config --json` to inspect protected identity count, scan mode, reporting limits, scoring thresholds, storage paths, token environment-variable state, and starter-config warnings without printing reporter emails or token values.
 
-For GitHub issues, `xig support-bundle --output xig-support.zip` creates a small diagnostic zip with `doctor.json` and a manifest. It intentionally excludes config files, API tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
+For GitHub issues, `xig support-bundle --output xig-support.zip` creates a small diagnostic zip with `doctor.json`, `status.json`, and a manifest. It intentionally excludes config files, API tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
 
 ## Why I built this
 

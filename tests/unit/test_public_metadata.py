@@ -76,6 +76,7 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "`xig config` privacy-safe config summary" in changelog
     assert "`xig doctor --json` privacy-safe setup diagnostics" in changelog
     assert "`xig support-bundle` privacy-safe diagnostic zip" in changelog
+    assert "`xig support-bundle` now includes privacy-safe `status.json`" in changelog
     assert "Offline scorer calibration command" in changelog
     assert "JSON calibration evidence export" in changelog
     assert "`xig status --json` machine-readable queue" in changelog
@@ -128,6 +129,7 @@ def test_issue_templates_request_privacy_safe_diagnostics() -> None:
 
     assert "xig doctor --json" in bug
     assert "xig support-bundle --output xig-support.zip" in bug
+    assert "status.json" in Path("README.md").read_text()
     assert "xig doctor --json" in live_validation
     assert "xig status --json" in live_validation
     assert "xig doctor --json" in selector_drift

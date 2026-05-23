@@ -91,14 +91,23 @@ def test_support_bundle_writes_privacy_safe_diagnostics(
     assert f"Support bundle written to {bundle}" in result.output
     with zipfile.ZipFile(bundle) as archive:
         names = set(archive.namelist())
-        assert names == {"SUPPORT_README.md", "doctor.json", "MANIFEST.json"}
+        assert names == {
+            "SUPPORT_README.md",
+            "doctor.json",
+            "status.json",
+            "MANIFEST.json",
+        }
         doctor = json.loads(archive.read("doctor.json"))
+        status = json.loads(archive.read("status.json"))
         manifest = json.loads(archive.read("MANIFEST.json"))
         combined = "\n".join(
             archive.read(name).decode("utf-8") for name in sorted(names)
         )
     assert doctor["ok"] is True
+    assert status["identities"][0]["handle"] == "wheelieinvestor"
+    assert status["identities"][0]["reports_24h"] == 0
     assert manifest["doctor_ok"] is True
+    assert "status.json" in manifest["files"]
     assert "secret-token-value" not in combined
     assert "config files" in combined
     assert "xig redact-report <report_dir>" in combined

@@ -62,7 +62,7 @@ Use `xig config` or `xig config --json` to inspect the active config without pri
 - Storage directory writability.
 - SQLite review queue access.
 
-It never prints token values. Use `xig doctor --json` to save the same privacy-safe diagnostics for support issues, scripts, or live-validation records. Use `xig support-bundle --output xig-support.zip` to create a small public-safe diagnostic zip that excludes config files, tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
+It never prints token values. Use `xig doctor --json` to save the same privacy-safe diagnostics for support issues, scripts, or live-validation records. Use `xig support-bundle --output xig-support.zip` to create a small public-safe diagnostic zip with `doctor.json`, `status.json`, and a manifest. It excludes config files, tokens, cookies, browser profiles, screenshots, raw report packages, and private evidence.
 
 ## Troubleshooting
 

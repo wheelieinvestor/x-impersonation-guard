@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - `xig doctor` checks for Playwright Chromium, starter identity placeholders, token presence, storage access, and SQLite queue access.
 - `xig doctor --json` privacy-safe setup diagnostics for support issues and validation records.
 - `xig support-bundle` privacy-safe diagnostic zip for public support issues.
+- `xig support-bundle` now includes privacy-safe `status.json` queue/report counts.
 - `xig review --show <id>` evidence details with score reasons, mitigations, weighted signals, profile metadata, and next safe commands.
 - Review queue snooze and restore workflow in both CLI and Textual TUI.
 - `xig list --status ...` and `xig status` queue visibility for pending, snoozed, approved, dismissed, reported, and failed candidates.
