@@ -129,7 +129,7 @@ flowchart LR
     Reporter --> Audit[(audit log)]
 ```
 
-Detection finds candidate accounts through handle variants, display-name search, follower sampling, and cached image-hash lookup. Profile image hashes are fetched when image URLs are available. Scoring ranks each candidate from 0 to 100, then stores reviewable accounts in SQLite.
+Detection finds candidate accounts through handle variants, display-name search, and follower sampling. Profile image hashes are fetched when image URLs are available. Scoring ranks each candidate from 0 to 100, then stores reviewable accounts in SQLite.
 
 ### The scoring model
 

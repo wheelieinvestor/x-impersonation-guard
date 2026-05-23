@@ -155,16 +155,6 @@ class ReviewStore:
             stmt = stmt.order_by(ReportRecord.created_at.desc())
             return list(session.scalars(stmt).all())
 
-    def cached_profiles(
-        self, identity_handle: str | None = None
-    ) -> list[AccountProfile]:
-        with self.session_factory() as session:
-            stmt = select(CandidateRecord)
-            if identity_handle:
-                stmt = stmt.where(CandidateRecord.identity_handle == identity_handle)
-            records = session.scalars(stmt).all()
-            return [profile_from_record(record) for record in records]
-
 
 def profile_from_record(record: CandidateRecord) -> AccountProfile:
     raw = json.loads(record.profile_json)

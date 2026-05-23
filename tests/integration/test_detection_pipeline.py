@@ -7,8 +7,7 @@ import x_impersonation_guard.detection as detection
 from x_impersonation_guard.config import AppConfig, default_config_dict
 from x_impersonation_guard.detection import run_scan
 from x_impersonation_guard.detectors.base import XProfileLookup
-from x_impersonation_guard.models import AccountProfile, CandidateSource
-from x_impersonation_guard.scoring.scorer import score_candidate
+from x_impersonation_guard.models import AccountProfile
 from x_impersonation_guard.storage.repository import ReviewStore
 
 
@@ -62,33 +61,6 @@ class FakeLookup(XProfileLookup):
         return [self.fake]
 
 
-class ProtectedOnlyLookup(XProfileLookup):
-    def __init__(self) -> None:
-        self.protected = AccountProfile(
-            id="1",
-            username="wheelieinvestor",
-            name="Wheelie Investor",
-            followers_count=100_000,
-            created_at=datetime(2019, 1, 1, tzinfo=UTC),
-            profile_image_phash="0000000000000000",
-        )
-
-    async def get_user_by_username(self, username: str) -> AccountProfile | None:
-        if username == "wheelieinvestor":
-            return self.protected
-        return None
-
-    async def search_users_by_display_name(
-        self, display_name: str
-    ) -> list[AccountProfile]:
-        del display_name
-        return []
-
-    async def sample_followers(self, user_id: str, limit: int) -> list[AccountProfile]:
-        del user_id, limit
-        return []
-
-
 @pytest.mark.asyncio
 async def test_run_scan_dedupes_scores_and_writes_queue(tmp_path) -> None:  # type: ignore[no-untyped-def]
     cfg = _wheelie_config()
@@ -99,35 +71,6 @@ async def test_run_scan_dedupes_scores_and_writes_queue(tmp_path) -> None:  # ty
     rows = store.list_queue("wheelieinvestor")
     assert len(rows) == 1
     assert rows[0].handle == "whee1ieinvestor"
-
-
-@pytest.mark.asyncio
-async def test_run_scan_uses_cached_image_lookup_by_default(tmp_path) -> None:  # type: ignore[no-untyped-def]
-    cfg = _wheelie_config()
-    identity = cfg.protected_identities[0]
-    protected = ProtectedOnlyLookup().protected
-    cached = AccountProfile(
-        id="cached-image-match",
-        username="wheelie_support",
-        name="Wheelie Support",
-        followers_count=3,
-        following_count=900,
-        created_at=datetime(2026, 5, 1, tzinfo=UTC),
-        profile_image_phash="0000000000000001",
-    )
-    store = ReviewStore(tmp_path / "db.sqlite")
-    result = score_candidate(protected, cached, identity, cfg.scoring)
-    candidate_id = store.upsert_scored_candidate(
-        identity.handle, CandidateSource.FIXTURE, result
-    )
-
-    results = await run_scan(cfg, identity, ProtectedOnlyLookup(), store)
-
-    assert candidate_id is not None
-    assert [item.candidate.username for item in results] == ["wheelie_support"]
-    rows = store.list_queue(identity.handle)
-    assert len(rows) == 1
-    assert rows[0].source == CandidateSource.IMAGE_LOOKUP.value
 
 
 class ImageLookup(FakeLookup):
