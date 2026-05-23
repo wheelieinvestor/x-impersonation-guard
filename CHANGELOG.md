@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses prerelease alpha tags while live validation is in progress.
 
+## [Unreleased]
+
+### Added
+
+- Launch support runbook covering triage labels, clean-install reproduction, hotfix workflow, secret exposure response, and live-validation guardrails.
+
 ## [0.2.0-alpha] - 2026-05-22
 
 ### Added
