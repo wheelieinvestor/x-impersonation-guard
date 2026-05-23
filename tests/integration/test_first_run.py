@@ -1,3 +1,4 @@
+import shlex
 from pathlib import Path
 
 import pytest
@@ -56,6 +57,46 @@ def test_quickstart_with_config_prints_real_next_steps(
     assert "xig report --config config.yaml --dry-run <candidate_id>" in result.output
     assert "xig validation-template --config config.yaml" in result.output
     assert "docs/live-validation.md" in result.output
+
+
+def test_quickstart_quotes_config_and_scopes_multi_identity_commands(
+    tmp_path: Path, runner: CliRunner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    raw = default_config_dict(
+        handle="firstcreator",
+        display_name="First Creator",
+        reporter_name="First Creator",
+        reporter_email="first@example.com",
+    )
+    raw["protected_identities"].append(
+        default_config_dict(
+            handle="secondcreator",
+            display_name="Second Creator",
+            reporter_name="Second Creator",
+            reporter_email="second@example.com",
+        )["protected_identities"][0]
+    )
+    config_path = tmp_path / "Config Dir" / "config.yaml"
+    config_path.parent.mkdir()
+    config_path.write_text(yaml.safe_dump(raw, sort_keys=False))
+    quoted_config = shlex.quote(str(config_path))
+
+    result = runner.invoke(app, ["quickstart", "--config", str(config_path)])
+
+    assert result.exit_code == 0, result.output
+    assert "Multiple identities configured" in result.output
+    assert "Showing scoped commands for @firstcreator" in result.output
+    assert f"xig doctor --config {quoted_config}" in result.output
+    assert f"xig scan --config {quoted_config} --identity firstcreator" in result.output
+    assert (
+        f"xig status --config {quoted_config} --identity firstcreator --json"
+        in result.output
+    )
+    assert (
+        f"xig report --config {quoted_config} --identity firstcreator --dry-run <candidate_id>"
+        in result.output
+    )
 
 
 def test_validation_template_writes_safe_public_checklist(
