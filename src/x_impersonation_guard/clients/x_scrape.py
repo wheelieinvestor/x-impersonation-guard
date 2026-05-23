@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import async_playwright
 
 from x_impersonation_guard.detectors.base import XProfileLookup
@@ -17,10 +18,13 @@ class XScrapeClient(XProfileLookup):
 
     async def get_user_by_username(self, username: str) -> AccountProfile | None:
         async with async_playwright() as playwright:
-            context = await playwright.chromium.launch_persistent_context(
-                self.user_data_dir,
-                headless=self.headless,
-            )
+            try:
+                context = await playwright.chromium.launch_persistent_context(
+                    self.user_data_dir,
+                    headless=self.headless,
+                )
+            except PlaywrightError as exc:
+                raise RuntimeError(_playwright_install_help(str(exc))) from exc
             page = await context.new_page()
             response = await page.goto(
                 f"https://x.com/{username}", wait_until="domcontentloaded"
@@ -51,3 +55,12 @@ class XScrapeClient(XProfileLookup):
 def _meta_description(html: str) -> str:
     match = re.search(r'<meta name="description" content="([^"]*)"', html)
     return match.group(1) if match else ""
+
+
+def _playwright_install_help(error: str) -> str:
+    return (
+        "Playwright Chromium could not start. Run `playwright install chromium` "
+        "and see https://wheelieinvestor.github.io/x-impersonation-guard/install/"
+        "#playwright-browser-install-failures. "
+        f"Original error: {error}"
+    )

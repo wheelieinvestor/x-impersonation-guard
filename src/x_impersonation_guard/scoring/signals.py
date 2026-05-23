@@ -26,10 +26,40 @@ CONFUSABLE_TRANSLATION = str.maketrans(
         "х": "x",
     }
 )
+SYMBOL_CONFUSABLES = {
+    "ⓐ": "a",
+    "@": "a",
+    "🅰": "a",
+    "🅰️": "a",
+    "€": "e",
+    "ⓔ": "e",
+    "ℹ": "i",
+    "ℹ️": "i",
+    "ⓘ": "i",
+    "!": "i",
+    "ⓛ": "l",
+    "ⅼ": "l",
+    "|": "l",
+    "🅾": "o",
+    "🅾️": "o",
+    "⭕": "o",
+    "ⓞ": "o",
+    "$": "s",
+    "ⓢ": "s",
+    "✕": "x",
+    "❌": "x",
+    "ⓧ": "x",
+    "0️⃣": "o",
+    "1️⃣": "l",
+    "5️⃣": "s",
+}
 
 
 def normalize_text(value: str) -> str:
-    return " ".join(value.casefold().translate(CONFUSABLE_TRANSLATION).split())
+    normalized = value.casefold()
+    for symbol, replacement in SYMBOL_CONFUSABLES.items():
+        normalized = normalized.replace(symbol.casefold(), replacement)
+    return " ".join(normalized.translate(CONFUSABLE_TRANSLATION).split())
 
 
 def normalize_handle(value: str) -> str:

@@ -49,6 +49,26 @@ It never prints token values.
 ## Troubleshooting
 
 - If `xig` is not found, confirm your Python scripts directory is on `PATH`.
-- If you need to confirm the installed package version, run `xig --version`.
-- If Playwright browser install fails, rerun `playwright install chromium`.
+- If you need to confirm installed versions for a bug report, run `xig version`.
 - If no candidates appear in fixture mode, remove the demo database at `~/.x-impersonation-guard/db.sqlite` and rerun `xig scan-fixture`.
+
+### Playwright browser install failures
+
+`xig` depends on Playwright Chromium for scrape fallback and Help Center report
+automation. If browser startup fails, run:
+
+```bash
+playwright install chromium
+```
+
+On Linux containers or minimal VMs, install browser system dependencies too:
+
+```bash
+playwright install chromium --with-deps
+```
+
+On macOS, make sure the active virtual environment is the same one where
+`x-impersonation-guard` is installed, then rerun `playwright install chromium`.
+
+If setup still fails, include `xig version`, your OS, and the exact Playwright
+error in a bug report. Do not paste tokens, cookies, emails, or private handles.

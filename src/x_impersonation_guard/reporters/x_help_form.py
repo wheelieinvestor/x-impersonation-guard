@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol
 
 import structlog
+from playwright.async_api import Error as PlaywrightError
 from playwright.async_api import Page, async_playwright
 
 from x_impersonation_guard.config import ProtectedIdentity
@@ -121,10 +122,13 @@ class XHelpFormReporter(Reporter):
         page: Page | None = None
         try:
             async with async_playwright() as playwright:
-                context = await playwright.chromium.launch_persistent_context(
-                    str(self.user_data_dir),
-                    headless=self.headless,
-                )
+                try:
+                    context = await playwright.chromium.launch_persistent_context(
+                        str(self.user_data_dir),
+                        headless=self.headless,
+                    )
+                except PlaywrightError as exc:
+                    raise ReporterError(_playwright_install_help(str(exc))) from exc
                 page = await context.new_page()
                 await self._capture_profile(page, candidate, report_dir)
                 await self._submit_form(page, identity, candidate, report_dir)
@@ -292,3 +296,12 @@ async def _fill_first_matching(
             return
     if required:
         raise RequiredFieldNotFoundError(field_name, labels)
+
+
+def _playwright_install_help(error: str) -> str:
+    return (
+        "Playwright Chromium could not start. Run `playwright install chromium` "
+        "and see https://wheelieinvestor.github.io/x-impersonation-guard/install/"
+        "#playwright-browser-install-failures. "
+        f"Original error: {error}"
+    )

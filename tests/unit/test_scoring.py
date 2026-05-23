@@ -28,6 +28,8 @@ def _protected() -> AccountProfile:
 
 def test_handle_similarity_accounts_for_confusables() -> None:
     assert handle_similarity("whee1ieinvestor", "wheelieinvestor") > 0.9
+    assert handle_similarity("wheelieinvestⓞr", "wheelieinvestor") > 0.9
+    assert handle_similarity("wheelieinvest$r", "wheelieinvestor") > 0.8
     assert handle_similarity("totallydifferent", "wheelieinvestor") < 0.5
 
 

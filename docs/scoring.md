@@ -16,6 +16,9 @@ Candidates are scored from 0 to 100. The default model is deterministic and expl
 
 Mitigations reduce scores for parody/fan disclaimers, verified affiliation mismatches, and accounts that predate the protected identity.
 
+For a narrative explanation of how clone tactics change over time, see
+[How impersonators evolve](impersonator-evolution.md).
+
 ## Demo examples
 
 - `@alex_charts1`: critical. Similar handle, identical profile image, new account, scam posts.

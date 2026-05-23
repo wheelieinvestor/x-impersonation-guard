@@ -38,3 +38,16 @@ def test_version_flag_works_without_config(
     assert result.exit_code == 0
     assert f"x-impersonation-guard {__version__}" in result.output
     assert "first run" not in result.output
+
+
+def test_version_command_prints_runtime_details(
+    tmp_path: Path, runner: CliRunner, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(app, ["version"])
+    assert result.exit_code == 0
+    assert f"x-impersonation-guard {__version__}" in result.output
+    assert "python " in result.output
+    assert "platform " in result.output
+    assert "playwright " in result.output
+    assert "first run" not in result.output
