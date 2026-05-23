@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-05-22
+Last updated: 2026-05-23
 
 ## Release
 
@@ -20,6 +20,7 @@ Published package: `x-impersonation-guard==0.2.0a0`
 | PyPI install on Linux Python 3.11 | Verified | `phase2.6/install-validation-A.log` |
 | PyPI install on Linux Python 3.12 | Verified | `phase2.6/install-validation-B.log` |
 | PyPI install on macOS Python 3.11 | Verified | `phase2.6/install-validation-C.log` |
+| Local wheel offline demo on macOS Python 3.11 | Verified | Phase 4 clean-venv smoke: `xig scan-fixture` -> `xig list` -> `xig report --dry-run 1` -> `xig export-report 1` |
 
 ## Implemented but not yet verified live
 
