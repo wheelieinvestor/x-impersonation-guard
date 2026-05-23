@@ -796,78 +796,6 @@ def status(
 
 
 @app.command()
-def quickstart(
-    config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
-) -> None:
-    """Print the safest next commands for demo or real-account setup."""
-    config_path = config.expanduser()
-    typer.echo("x-impersonation-guard quickstart")
-    typer.echo("")
-    typer.echo("Safe offline demo:")
-    _echo_commands(
-        [
-            "xig scan-fixture",
-            "xig doctor",
-            "xig review",
-            "xig review --show 1",
-            "xig report --dry-run 1",
-        ]
-    )
-    typer.echo("")
-
-    if not config_path.exists():
-        typer.echo(f"No config found at {config_path}.")
-        typer.echo("Real-account setup:")
-        _echo_commands(
-            [
-                'export X_API_BEARER_TOKEN="..."',
-                "xig init --guided",
-                "xig doctor",
-                "xig scan",
-            ]
-        )
-        typer.echo("")
-        typer.echo(
-            "Nothing here submits a live report. Live reporting requires review approval plus `--execute --confirm-live`."
-        )
-        return
-
-    try:
-        cfg = load_config(config_path)
-    except (OSError, ValueError, ValidationError) as exc:
-        typer.echo(f"Config invalid at {config_path}: {exc}")
-        typer.echo("Fix the config, then run `xig doctor`.")
-        return
-
-    identity_count = len(cfg.protected_identities)
-    identity_label = "identity" if identity_count == 1 else "identities"
-    typer.echo(
-        f"Config found at {config_path}: {identity_count} protected {identity_label}."
-    )
-    for warning in _starter_identity_warnings(cfg):
-        typer.echo(f"WARN: {warning}")
-    token_name = cfg.x_api.bearer_token_env
-    token_state = "set" if os.getenv(token_name) else "not set"
-    typer.echo(f"{token_name}: {token_state}")
-    typer.echo("")
-    typer.echo("Recommended next commands:")
-    _echo_commands(
-        [
-            f"xig doctor --config {config_path}",
-            f"xig scan --config {config_path}",
-            f"xig status --config {config_path}",
-            f"xig review --config {config_path}",
-            f"xig review --config {config_path} --show <candidate_id>",
-            f"xig report --config {config_path} --dry-run <candidate_id>",
-        ]
-    )
-    typer.echo("")
-    typer.echo(
-        "Before broader public launch, follow `docs/live-validation.md` and record one controlled live-validation run."
-    )
-
-
-@app.command()
 def doctor(
     config: Annotated[Path, typer.Option("--config")] = Path("config.yaml"),
 ) -> None:
@@ -1193,11 +1121,6 @@ def _is_writable_dir(path: Path) -> bool:
     except OSError:
         return False
     return True
-
-
-def _echo_commands(commands: list[str]) -> None:
-    for command in commands:
-        typer.echo(f"  {command}")
 
 
 def _load(path: Path) -> AppConfig:

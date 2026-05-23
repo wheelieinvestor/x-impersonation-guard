@@ -34,7 +34,6 @@ No credentials. No live X calls. No reports submitted.
 ```bash
 pip install --pre x-impersonation-guard
 playwright install chromium
-xig quickstart
 xig scan-fixture
 xig doctor
 xig review
@@ -109,8 +108,6 @@ xig report --dry-run 1
 ```
 
 Prefer prompts? Run `xig init --guided`. If you run `xig init` without identity options, it writes a generic starter config and tells you which fields to edit before live use.
-
-Unsure what to run next? `xig quickstart` prints the safe offline demo path when no config exists and the recommended real-account sequence after config is present.
 
 Live browser scanning and live Help Center reporting require `playwright install chromium`. The offline demo and dry-run evidence path do not submit reports.
 
