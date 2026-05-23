@@ -53,7 +53,7 @@ body:
     id: diagnostics
     attributes:
       label: Privacy-safe diagnostics
-      description: Paste output from `xig doctor --json` or attach `xig support-bundle --output xig-support.zip` if relevant. Do not paste token values, cookies, browser profiles, private DMs, or unredacted report packages.
+      description: Paste output from `xig doctor --json` if relevant. Do not paste token values, cookies, browser profiles, private DMs, or unredacted report packages.
       render: json
     validations:
       required: false

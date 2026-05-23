@@ -73,7 +73,6 @@ def test_changelog_tracks_post_alpha_hardening() -> None:
     assert "Estimated X API scan cost guard" in changelog
     assert "Cached image-hash lookup in the default scan path" in changelog
     assert "`xig doctor --json` privacy-safe setup diagnostics" in changelog
-    assert "`xig support-bundle` privacy-safe diagnostic zip" in changelog
     assert "Offline scorer calibration command" in changelog
     assert "JSON calibration evidence export" in changelog
     assert "`xig status --json` machine-readable queue" in changelog
@@ -117,7 +116,6 @@ def test_issue_templates_request_privacy_safe_diagnostics() -> None:
     changelog = Path("CHANGELOG.md").read_text()
 
     assert "xig doctor --json" in bug
-    assert "xig support-bundle --output xig-support.zip" in bug
     assert "xig doctor --json" in live_validation
     assert "xig status --json" in live_validation
     assert "xig doctor --json" in selector_drift
